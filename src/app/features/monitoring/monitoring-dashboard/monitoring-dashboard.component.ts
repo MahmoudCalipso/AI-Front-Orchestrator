@@ -196,15 +196,8 @@ export class MonitoringDashboardComponent implements OnInit, AfterViewInit, OnDe
         this.currentMetrics = metrics;
       },
       error: (error) => {
-        console.error('Failed to load metrics', error);
-        // Mock data
-        this.currentMetrics = {
-          cpu_usage: 45,
-          memory_usage: 62,
-          disk_usage: 38,
-          active_requests: 127,
-          avg_response_time: 145
-        };
+        console.error('Failed to load metrics from API:', error);
+        this.currentMetrics = null;
       }
     });
   }
@@ -215,13 +208,8 @@ export class MonitoringDashboardComponent implements OnInit, AfterViewInit, OnDe
         this.buildHistory = history;
       },
       error: (error) => {
-        console.error('Failed to load build history', error);
-        // Mock data
-        this.buildHistory = [
-          { id: '1', project: 'api-service', status: 'success', duration: 145, timestamp: new Date().toISOString() },
-          { id: '2', project: 'web-app', status: 'success', duration: 230, timestamp: new Date().toISOString() },
-          { id: '3', project: 'mobile-api', status: 'failed', duration: 89, timestamp: new Date().toISOString() }
-        ];
+        console.error('Failed to load build history from API:', error);
+        this.buildHistory = [];
       }
     });
   }

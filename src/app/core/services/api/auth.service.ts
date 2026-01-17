@@ -54,6 +54,30 @@ export class AuthService extends BaseApiService {
     );
   }
 
+  /**
+   * List all users (admin only)
+   * GET /api/users
+   */
+  listUsers(): Observable<UserInfo[]> {
+    return this.get<UserInfo[]>('/api/users');
+  }
+
+  /**
+   * Update user (admin only)
+   * PUT /api/users/:id
+   */
+  updateUser(userId: string, data: Partial<UserInfo>): Observable<UserInfo> {
+    return this.put<UserInfo>(`/api/users/${userId}`, data);
+  }
+
+  /**
+   * Delete user (admin only)
+   * DELETE /api/users/:id
+   */
+  deleteUser(userId: string): Observable<void> {
+    return this.delete<void>(`/api/users/${userId}`);
+  }
+
   changePassword(request: ChangePasswordRequest): Observable<void> {
     return this.post<void>('/api/v1/auth/change-password', request);
   }

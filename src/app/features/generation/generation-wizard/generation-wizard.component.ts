@@ -114,36 +114,10 @@ export class GenerationWizardComponent implements OnInit {
                 this.loading = false;
             },
             error: (error) => {
-                console.error('Failed to load languages', error);
+                console.error('Failed to load languages from API:', error);
                 this.loading = false;
-                // Fallback data
-                this.languages = [
-                    {
-                        name: 'python',
-                        displayName: 'Python',
-                        frameworks: [
-                            { name: 'FastAPI', version: '0.128.0', description: 'Modern, fast web framework' },
-                            { name: 'Django', version: '5.0', description: 'High-level web framework' },
-                            { name: 'Flask', version: '3.0', description: 'Lightweight web framework' }
-                        ]
-                    },
-                    {
-                        name: 'typescript',
-                        displayName: 'TypeScript',
-                        frameworks: [
-                            { name: 'NestJS', version: '10.0', description: 'Progressive Node.js framework' },
-                            { name: 'Express', version: '4.18', description: 'Fast, minimalist web framework' }
-                        ]
-                    },
-                    {
-                        name: 'java',
-                        displayName: 'Java',
-                        frameworks: [
-                            { name: 'Spring Boot', version: '3.2', description: 'Enterprise Java framework' },
-                            { name: 'Quarkus', version: '3.6', description: 'Kubernetes-native Java framework' }
-                        ]
-                    }
-                ];
+                this.toast.error('Failed to load language registry. Please check your connection to the backend.');
+                this.languages = [];
             }
         });
     }
@@ -174,8 +148,9 @@ export class GenerationWizardComponent implements OnInit {
                 this.toast.success('Description analyzed successfully!');
 
                 // Auto-fill language form if suggestions available
-                if (result.suggested_languages && result.suggested_languages.length > 0) {
-                    const suggested = result.suggested_languages[0];
+                const suggestions = (result as any).suggested_languages;
+                if (suggestions && suggestions.length > 0) {
+                    const suggested = suggestions[0];
                     this.languageForm.patchValue({
                         language: suggested.name,
                         framework: suggested.framework

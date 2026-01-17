@@ -1,0 +1,144 @@
+<div class="code-analysis-container">
+    <div class="page-header">
+        <div>
+            <h1>
+                <mat-icon>analytics</mat-icon>
+                Code Analysis
+            </h1>
+            <p class="subtitle">Analyze code quality, security, and complexity</p>
+        </div>
+        <div class="header-actions">
+            <button mat-raised-button color="primary" (click)="runAnalysis()">
+                <mat-icon>play_arrow</mat-icon>
+                Run Analysis
+            </button>
+            <button mat-raised-button color="accent" (click)="runSecurityScan()">
+                <mat-icon>security</mat-icon>
+                Security Scan
+            </button>
+        </div>
+    </div>
+
+    <!-- Quality Metrics -->
+    <div class="metrics-grid">
+        <mat-card class="metric-card">
+            <mat-card-content>
+                <div class="metric-circle" [style.--progress]="qualityMetrics.codeQuality">
+                    <span class="metric-value">{{ qualityMetrics.codeQuality }}%</span>
+                </div>
+                <h3>Code Quality</h3>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="metric-card">
+            <mat-card-content>
+                <div class="metric-circle" [style.--progress]="qualityMetrics.maintainability">
+                    <span class="metric-value">{{ qualityMetrics.maintainability }}%</span>
+                </div>
+                <h3>Maintainability</h3>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="metric-card">
+            <mat-card-content>
+                <div class="metric-circle" [style.--progress]="qualityMetrics.testCoverage">
+                    <span class="metric-value">{{ qualityMetrics.testCoverage }}%</span>
+                </div>
+                <h3>Test Coverage</h3>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="metric-card">
+            <mat-card-content>
+                <div class="metric-circle" [style.--progress]="qualityMetrics.documentation">
+                    <span class="metric-value">{{ qualityMetrics.documentation }}%</span>
+                </div>
+                <h3>Documentation</h3>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <!-- Analysis Results -->
+    <mat-card class="results-card">
+        <mat-tab-group>
+            <!-- Issues Tab -->
+            <mat-tab label="Issues">
+                <div class="tab-content">
+                    <div *ngIf="analysisResult" class="issues-list">
+                        <div *ngFor="let issue of analysisResult.issues" class="issue-item">
+                            <div class="issue-severity" [class]="'severity-' + issue.severity">
+                                <mat-icon>{{ issue.severity === 'high' ? 'error' : issue.severity === 'medium' ?
+                                    'warning' : 'info' }}</mat-icon>
+                            </div>
+                            <div class="issue-details">
+                                <h4>{{ issue.message }}</h4>
+                                <p>{{ issue.type }} • {{ issue.file }}:{{ issue.line }}</p>
+                            </div>
+                            <button mat-icon-button>
+                                <mat-icon>arrow_forward</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </mat-tab>
+
+            <!-- Complexity Tab -->
+            <mat-tab label="Complexity">
+                <div class="tab-content">
+                    <div *ngIf="analysisResult" class="complexity-section">
+                        <div class="complexity-stats">
+                            <div class="stat-box">
+                                <h3>{{ analysisResult.complexity.average }}</h3>
+                                <p>Average Complexity</p>
+                            </div>
+                            <div class="stat-box">
+                                <h3>{{ analysisResult.complexity.highest }}</h3>
+                                <p>Highest Complexity</p>
+                            </div>
+                        </div>
+                        <div class="complexity-files">
+                            <h3>Most Complex Files</h3>
+                            <div *ngFor="let file of analysisResult.complexity.files" class="complexity-file">
+                                <span class="file-name">{{ file.name }}</span>
+                                <div class="complexity-bar">
+                                    <div class="complexity-fill" [style.width.%]="(file.complexity / 15) * 100"></div>
+                                </div>
+                                <span class="complexity-score">{{ file.complexity }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </mat-tab>
+
+            <!-- Security Tab -->
+            <mat-tab label="Security">
+                <div class="tab-content">
+                    <div *ngIf="securityScan" class="security-section">
+                        <div class="security-score">
+                            <div class="score-circle">
+                                <span class="score-value">{{ securityScan.score }}</span>
+                                <span class="score-label">/100</span>
+                            </div>
+                            <h3>Security Score</h3>
+                        </div>
+                        <div class="vulnerabilities-list">
+                            <h3>Vulnerabilities Found</h3>
+                            <div *ngFor="let vuln of securityScan.vulnerabilities" class="vulnerability-item">
+                                <span class="badge" [class]="'badge-' + getSeverityColor(vuln.severity)">
+                                    {{ vuln.severity }}
+                                </span>
+                                <div class="vuln-details">
+                                    <h4>{{ vuln.type }}</h4>
+                                    <p>{{ vuln.description }}</p>
+                                    <p class="vuln-location">{{ vuln.location }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </mat-tab>
+        </mat-tab-group>
+    </mat-card>
+</div>
+
+<app-loading-spinner *ngIf="loading" [fullscreen]="true" message="Analyzing code..."></app-loading-spinner>

@@ -1,0 +1,335 @@
+.code-analysis-container {
+    min-height: 100vh;
+    padding: var(--spacing-xl);
+    background: var(--bg-primary);
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-xl);
+}
+
+.page-header h1 {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary-400), var(--accent-400));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: var(--spacing-sm);
+}
+
+.page-header h1 mat-icon {
+    font-size: 2.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: linear-gradient(135deg, var(--primary-600), var(--accent-600));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.metric-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-primary);
+    text-align: center;
+}
+
+.metric-card mat-card-content {
+    padding: var(--spacing-xl);
+}
+
+.metric-circle {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto var(--spacing-md);
+    border-radius: 50%;
+    background: conic-gradient(var(--accent-500) calc(var(--progress) * 1%),
+            var(--bg-hover) 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.metric-circle::before {
+    content: '';
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: var(--bg-card);
+    border-radius: 50%;
+}
+
+.metric-value {
+    position: relative;
+    z-index: 1;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.metric-card h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.results-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-primary);
+}
+
+.tab-content {
+    padding: var(--spacing-lg);
+    min-height: 400px;
+}
+
+.issues-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.issue-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+}
+
+.issue-severity {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+}
+
+.issue-severity.severity-high {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--error);
+}
+
+.issue-severity.severity-medium {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+}
+
+.issue-severity.severity-low {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--info);
+}
+
+.issue-details {
+    flex: 1;
+}
+
+.issue-details h4 {
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin: 0 0 4px 0;
+    color: var(--text-primary);
+}
+
+.issue-details p {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    margin: 0;
+}
+
+.complexity-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+}
+
+.complexity-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.stat-box {
+    text-align: center;
+    padding: var(--spacing-lg);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+}
+
+.stat-box h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 var(--spacing-sm) 0;
+    color: var(--accent-400);
+}
+
+.stat-box p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.complexity-files h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+.complexity-file {
+    display: grid;
+    grid-template-columns: 200px 1fr 60px;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) 0;
+}
+
+.file-name {
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+.complexity-bar {
+    height: 8px;
+    background: var(--bg-hover);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.complexity-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--warning), var(--error));
+    border-radius: var(--radius-full);
+}
+
+.complexity-score {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    text-align: right;
+}
+
+.security-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+}
+
+.security-score {
+    text-align: center;
+}
+
+.score-circle {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto var(--spacing-md);
+    border-radius: 50%;
+    border: 8px solid var(--accent-500);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.score-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.score-label {
+    font-size: 1rem;
+    color: var(--text-secondary);
+}
+
+.vulnerabilities-list h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+.vulnerability-item {
+    display: flex;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.vuln-details {
+    flex: 1;
+}
+
+.vuln-details h4 {
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin: 0 0 4px 0;
+    color: var(--text-primary);
+}
+
+.vuln-details p {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin: 0 0 4px 0;
+}
+
+.vuln-location {
+    font-family: 'Consolas', 'Monaco', monospace;
+    color: var(--text-tertiary);
+}
+
+@media (max-width: 768px) {
+    .code-analysis-container {
+        padding: var(--spacing-md);
+    }
+
+    .page-header {
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+    .header-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .header-actions button {
+        width: 100%;
+    }
+
+    .complexity-file {
+        grid-template-columns: 1fr;
+    }
+}

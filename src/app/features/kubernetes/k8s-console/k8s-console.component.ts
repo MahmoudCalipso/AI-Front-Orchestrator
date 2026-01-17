@@ -73,14 +73,9 @@ export class K8sConsoleComponent implements OnInit {
                 this.clusterInfo = info;
             },
             error: (error) => {
-                console.error('Failed to load cluster info', error);
-                // Mock data
-                this.clusterInfo = {
-                    name: 'demo-cluster',
-                    version: 'v1.28.0',
-                    nodes: 3,
-                    status: 'Healthy'
-                };
+                console.error('Failed to load cluster info from API:', error);
+                this.toast.error('Failed to connect to Kubernetes cluster');
+                this.clusterInfo = null;
             }
         });
     }
@@ -91,17 +86,8 @@ export class K8sConsoleComponent implements OnInit {
                 this.deployments = deployments;
             },
             error: (error) => {
-                console.error('Failed to load deployments', error);
-                // Mock data
-                this.deployments = [
-                    {
-                        name: 'api-service',
-                        replicas: 3,
-                        ready_replicas: 3,
-                        available_replicas: 3,
-                        status: 'Running'
-                    }
-                ];
+                console.error('Failed to load deployments from API:', error);
+                this.deployments = [];
             }
         });
     }
@@ -112,16 +98,8 @@ export class K8sConsoleComponent implements OnInit {
                 this.pods = pods;
             },
             error: (error) => {
-                console.error('Failed to load pods', error);
-                // Mock data
-                this.pods = [
-                    {
-                        name: 'api-service-abc123',
-                        status: 'Running',
-                        node: 'node-1',
-                        ip: '10.0.1.5'
-                    }
-                ];
+                console.error('Failed to load pods from API:', error);
+                this.pods = [];
             }
         });
     }
@@ -132,16 +110,8 @@ export class K8sConsoleComponent implements OnInit {
                 this.services = services;
             },
             error: (error) => {
-                console.error('Failed to load services', error);
-                // Mock data
-                this.services = [
-                    {
-                        name: 'api-service',
-                        type: 'LoadBalancer',
-                        cluster_ip: '10.96.0.1',
-                        ports: [{ port: 8080, target_port: 8080 }]
-                    }
-                ];
+                console.error('Failed to load services from API:', error);
+                this.services = [];
             }
         });
     }

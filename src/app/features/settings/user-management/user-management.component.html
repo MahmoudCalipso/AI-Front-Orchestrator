@@ -1,0 +1,177 @@
+<div class="user-management-container">
+    <div class="page-header">
+        <h1>
+            <mat-icon>people</mat-icon>
+            User Management
+        </h1>
+        <p class="subtitle">Manage users, roles, and permissions</p>
+    </div>
+
+    <div class="content-grid">
+        <!-- User Form -->
+        <mat-card class="user-form-card">
+            <mat-card-header>
+                <mat-card-title>
+                    <mat-icon>{{ editingUser ? 'edit' : 'person_add' }}</mat-icon>
+                    {{ editingUser ? 'Edit User' : 'Create New User' }}
+                </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <form [formGroup]="userForm" class="user-form">
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Username</mat-label>
+                        <input matInput formControlName="username" placeholder="johndoe">
+                        <mat-icon matPrefix>person</mat-icon>
+                        <mat-error *ngIf="userForm.get('username')?.hasError('required')">
+                            Username is required
+                        </mat-error>
+                        <mat-error *ngIf="userForm.get('username')?.hasError('minlength')">
+                            Minimum 3 characters
+                        </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Email</mat-label>
+                        <input matInput type="email" formControlName="email" placeholder="john@example.com">
+                        <mat-icon matPrefix>email</mat-icon>
+                        <mat-error *ngIf="userForm.get('email')?.hasError('required')">
+                            Email is required
+                        </mat-error>
+                        <mat-error *ngIf="userForm.get('email')?.hasError('email')">
+                            Invalid email format
+                        </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="full-width" *ngIf="!editingUser">
+                        <mat-label>Password</mat-label>
+                        <input matInput type="password" formControlName="password">
+                        <mat-icon matPrefix>lock</mat-icon>
+                        <mat-error *ngIf="userForm.get('password')?.hasError('required')">
+                            Password is required
+                        </mat-error>
+                        <mat-error *ngIf="userForm.get('password')?.hasError('minlength')">
+                            Minimum 8 characters
+                        </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Role</mat-label>
+                        <mat-select formControlName="role">
+                            <mat-option *ngFor="let role of roles" [value]="role">
+                                {{ role | titlecase }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matPrefix>badge</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Permissions</mat-label>
+                        <mat-select formControlName="permissions" multiple>
+                            <mat-option *ngFor="let permission of availablePermissions" [value]="permission">
+                                {{ permission }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matPrefix>security</mat-icon>
+                    </mat-form-field>
+
+                    <mat-checkbox formControlName="is_active" class="active-checkbox">
+                        Active User
+                    </mat-checkbox>
+
+                    <div class="form-actions">
+                        <button mat-raised-button color="primary" (click)="editingUser ? updateUser() : createUser()"
+                            [disabled]="userForm.invalid">
+                            <mat-icon>{{ editingUser ? 'save' : 'add' }}</mat-icon>
+                            {{ editingUser ? 'Update User' : 'Create User' }}
+                        </button>
+                        <button mat-button (click)="resetForm()" *ngIf="editingUser">
+                            <mat-icon>cancel</mat-icon>
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </mat-card-content>
+        </mat-card>
+
+        <!-- Users Table -->
+        <mat-card class="users-table-card">
+            <mat-card-header>
+                <mat-card-title>
+                    <mat-icon>list</mat-icon>
+                    All Users
+                </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <table mat-table [dataSource]="users" class="users-table">
+                    <ng-container matColumnDef="username">
+                        <th mat-header-cell *matHeaderCellDef>Username</th>
+                        <td mat-cell *matCellDef="let user">
+                            <div class="user-cell">
+                                <mat-icon>person</mat-icon>
+                                {{ user.username }}
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="email">
+                        <th mat-header-cell *matHeaderCellDef>Email</th>
+                        <td mat-cell *matCellDef="let user">{{ user.email }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="role">
+                        <th mat-header-cell *matHeaderCellDef>Role</th>
+                        <td mat-cell *matCellDef="let user">
+                            <span class="badge" [class]="getRoleBadgeClass(user.role)">
+                                {{ user.role | titlecase }}
+                            </span>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="permissions">
+                        <th mat-header-cell *matHeaderCellDef>Permissions</th>
+                        <td mat-cell *matCellDef="let user">
+                            <mat-chip-set>
+                                <mat-chip *ngFor="let permission of user.permissions.slice(0, 2)">
+                                    {{ permission }}
+                                </mat-chip>
+                                <mat-chip *ngIf="user.permissions.length > 2">
+                                    +{{ user.permissions.length - 2 }}
+                                </mat-chip>
+                            </mat-chip-set>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="status">
+                        <th mat-header-cell *matHeaderCellDef>Status</th>
+                        <td mat-cell *matCellDef="let user">
+                            <span class="badge" [class]="user.is_active ? 'badge-success' : 'badge-error'">
+                                {{ user.is_active ? 'Active' : 'Inactive' }}
+                            </span>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef>Actions</th>
+                        <td mat-cell *matCellDef="let user">
+                            <button mat-icon-button (click)="editUser(user)" matTooltip="Edit">
+                                <mat-icon>edit</mat-icon>
+                            </button>
+                            <button mat-icon-button (click)="toggleUserStatus(user)"
+                                [matTooltip]="user.is_active ? 'Deactivate' : 'Activate'">
+                                <mat-icon>{{ user.is_active ? 'block' : 'check_circle' }}</mat-icon>
+                            </button>
+                            <button mat-icon-button (click)="deleteUser(user)" matTooltip="Delete" color="warn">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                </table>
+            </mat-card-content>
+        </mat-card>
+    </div>
+</div>
+
+<app-loading-spinner *ngIf="loading" [fullscreen]="true" message="Loading users..."></app-loading-spinner>
