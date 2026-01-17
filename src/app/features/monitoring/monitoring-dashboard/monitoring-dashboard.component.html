@@ -1,0 +1,161 @@
+<div class="monitoring-dashboard-container">
+    <div class="dashboard-header">
+        <div>
+            <h1>
+                <mat-icon>monitoring</mat-icon>
+                Monitoring Dashboard
+            </h1>
+            <p class="subtitle">Real-time system metrics and build history</p>
+        </div>
+        <mat-form-field appearance="outline" class="time-range-selector">
+            <mat-label>Time Range</mat-label>
+            <mat-select [(value)]="timeRange" (selectionChange)="onTimeRangeChange($event.value)">
+                <mat-option value="15m">Last 15 minutes</mat-option>
+                <mat-option value="1h">Last hour</mat-option>
+                <mat-option value="6h">Last 6 hours</mat-option>
+                <mat-option value="24h">Last 24 hours</mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
+
+    <!-- Current Metrics -->
+    <div class="metrics-grid" *ngIf="currentMetrics">
+        <mat-card class="metric-card">
+            <mat-card-content>
+                <div class="metric-icon cpu">
+                    <mat-icon>memory</mat-icon>
+                </div>
+                <div class="metric-details">
+                    <h3>{{ currentMetrics.cpu_usage }}%</h3>
+                    <p>CPU Usage</p>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="metric-card">
+            <mat-card-content>
+                <div class="metric-icon memory">
+                    <mat-icon>storage</mat-icon>
+                </div>
+                <div class="metric-details">
+                    <h3>{{ currentMetrics.memory_usage }}%</h3>
+                    <p>Memory Usage</p>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="metric-card">
+            <mat-card-content>
+                <div class="metric-icon requests">
+                    <mat-icon>trending_up</mat-icon>
+                </div>
+                <div class="metric-details">
+                    <h3>{{ currentMetrics.active_requests }}</h3>
+                    <p>Active Requests</p>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="metric-card">
+            <mat-card-content>
+                <div class="metric-icon response">
+                    <mat-icon>speed</mat-icon>
+                </div>
+                <div class="metric-details">
+                    <h3>{{ currentMetrics.avg_response_time }}ms</h3>
+                    <p>Avg Response Time</p>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid">
+        <mat-card class="chart-card">
+            <mat-card-header>
+                <mat-card-title>
+                    <mat-icon>memory</mat-icon>
+                    CPU Usage
+                </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <div class="chart-container">
+                    <canvas #cpuChart></canvas>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="chart-card">
+            <mat-card-header>
+                <mat-card-title>
+                    <mat-icon>storage</mat-icon>
+                    Memory Usage
+                </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <div class="chart-container">
+                    <canvas #memoryChart></canvas>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="chart-card">
+            <mat-card-header>
+                <mat-card-title>
+                    <mat-icon>trending_up</mat-icon>
+                    Requests per Minute
+                </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <div class="chart-container">
+                    <canvas #requestsChart></canvas>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="chart-card">
+            <mat-card-header>
+                <mat-card-title>
+                    <mat-icon>speed</mat-icon>
+                    Response Time
+                </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <div class="chart-container">
+                    <canvas #responseTimeChart></canvas>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <!-- Build History -->
+    <mat-card class="build-history-card">
+        <mat-card-header>
+            <mat-card-title>
+                <mat-icon>history</mat-icon>
+                Recent Builds
+            </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <div class="build-list">
+                <div *ngFor="let build of buildHistory" class="build-item">
+                    <div class="build-info">
+                        <mat-icon class="build-icon">folder</mat-icon>
+                        <div class="build-details">
+                            <h4>{{ build.project }}</h4>
+                            <p>{{ build.timestamp | date:'short' }}</p>
+                        </div>
+                    </div>
+                    <div class="build-stats">
+                        <span class="duration">{{ build.duration }}s</span>
+                        <span class="badge" [class]="'badge-' + getStatusColor(build.status)">
+                            {{ build.status }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<app-loading-spinner *ngIf="loading" [fullscreen]="true" message="Loading metrics..."></app-loading-spinner>

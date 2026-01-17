@@ -1,0 +1,91 @@
+<div class="login-container">
+  <div class="login-card-wrapper animate-fadeIn">
+    <div class="logo-section">
+      <div class="logo-icon">
+        <mat-icon>code</mat-icon>
+      </div>
+      <h1 class="gradient-text">AI Orchestrator</h1>
+      <p class="subtitle">Platform-as-a-Service for AI-Powered Development</p>
+    </div>
+
+    <mat-card class="login-card">
+      <mat-card-content>
+        <h2>Welcome Back</h2>
+        <p class="login-description">Sign in to continue to your workspace</p>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Email Address</mat-label>
+            <input 
+              matInput 
+              type="email" 
+              formControlName="email"
+              placeholder="you@example.com"
+              autocomplete="email">
+            <mat-icon matPrefix>email</mat-icon>
+            <mat-error *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+              {{ getErrorMessage('email') }}
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Password</mat-label>
+            <input 
+              matInput 
+              [type]="hidePassword ? 'password' : 'text'"
+              formControlName="password"
+              placeholder="Enter your password"
+              autocomplete="current-password">
+            <mat-icon matPrefix>lock</mat-icon>
+            <button 
+              mat-icon-button 
+              matSuffix 
+              type="button"
+              (click)="hidePassword = !hidePassword"
+              [attr.aria-label]="'Hide password'"
+              [attr.aria-pressed]="hidePassword">
+              <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            <mat-error *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+              {{ getErrorMessage('password') }}
+            </mat-error>
+          </mat-form-field>
+
+          <div class="form-options">
+            <mat-checkbox formControlName="rememberMe">
+              Remember me
+            </mat-checkbox>
+            <a routerLink="/forgot-password" class="forgot-link">Forgot password?</a>
+          </div>
+
+          <button 
+            mat-raised-button 
+            color="primary" 
+            type="submit"
+            class="login-button full-width"
+            [disabled]="loading">
+            <span *ngIf="!loading">Sign In</span>
+            <span *ngIf="loading" class="loading-text">
+              <mat-icon class="spinner-icon">refresh</mat-icon>
+              Signing in...
+            </span>
+          </button>
+        </form>
+
+        <div class="divider">
+          <span>or</span>
+        </div>
+
+        <div class="register-section">
+          <p>Don't have an account? <a routerLink="/register" class="register-link">Create one</a></p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="footer-text">
+      <p>© 2026 AI Orchestrator. All rights reserved.</p>
+    </div>
+  </div>
+
+  <app-loading-spinner *ngIf="loading" [fullscreen]="true" message="Signing you in..."></app-loading-spinner>
+</div>

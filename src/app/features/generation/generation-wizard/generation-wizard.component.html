@@ -1,0 +1,291 @@
+<div class="generation-wizard-container">
+    <div class="wizard-header">
+        <h1>
+            <mat-icon>auto_awesome</mat-icon>
+            Project Generation Wizard
+        </h1>
+        <p class="subtitle">Create a new project with AI-powered code generation</p>
+    </div>
+
+    <mat-card class="wizard-card">
+        <mat-stepper [linear]="true" #stepper>
+            <!-- Step 1: Description -->
+            <mat-step [stepControl]="descriptionForm">
+                <form [formGroup]="descriptionForm">
+                    <ng-template matStepLabel>Project Description</ng-template>
+
+                    <div class="step-content">
+                        <h2>Describe Your Project</h2>
+                        <p class="step-description">Tell us what you want to build, and our AI will analyze and suggest
+                            the best tech stack.</p>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Project Name</mat-label>
+                            <input matInput formControlName="projectName" placeholder="my-awesome-app">
+                            <mat-icon matPrefix>label</mat-icon>
+                            <mat-error *ngIf="descriptionForm.get('projectName')?.hasError('required')">
+                                Project name is required
+                            </mat-error>
+                            <mat-error *ngIf="descriptionForm.get('projectName')?.hasError('minlength')">
+                                Minimum 3 characters required
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Project Description</mat-label>
+                            <textarea matInput formControlName="description" rows="6"
+                                placeholder="E.g., A RESTful API for an e-commerce platform with user authentication, product catalog, shopping cart, and payment integration..."></textarea>
+                            <mat-icon matPrefix>description</mat-icon>
+                            <mat-hint>Be as detailed as possible (minimum 20 characters)</mat-hint>
+                            <mat-error *ngIf="descriptionForm.get('description')?.hasError('required')">
+                                Description is required
+                            </mat-error>
+                            <mat-error *ngIf="descriptionForm.get('description')?.hasError('minlength')">
+                                Please provide more details (minimum 20 characters)
+                            </mat-error>
+                        </mat-form-field>
+
+                        <button mat-raised-button color="accent" (click)="analyzeDescription()"
+                            [disabled]="descriptionForm.invalid || analyzing" class="analyze-button">
+                            <mat-icon>psychology</mat-icon>
+                            <span *ngIf="!analyzing">Analyze with AI</span>
+                            <span *ngIf="analyzing">Analyzing...</span>
+                        </button>
+
+                        <div *ngIf="analysisResult" class="analysis-result animate-fadeIn">
+                            <h3>
+                                <mat-icon>check_circle</mat-icon>
+                                Analysis Complete
+                            </h3>
+                            <div class="suggestions">
+                                <p><strong>Suggested Technologies:</strong></p>
+                                <mat-chip-set>
+                                    <mat-chip *ngFor="let lang of analysisResult.suggested_languages">
+                                        {{ lang.name }} - {{ lang.framework }}
+                                    </mat-chip>
+                                </mat-chip-set>
+                                <p class="analysis-confidence">Confidence: {{ analysisResult.confidence }}%</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-actions">
+                        <button mat-button disabled>Back</button>
+                        <button mat-raised-button color="primary" matStepperNext [disabled]="descriptionForm.invalid">
+                            Next
+                            <mat-icon>arrow_forward</mat-icon>
+                        </button>
+                    </div>
+                </form>
+            </mat-step>
+
+            <!-- Step 2: Language & Framework -->
+            <mat-step [stepControl]="languageForm">
+                <form [formGroup]="languageForm">
+                    <ng-template matStepLabel>Language & Framework</ng-template>
+
+                    <div class="step-content">
+                        <h2>Select Technology Stack</h2>
+                        <p class="step-description">Choose the programming language and framework for your project.</p>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Programming Language</mat-label>
+                            <mat-select formControlName="language" (selectionChange)="onLanguageChange($event.value)">
+                                <mat-option *ngFor="let lang of languages" [value]="lang.name">
+                                    {{ lang.displayName }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-icon matPrefix>code</mat-icon>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width" *ngIf="frameworks.length > 0">
+                            <mat-label>Framework</mat-label>
+                            <mat-select formControlName="framework" (selectionChange)="onFrameworkChange($event.value)">
+                                <mat-option *ngFor="let fw of frameworks" [value]="fw.name">
+                                    <div class="framework-option">
+                                        <span class="fw-name">{{ fw.name }}</span>
+                                        <span class="fw-version">v{{ fw.version }}</span>
+                                    </div>
+                                    <div class="fw-description">{{ fw.description }}</div>
+                                </mat-option>
+                            </mat-select>
+                            <mat-icon matPrefix>layers</mat-icon>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width"
+                            *ngIf="languageForm.get('framework')?.value">
+                            <mat-label>Version</mat-label>
+                            <input matInput formControlName="version" readonly>
+                            <mat-icon matPrefix>tag</mat-icon>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="step-actions">
+                        <button mat-button matStepperPrevious>
+                            <mat-icon>arrow_back</mat-icon>
+                            Back
+                        </button>
+                        <button mat-raised-button color="primary" matStepperNext [disabled]="languageForm.invalid">
+                            Next
+                            <mat-icon>arrow_forward</mat-icon>
+                        </button>
+                    </div>
+                </form>
+            </mat-step>
+
+            <!-- Step 3: Configuration -->
+            <mat-step [stepControl]="configForm">
+                <form [formGroup]="configForm">
+                    <ng-template matStepLabel>Configuration</ng-template>
+
+                    <div class="step-content">
+                        <h2>Project Configuration</h2>
+                        <p class="step-description">Customize your project setup and features.</p>
+
+                        <div class="config-section">
+                            <h3>Features</h3>
+                            <div class="checkbox-group">
+                                <mat-checkbox formControlName="includeDocker">
+                                    <mat-icon>docker</mat-icon>
+                                    Include Docker Configuration
+                                </mat-checkbox>
+                                <mat-checkbox formControlName="includeTests">
+                                    <mat-icon>verified</mat-icon>
+                                    Include Unit Tests
+                                </mat-checkbox>
+                                <mat-checkbox formControlName="includeCI">
+                                    <mat-icon>integration_instructions</mat-icon>
+                                    Include CI/CD Pipeline
+                                </mat-checkbox>
+                            </div>
+                        </div>
+
+                        <div class="config-section">
+                            <h3>Additional Options</h3>
+
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Database</mat-label>
+                                <mat-select formControlName="database">
+                                    <mat-option value="">None</mat-option>
+                                    <mat-option value="postgresql">PostgreSQL</mat-option>
+                                    <mat-option value="mysql">MySQL</mat-option>
+                                    <mat-option value="mongodb">MongoDB</mat-option>
+                                    <mat-option value="sqlite">SQLite</mat-option>
+                                </mat-select>
+                                <mat-icon matPrefix>storage</mat-icon>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Authentication</mat-label>
+                                <mat-select formControlName="authentication">
+                                    <mat-option value="none">None</mat-option>
+                                    <mat-option value="jwt">JWT</mat-option>
+                                    <mat-option value="oauth">OAuth 2.0</mat-option>
+                                    <mat-option value="session">Session-based</mat-option>
+                                </mat-select>
+                                <mat-icon matPrefix>security</mat-icon>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div class="step-actions">
+                        <button mat-button matStepperPrevious>
+                            <mat-icon>arrow_back</mat-icon>
+                            Back
+                        </button>
+                        <button mat-raised-button color="primary" matStepperNext>
+                            Review
+                            <mat-icon>arrow_forward</mat-icon>
+                        </button>
+                    </div>
+                </form>
+            </mat-step>
+
+            <!-- Step 4: Generate -->
+            <mat-step>
+                <ng-template matStepLabel>Generate</ng-template>
+
+                <div class="step-content">
+                    <div *ngIf="!generating && !generationResult">
+                        <h2>Ready to Generate</h2>
+                        <p class="step-description">Review your configuration and start generation.</p>
+
+                        <div class="summary-card">
+                            <h3>Project Summary</h3>
+                            <div class="summary-item">
+                                <strong>Name:</strong> {{ descriptionForm.value.projectName }}
+                            </div>
+                            <div class="summary-item">
+                                <strong>Language:</strong> {{ languageForm.value.language }}
+                            </div>
+                            <div class="summary-item">
+                                <strong>Framework:</strong> {{ languageForm.value.framework }} v{{
+                                languageForm.value.version }}
+                            </div>
+                            <div class="summary-item">
+                                <strong>Database:</strong> {{ configForm.value.database || 'None' }}
+                            </div>
+                            <div class="summary-item">
+                                <strong>Authentication:</strong> {{ configForm.value.authentication }}
+                            </div>
+                        </div>
+
+                        <button mat-raised-button color="primary" class="generate-button" (click)="generateProject()">
+                            <mat-icon>rocket_launch</mat-icon>
+                            Generate Project
+                        </button>
+                    </div>
+
+                    <div *ngIf="generating" class="generation-progress animate-fadeIn">
+                        <mat-icon class="progress-icon">hourglass_empty</mat-icon>
+                        <h2>Generating Your Project...</h2>
+                        <p>This may take a few moments. Please don't close this window.</p>
+                        <mat-progress-bar mode="determinate" [value]="generationProgress"></mat-progress-bar>
+                        <p class="progress-text">{{ generationProgress }}% Complete</p>
+                    </div>
+
+                    <div *ngIf="generationResult" class="generation-success animate-fadeIn">
+                        <mat-icon class="success-icon">check_circle</mat-icon>
+                        <h2>Project Generated Successfully!</h2>
+                        <p>Your project has been created and is ready to use.</p>
+
+                        <div class="result-info">
+                            <div class="info-item">
+                                <mat-icon>folder</mat-icon>
+                                <span>{{ generationResult.files_created?.length || 0 }} files created</span>
+                            </div>
+                            <div class="info-item">
+                                <mat-icon>code</mat-icon>
+                                <span>{{ generationResult.total_lines || 0 }} lines of code</span>
+                            </div>
+                        </div>
+
+                        <div class="result-actions">
+                            <button mat-raised-button color="primary" (click)="downloadProject()">
+                                <mat-icon>download</mat-icon>
+                                Download Project
+                            </button>
+                            <button mat-raised-button color="accent" (click)="viewInIDE()">
+                                <mat-icon>code</mat-icon>
+                                Open in IDE
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-actions" *ngIf="!generating">
+                    <button mat-button matStepperPrevious [disabled]="generating">
+                        <mat-icon>arrow_back</mat-icon>
+                        Back
+                    </button>
+                    <button mat-button (click)="reset()" *ngIf="generationResult">
+                        <mat-icon>refresh</mat-icon>
+                        Start New Project
+                    </button>
+                </div>
+            </mat-step>
+        </mat-stepper>
+    </mat-card>
+</div>
+
+<app-loading-spinner *ngIf="loading" [fullscreen]="true" message="Loading languages..."></app-loading-spinner>

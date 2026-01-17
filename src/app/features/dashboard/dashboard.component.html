@@ -1,0 +1,148 @@
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div>
+            <h1>Dashboard</h1>
+            <p class="subtitle">Welcome back! Here's what's happening with your projects.</p>
+        </div>
+        <div class="header-actions">
+            <button mat-raised-button color="primary" routerLink="/generation">
+                <mat-icon>add</mat-icon>
+                New Project
+            </button>
+        </div>
+    </div>
+
+    <app-loading-spinner *ngIf="loading" message="Loading dashboard..."></app-loading-spinner>
+
+    <div *ngIf="!loading" class="dashboard-content animate-fadeIn">
+        <!-- Metrics Cards -->
+        <div class="metrics-grid">
+            <mat-card *ngFor="let metric of metrics" class="metric-card" [class]="'metric-' + metric.color">
+                <mat-card-content>
+                    <div class="metric-header">
+                        <div class="metric-icon" [class]="'bg-' + metric.color">
+                            <mat-icon>{{ metric.icon }}</mat-icon>
+                        </div>
+                        <div class="metric-trend" *ngIf="metric.trend" [class.positive]="metric.trend > 0"
+                            [class.negative]="metric.trend < 0">
+                            <mat-icon>{{ metric.trend > 0 ? 'trending_up' : 'trending_down' }}</mat-icon>
+                            <span>{{ Math.abs(metric.trend) }}%</span>
+                        </div>
+                    </div>
+                    <div class="metric-content">
+                        <h3 class="metric-value">{{ metric.value }}</h3>
+                        <p class="metric-title">{{ metric.title }}</p>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="content-grid">
+            <!-- Recent Projects -->
+            <mat-card class="recent-projects-card">
+                <mat-card-header>
+                    <mat-card-title>
+                        <mat-icon>folder</mat-icon>
+                        Recent Projects
+                    </mat-card-title>
+                    <button mat-button routerLink="/storage">View All</button>
+                </mat-card-header>
+                <mat-card-content>
+                    <div *ngIf="recentProjects.length === 0" class="empty-state">
+                        <mat-icon>folder_open</mat-icon>
+                        <p>No projects yet</p>
+                        <button mat-raised-button color="primary" routerLink="/generation">
+                            Create Your First Project
+                        </button>
+                    </div>
+
+                    <div *ngIf="recentProjects.length > 0" class="projects-list">
+                        <div *ngFor="let project of recentProjects" class="project-item">
+                            <div class="project-icon">
+                                <mat-icon>folder</mat-icon>
+                            </div>
+                            <div class="project-info">
+                                <h4>{{ project.project_name }}</h4>
+                                <p>{{ project.language }} • {{ formatDate(project.created_at) }}</p>
+                            </div>
+                            <div class="project-actions">
+                                <span class="badge" [class]="'badge-' + getStatusColor(project.status)">
+                                    {{ project.status }}
+                                </span>
+                                <button mat-icon-button>
+                                    <mat-icon>more_vert</mat-icon>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <!-- Quick Actions -->
+            <mat-card class="quick-actions-card">
+                <mat-card-header>
+                    <mat-card-title>
+                        <mat-icon>flash_on</mat-icon>
+                        Quick Actions
+                    </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="actions-grid">
+                        <button mat-raised-button class="action-button" routerLink="/generation">
+                            <mat-icon>add_circle</mat-icon>
+                            <span>Generate Project</span>
+                        </button>
+                        <button mat-raised-button class="action-button" routerLink="/migration">
+                            <mat-icon>sync_alt</mat-icon>
+                            <span>Migrate Code</span>
+                        </button>
+                        <button mat-raised-button class="action-button" routerLink="/ide">
+                            <mat-icon>code</mat-icon>
+                            <span>Open IDE</span>
+                        </button>
+                        <button mat-raised-button class="action-button" routerLink="/kubernetes">
+                            <mat-icon>cloud</mat-icon>
+                            <span>Deploy to K8s</span>
+                        </button>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <!-- System Health -->
+            <mat-card class="system-health-card" *ngIf="systemHealth">
+                <mat-card-header>
+                    <mat-card-title>
+                        <mat-icon>monitor_heart</mat-icon>
+                        System Health
+                    </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="health-metrics">
+                        <div class="health-item">
+                            <span class="health-label">CPU Usage</span>
+                            <div class="health-bar">
+                                <div class="health-fill" [style.width.%]="systemHealth.cpu_usage || 0"></div>
+                            </div>
+                            <span class="health-value">{{ systemHealth.cpu_usage || 0 }}%</span>
+                        </div>
+                        <div class="health-item">
+                            <span class="health-label">Memory</span>
+                            <div class="health-bar">
+                                <div class="health-fill" [style.width.%]="systemHealth.memory_usage || 0"></div>
+                            </div>
+                            <span class="health-value">{{ systemHealth.memory_usage || 0 }}%</span>
+                        </div>
+                        <div class="health-item">
+                            <span class="health-label">Disk</span>
+                            <div class="health-bar">
+                                <div class="health-fill" [style.width.%]="systemHealth.disk_usage || 0"></div>
+                            </div>
+                            <span class="health-value">{{ systemHealth.disk_usage || 0 }}%</span>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>

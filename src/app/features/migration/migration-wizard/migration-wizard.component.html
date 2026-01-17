@@ -1,0 +1,270 @@
+<div class="migration-wizard-container">
+    <div class="wizard-header">
+        <h1>
+            <mat-icon>sync_alt</mat-icon>
+            Code Migration Wizard
+        </h1>
+        <p class="subtitle">Migrate your project to a different language or framework</p>
+    </div>
+
+    <mat-card class="wizard-card">
+        <mat-stepper [linear]="true" #stepper>
+            <!-- Step 1: Source Project -->
+            <mat-step [stepControl]="sourceForm">
+                <form [formGroup]="sourceForm">
+                    <ng-template matStepLabel>Source Project</ng-template>
+
+                    <div class="step-content">
+                        <h2>Select Source Project</h2>
+                        <p class="step-description">Specify the project you want to migrate.</p>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Project Path</mat-label>
+                            <input matInput formControlName="projectPath" placeholder="/path/to/project">
+                            <mat-icon matPrefix>folder</mat-icon>
+                            <mat-error *ngIf="sourceForm.get('projectPath')?.hasError('required')">
+                                Project path is required
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Source Language</mat-label>
+                            <mat-select formControlName="sourceLanguage"
+                                (selectionChange)="onSourceLanguageChange($event.value)">
+                                <mat-option *ngFor="let lang of frameworks" [value]="lang.name">
+                                    {{ lang.display_name }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-icon matPrefix>code</mat-icon>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width" *ngIf="sourceFrameworks.length > 0">
+                            <mat-label>Source Framework</mat-label>
+                            <mat-select formControlName="sourceFramework">
+                                <mat-option *ngFor="let fw of sourceFrameworks" [value]="fw.name">
+                                    {{ fw.name }} v{{ fw.version }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-icon matPrefix>layers</mat-icon>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="step-actions">
+                        <button mat-button disabled>Back</button>
+                        <button mat-raised-button color="primary" matStepperNext [disabled]="sourceForm.invalid">
+                            Next
+                            <mat-icon>arrow_forward</mat-icon>
+                        </button>
+                    </div>
+                </form>
+            </mat-step>
+
+            <!-- Step 2: Target Framework -->
+            <mat-step [stepControl]="targetForm">
+                <form [formGroup]="targetForm">
+                    <ng-template matStepLabel>Target Framework</ng-template>
+
+                    <div class="step-content">
+                        <h2>Select Target Framework</h2>
+                        <p class="step-description">Choose the language and framework to migrate to.</p>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Target Language</mat-label>
+                            <mat-select formControlName="targetLanguage"
+                                (selectionChange)="onTargetLanguageChange($event.value)">
+                                <mat-option *ngFor="let lang of frameworks" [value]="lang.name">
+                                    {{ lang.display_name }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-icon matPrefix>code</mat-icon>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width" *ngIf="targetFrameworks.length > 0">
+                            <mat-label>Target Framework</mat-label>
+                            <mat-select formControlName="targetFramework"
+                                (selectionChange)="onTargetFrameworkChange($event.value)">
+                                <mat-option *ngFor="let fw of targetFrameworks" [value]="fw.name">
+                                    {{ fw.name }} v{{ fw.version }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-icon matPrefix>layers</mat-icon>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width"
+                            *ngIf="targetForm.get('targetFramework')?.value">
+                            <mat-label>Version</mat-label>
+                            <input matInput formControlName="targetVersion" readonly>
+                            <mat-icon matPrefix>tag</mat-icon>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="step-actions">
+                        <button mat-button matStepperPrevious>
+                            <mat-icon>arrow_back</mat-icon>
+                            Back
+                        </button>
+                        <button mat-raised-button color="primary" matStepperNext [disabled]="targetForm.invalid">
+                            Next
+                            <mat-icon>arrow_forward</mat-icon>
+                        </button>
+                    </div>
+                </form>
+            </mat-step>
+
+            <!-- Step 3: Configuration -->
+            <mat-step [stepControl]="configForm">
+                <form [formGroup]="configForm">
+                    <ng-template matStepLabel>Configuration</ng-template>
+
+                    <div class="step-content">
+                        <h2>Migration Options</h2>
+                        <p class="step-description">Configure migration behavior.</p>
+
+                        <div class="checkbox-group">
+                            <mat-checkbox formControlName="preserveStructure">
+                                <mat-icon>account_tree</mat-icon>
+                                Preserve Project Structure
+                            </mat-checkbox>
+                            <mat-checkbox formControlName="updateDependencies">
+                                <mat-icon>update</mat-icon>
+                                Update Dependencies
+                            </mat-checkbox>
+                            <mat-checkbox formControlName="generateTests">
+                                <mat-icon>verified</mat-icon>
+                                Generate Tests
+                            </mat-checkbox>
+                            <mat-checkbox formControlName="optimizeCode">
+                                <mat-icon>speed</mat-icon>
+                                Optimize Code
+                            </mat-checkbox>
+                        </div>
+                    </div>
+
+                    <div class="step-actions">
+                        <button mat-button matStepperPrevious>
+                            <mat-icon>arrow_back</mat-icon>
+                            Back
+                        </button>
+                        <button mat-raised-button color="primary" matStepperNext>
+                            Review
+                            <mat-icon>arrow_forward</mat-icon>
+                        </button>
+                    </div>
+                </form>
+            </mat-step>
+
+            <!-- Step 4: Migrate -->
+            <mat-step>
+                <ng-template matStepLabel>Migrate</ng-template>
+
+                <div class="step-content">
+                    <div *ngIf="!migrating && !migrationResult">
+                        <h2>Ready to Migrate</h2>
+                        <p class="step-description">Review and start migration.</p>
+
+                        <div class="summary-card">
+                            <h3>Migration Summary</h3>
+                            <div class="migration-flow">
+                                <div class="flow-item">
+                                    <div class="flow-label">From</div>
+                                    <div class="flow-value">
+                                        {{ sourceForm.value.sourceLanguage }} - {{ sourceForm.value.sourceFramework }}
+                                    </div>
+                                </div>
+                                <mat-icon class="flow-arrow">arrow_forward</mat-icon>
+                                <div class="flow-item">
+                                    <div class="flow-label">To</div>
+                                    <div class="flow-value">
+                                        {{ targetForm.value.targetLanguage }} - {{ targetForm.value.targetFramework }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button mat-raised-button color="primary" class="migrate-button" (click)="startMigration()">
+                            <mat-icon>sync_alt</mat-icon>
+                            Start Migration
+                        </button>
+                    </div>
+
+                    <div *ngIf="migrating" class="migration-progress animate-fadeIn">
+                        <mat-icon class="progress-icon">sync</mat-icon>
+                        <h2>Migrating Your Project...</h2>
+                        <p>This may take several minutes depending on project size.</p>
+                        <mat-progress-bar mode="determinate" [value]="migrationProgress"></mat-progress-bar>
+                        <p class="progress-text">{{ migrationProgress }}% Complete</p>
+                    </div>
+
+                    <div *ngIf="migrationResult" class="migration-results animate-fadeIn">
+                        <div class="results-header">
+                            <mat-icon class="success-icon">check_circle</mat-icon>
+                            <h2>Migration Complete!</h2>
+                            <p>{{ migrationResult.files_migrated || 0 }} files migrated successfully</p>
+                        </div>
+
+                        <div class="diff-viewer">
+                            <div class="file-list">
+                                <h3>Migrated Files</h3>
+                                <div class="file-list-items">
+                                    <div *ngFor="let file of migrationResult.migrated_files" class="file-item"
+                                        [class.selected]="selectedFile === file" (click)="selectFile(file)">
+                                        <mat-icon>description</mat-icon>
+                                        <span class="file-path">{{ file.path }}</span>
+                                        <span class="file-changes">{{ file.changes }} changes</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="code-diff" *ngIf="selectedFile">
+                                <mat-tab-group>
+                                    <mat-tab label="Original">
+                                        <div class="code-panel">
+                                            <pre><code>{{ selectedFile.originalCode }}</code></pre>
+                                        </div>
+                                    </mat-tab>
+                                    <mat-tab label="Migrated">
+                                        <div class="code-panel">
+                                            <pre><code>{{ selectedFile.migratedCode }}</code></pre>
+                                        </div>
+                                    </mat-tab>
+                                    <mat-tab label="Side by Side">
+                                        <div class="code-comparison">
+                                            <div class="code-column">
+                                                <h4>Original</h4>
+                                                <pre><code>{{ selectedFile.originalCode }}</code></pre>
+                                            </div>
+                                            <div class="code-column">
+                                                <h4>Migrated</h4>
+                                                <pre><code>{{ selectedFile.migratedCode }}</code></pre>
+                                            </div>
+                                        </div>
+                                    </mat-tab>
+                                </mat-tab-group>
+                            </div>
+                        </div>
+
+                        <div class="result-actions">
+                            <button mat-raised-button color="primary" (click)="downloadMigratedProject()">
+                                <mat-icon>download</mat-icon>
+                                Download Migrated Project
+                            </button>
+                            <button mat-button (click)="reset()">
+                                <mat-icon>refresh</mat-icon>
+                                Start New Migration
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-actions" *ngIf="!migrating && !migrationResult">
+                    <button mat-button matStepperPrevious>
+                        <mat-icon>arrow_back</mat-icon>
+                        Back
+                    </button>
+                </div>
+            </mat-step>
+        </mat-stepper>
+    </mat-card>
+</div>
+
+<app-loading-spinner *ngIf="loading" [fullscreen]="true" message="Loading frameworks..."></app-loading-spinner>

@@ -1,0 +1,99 @@
+<div class="ide-container">
+    <mat-toolbar class="ide-toolbar">
+        <button mat-icon-button>
+            <mat-icon>menu</mat-icon>
+        </button>
+        <span class="toolbar-title">
+            <mat-icon>code</mat-icon>
+            AI Orchestrator IDE
+        </span>
+        <span class="spacer"></span>
+        <button mat-icon-button (click)="saveFile()" [disabled]="!currentFile">
+            <mat-icon>save</mat-icon>
+        </button>
+        <button mat-icon-button (click)="formatCode()" [disabled]="!currentFile">
+            <mat-icon>format_align_left</mat-icon>
+        </button>
+        <button mat-icon-button (click)="runCode()">
+            <mat-icon>play_arrow</mat-icon>
+        </button>
+    </mat-toolbar>
+
+    <mat-sidenav-container class="ide-sidenav-container">
+        <!-- File Explorer -->
+        <mat-sidenav mode="side" opened class="file-explorer">
+            <div class="explorer-header">
+                <h3>
+                    <mat-icon>folder</mat-icon>
+                    Explorer
+                </h3>
+            </div>
+
+            <div class="file-tree">
+                <ng-container *ngFor="let node of fileTree">
+                    <div class="file-node" (click)="openFile(node)">
+                        <mat-icon>{{ node.isDirectory ? 'folder' : 'description' }}</mat-icon>
+                        <span>{{ node.name }}</span>
+                    </div>
+                    <div class="file-children" *ngIf="node.isDirectory && node.children">
+                        <div *ngFor="let child of node.children" class="file-node child" (click)="openFile(child)">
+                            <mat-icon>{{ child.isDirectory ? 'folder' : 'description' }}</mat-icon>
+                            <span>{{ child.name }}</span>
+                        </div>
+                    </div>
+                </ng-container>
+            </div>
+        </mat-sidenav>
+
+        <!-- Main Content -->
+        <mat-sidenav-content class="ide-content">
+            <!-- Open Files Tabs -->
+            <div class="open-files-tabs" *ngIf="openFiles.length > 0">
+                <div *ngFor="let file of openFiles" class="file-tab" [class.active]="currentFile === file"
+                    (click)="openFile(file)">
+                    <mat-icon class="file-icon">description</mat-icon>
+                    <span class="file-name">{{ file.name }}</span>
+                    <button mat-icon-button class="close-button" (click)="closeFile(file, $event)">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Editor -->
+            <div class="editor-panel">
+                <div #editorContainer class="monaco-editor-container"></div>
+            </div>
+
+            <!-- Bottom Panel -->
+            <div class="bottom-panel">
+                <mat-tab-group>
+                    <mat-tab label="Terminal">
+                        <div #terminalContainer class="terminal-container">
+                            <div class="terminal-placeholder">
+                                <mat-icon>terminal</mat-icon>
+                                <p>Terminal (xterm.js integration coming soon)</p>
+                                <p class="terminal-demo">$ npm install</p>
+                                <p class="terminal-demo">$ npm run dev</p>
+                            </div>
+                        </div>
+                    </mat-tab>
+                    <mat-tab label="Problems">
+                        <div class="problems-panel">
+                            <p class="empty-state">No problems detected</p>
+                        </div>
+                    </mat-tab>
+                    <mat-tab label="Output">
+                        <div class="output-panel">
+                            <p class="empty-state">No output</p>
+                        </div>
+                    </mat-tab>
+                    <mat-tab label="Debug Console">
+                        <div class="debug-panel">
+                            <p class="empty-state">Debugger not active</p>
+                        </div>
+                    </mat-tab>
+                </mat-tab-group>
+            </div>
+        </mat-sidenav-content>
+    </mat-sidenav-container>
+</div>
