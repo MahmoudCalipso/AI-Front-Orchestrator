@@ -1,0 +1,73 @@
+<div class="dashboard-container">
+  <header class="dashboard-header">
+    <div class="logo">
+      <span class="icon">🚀</span>
+      <h1>AI Orchestrator</h1>
+    </div>
+    <nav class="main-nav">
+      <a href="#" class="active">Dashboard</a>
+      <a href="#">Generate</a>
+      <a href="#">Migrate</a>
+      <a href="#">Analyze</a>
+      <a href="#">Deploy</a>
+      <a href="#">Storage</a>
+    </nav>
+  </header>
+
+  <main class="dashboard-content">
+    <section class="stats-grid">
+      <div class="stat-card">
+        <h3>Active Projects</h3>
+        <div class="value">{{stats.activeProjects}} <span class="trend">↗</span></div>
+      </div>
+      <div class="stat-card">
+        <h3>Total Migrations</h3>
+        <div class="value">{{stats.totalMigrations}}</div>
+      </div>
+      <div class="stat-card">
+        <h3>Code Analysis</h3>
+        <div class="value">{{stats.codeAnalysis}}%</div>
+      </div>
+      <div class="stat-card">
+        <h3>Storage Used</h3>
+        <div class="value">{{stats.storageUsed}} <span class="total">/ 10GB</span></div>
+      </div>
+    </section>
+
+    <section class="projects-section">
+      <h2>Recent Projects</h2>
+      <div class="projects-grid">
+        <div class="project-card" *ngFor="let project of recentProjects">
+          <div class="project-info">
+            <h4>{{project.name}}</h4>
+            <p>{{project.type}}</p>
+          </div>
+          <div class="project-status" [ngClass]="project.status.toLowerCase().replace(' ', '-')">
+            {{project.status}}
+          </div>
+          <div class="project-stacks">
+            <span *ngFor="let stack of project.stacks" class="stack-icon">{{stack}}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="quick-actions">
+      <h3>Quick Actions</h3>
+      <button class="btn-primary">+ New Project</button>
+      <button class="btn-secondary">⇄ Migrate Code</button>
+      <button class="btn-secondary">☸ Deploy to K8s</button>
+      <button class="btn-secondary">▶ Run Analysis</button>
+    </section>
+
+    <section class="timeline-section">
+      <h3>Activity Timeline</h3>
+      <div class="timeline">
+        <div class="timeline-item" *ngFor="let item of activityTimeline">
+          <span class="time">{{item.time}}</span>
+          <span class="action"><strong>{{item.user}}</strong> {{item.action}}</span>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
