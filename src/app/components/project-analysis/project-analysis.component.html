@@ -1,0 +1,38 @@
+<div class="analysis-container">
+  <header class="page-header">
+    <h1>Analyse de Code & Sécurité</h1>
+    <p>Détectez les vulnérabilités, optimisez les performances et améliorez la qualité.</p>
+  </header>
+
+  <div class="analysis-grid">
+    <section class="input-panel">
+      <div class="card">
+        <h3>Code à Analyser</h3>
+        <div class="form-group">
+          <textarea placeholder="Collez votre code ici ou sélectionnez un fichier..."></textarea>
+        </div>
+        <div class="analysis-actions">
+          <button class="btn-action">🔍 Analyse Complète</button>
+          <button class="btn-action">🛡️ Scan Sécurité</button>
+          <button class="btn-action">⚡ Optimisation</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="results-panel">
+      <div class="card result-card">
+        <h3>Résultats de l'Analyse</h3>
+        <div class="empty-state" *ngIf="!results">
+          <p>Lancez une analyse pour voir les résultats.</p>
+        </div>
+        <div class="results-content" *ngIf="results">
+          <div class="issue-item" *ngFor="let issue of results.issues" [ngClass]="issue.severity">
+            <span class="severity-badge">{{issue.severity}}</span>
+            <p>{{issue.description}}</p>
+            <code>{{issue.suggestion}}</code>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

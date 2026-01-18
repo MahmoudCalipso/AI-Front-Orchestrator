@@ -1,0 +1,64 @@
+<div class="migration-container">
+  <header class="page-header">
+    <h1>Migration de Projet AI</h1>
+    <p>Migrez votre code d'une stack à une autre de manière autonome.</p>
+  </header>
+
+  <div class="migration-grid">
+    <section class="source-panel">
+      <div class="card">
+        <h3>Source</h3>
+        <div class="form-group">
+          <label>Chemin du Projet / URL Git</label>
+          <input type="text" placeholder="/home/user/project-legacy">
+        </div>
+        <div class="form-group">
+          <label>Stack Actuelle</label>
+          <select>
+            <option>PHP / Laravel</option>
+            <option>Java / Spring Boot</option>
+            <option>Python / Django</option>
+            <option>Node.js / Express</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <div class="arrow-divider">➜</div>
+
+    <section class="target-panel">
+      <div class="card">
+        <h3>Cible</h3>
+        <div class="form-group">
+          <label>Stack Cible</label>
+          <select>
+            <option>Python / FastAPI</option>
+            <option>Go / Gin</option>
+            <option>Node.js / NestJS</option>
+            <option>Rust / Actix</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Options de Migration</label>
+          <div class="toggle-group">
+            <label><input type="checkbox" checked> Convertir les tests</label>
+            <label><input type="checkbox" checked> Migrer le schéma DB</label>
+            <label><input type="checkbox"> Dockeriser la cible</label>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="action-bar">
+    <button class="btn-migrate">Lancer la Migration 🚀</button>
+  </div>
+
+  <section class="progress-section" *ngIf="isMigrating">
+    <h3>Progression de la Migration</h3>
+    <div class="progress-bar">
+      <div class="progress-fill" [style.width.%]="migrationProgress"></div>
+    </div>
+    <p>{{currentStep}}</p>
+  </section>
+</div>

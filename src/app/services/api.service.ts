@@ -6,66 +6,82 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class ApiService {
-  private baseUrl = 'http://localhost:8080'; // À adapter selon l'environnement
-  private apiKey = ''; // À configurer via un service de paramètres
+  private baseUrl = 'http://localhost:8080';
 
   constructor(private http: HttpClient) {}
 
   private getHeaders() {
+    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
     return new HttpHeaders({
       'Content-Type': 'application/json',
-      'X-API-Key': this.apiKey
+      'X-API-Key': user.api_key || ''
     });
   }
 
-  // Core Endpoints
-  getHealth(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/health`);
+  // --- AI Agent (Universal) ---
+  fixCode(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/code/fix`, data, { headers: this.getHeaders() });
   }
 
-  getStatus(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/status`, { headers: this.getHeaders() });
+  analyzeCode(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/code/analyze`, data, { headers: this.getHeaders() });
   }
 
-  // Models
-  getModels(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/models`, { headers: this.getHeaders() });
+  optimizeCode(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/code/optimize`, data, { headers: this.getHeaders() });
   }
 
-  // Inference
-  runInference(data: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/inference`, data, { headers: this.getHeaders() });
+  refactorCode(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/code/refactor`, data, { headers: this.getHeaders() });
   }
 
-  // Generation
+  explainCode(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/code/explain`, data, { headers: this.getHeaders() });
+  }
+
+  // --- Project Operations ---
+  analyzeProject(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/project/analyze`, data, { headers: this.getHeaders() });
+  }
+
+  migrateProject(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/project/migrate`, data, { headers: this.getHeaders() });
+  }
+
+  addFeature(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/project/add-feature`, data, { headers: this.getHeaders() });
+  }
+
+  // --- Generation ---
   generateProject(data: any): Observable<any> {
     return this.http.post(`${this.baseUrl}/api/generate`, data, { headers: this.getHeaders() });
   }
 
-  analyzeDescription(data: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/api/analyze-description`, data, { headers: this.getHeaders() });
+  // --- Security ---
+  scanSecurity(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/security/scan`, data, { headers: this.getHeaders() });
   }
 
-  // Project Management
-  getUserProjects(userId: string): Observable<any> {
-    return this.http.get(`${this.baseUrl}/api/user/${userId}/projects`, { headers: this.getHeaders() });
-  }
-
-  createProject(userId: string, data: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/api/user/${userId}/projects`, data, { headers: this.getHeaders() });
-  }
-
-  openProject(projectId: string, data: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/api/projects/${projectId}/open`, data, { headers: this.getHeaders() });
-  }
-
-  // Git
+  // --- Git ---
   getGitProviders(): Observable<any> {
     return this.http.get(`${this.baseUrl}/git/providers`, { headers: this.getHeaders() });
   }
 
-  // Security
-  scanSecurity(data: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/api/security/scan`, data, { headers: this.getHeaders() });
+  initGitRepo(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/git/repositories/init`, data, { headers: this.getHeaders() });
+  }
+
+  // --- IDE & Workspace ---
+  createWorkspace(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/workspace`, data, { headers: this.getHeaders() });
+  }
+
+  getWorkspace(id: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/api/workspace/${id}`, { headers: this.getHeaders() });
+  }
+
+  // --- Infrastructure ---
+  generateK8s(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/kubernetes/generate`, data, { headers: this.getHeaders() });
   }
 }

@@ -1,0 +1,71 @@
+<div class="generation-container">
+  <header class="page-header">
+    <h1>Génération de Projet AI</h1>
+    <p>Décrivez votre projet et laissez l'IA orchestrer la création.</p>
+  </header>
+
+  <div class="generation-grid">
+    <section class="config-panel">
+      <div class="card">
+        <h3>Détails du Projet</h3>
+        <div class="form-group">
+          <label>Nom du Projet</label>
+          <input type="text" placeholder="ex: E-Commerce Platform">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea placeholder="Décrivez les fonctionnalités clés..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Stack Technique</label>
+          <div class="stack-options">
+            <div class="stack-group">
+              <label>Backend</label>
+              <select>
+                <option>FastAPI (Python)</option>
+                <option>Spring Boot (Java)</option>
+                <option>NestJS (Node.js)</option>
+              </select>
+            </div>
+            <div class="stack-group">
+              <label>Frontend</label>
+              <select>
+                <option>Angular</option>
+                <option>React</option>
+                <option>Vue.js</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="advanced-panel">
+      <div class="card">
+        <h3>Configuration Base de Données</h3>
+        <div class="db-options">
+          <button class="db-btn active">PostgreSQL</button>
+          <button class="db-btn">MySQL</button>
+          <button class="db-btn">MongoDB</button>
+        </div>
+        <div class="form-group">
+          <label>Chaîne de Connexion (Optionnel)</label>
+          <input type="text" placeholder="postgresql://user:pass@host:port/db">
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Options Avancées</h3>
+        <div class="toggle-group">
+          <label><input type="checkbox" checked> Authentification JWT</label>
+          <label><input type="checkbox" checked> RBAC (Contrôle d'accès)</label>
+          <label><input type="checkbox"> Déploiement Kubernetes</label>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="action-bar">
+    <button class="btn-generate">Générer le Projet 🚀</button>
+  </div>
+</div>
