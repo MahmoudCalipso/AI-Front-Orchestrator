@@ -9,6 +9,7 @@ import { GenerationService } from '../../core/services/api/generation.service';
 import { MonitoringService } from '../../core/services/api/monitoring.service';
 import { StorageService } from '../../core/services/api/storage.service';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
+import { StatusColorPipe } from '../../shared/pipes/status-color.pipe';
 
 interface MetricCard {
     title: string;
@@ -27,6 +28,7 @@ interface MetricCard {
         MatButtonModule,
         MatIconModule,
         MatGridListModule,
+        StatusColorPipe,
         LoadingSpinnerComponent
     ],
     templateUrl: './dashboard.component.html',
@@ -115,15 +117,7 @@ export class DashboardComponent implements OnInit {
         });
     }
 
-    getStatusColor(status: string): string {
-        const statusColors: { [key: string]: string } = {
-            'completed': 'success',
-            'in_progress': 'warning',
-            'failed': 'error',
-            'pending': 'info'
-        };
-        return statusColors[status] || 'info';
-    }
+
 
     formatDate(date: string): string {
         return new Date(date).toLocaleDateString('en-US', {

@@ -6,7 +6,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
 import { ToastService } from '../../../shared/services/toast.service';
+import { SafeHtmlPipe } from '../../../shared/pipes/safe-html.pipe';
+import { HighlightDirective } from '../../../shared/directives/highlight.directive';
 
 export interface ChatMessage {
     role: 'user' | 'ai';
@@ -26,7 +29,9 @@ export interface ChatMessage {
         MatIconModule,
         MatInputModule,
         MatFormFieldModule,
-        MatProgressSpinnerModule
+        MatProgressSpinnerModule,
+        SafeHtmlPipe,
+        HighlightDirective
     ],
     templateUrl: './ide-chat.component.html',
     styleUrl: './ide-chat.component.css'

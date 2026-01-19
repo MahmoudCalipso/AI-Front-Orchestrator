@@ -7,12 +7,13 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { K8sService, K8sResource } from '../../../core/services/api/k8s.service';
+import { StatusColorPipe } from '../../../shared/pipes/status-color.pipe';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-k8s-window',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule, MatListModule, MatDividerModule, MatSelectModule, MatProgressSpinnerModule, FormsModule],
+  imports: [CommonModule, MatIconModule, MatButtonModule, MatListModule, MatDividerModule, MatSelectModule, MatProgressSpinnerModule, FormsModule, StatusColorPipe],
   templateUrl: './k8s-window.html',
   styleUrl: './k8s-window.scss'
 })
@@ -39,9 +40,5 @@ export class K8sWindowComponent implements OnInit {
     });
   }
 
-  getStatusClass(status: string): string {
-    if (status === 'Running' || status === 'Ready') return 'status-ok';
-    if (status === 'Pending') return 'status-warn';
-    return 'status-error';
-  }
+
 }

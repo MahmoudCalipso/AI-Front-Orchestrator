@@ -9,6 +9,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ToastService } from '../../../shared/services/toast.service';
+import { StatusColorPipe } from '../../../shared/pipes/status-color.pipe';
 
 interface GitChange {
   path: string;
@@ -23,6 +24,7 @@ interface GitChange {
     CommonModule,
     FormsModule,
     MatButtonModule,
+    StatusColorPipe,
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,

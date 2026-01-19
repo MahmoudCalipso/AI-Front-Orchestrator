@@ -36,7 +36,7 @@
             <mat-list dense>
                 @for (change of stagedChanges; track change.path) {
                 <mat-list-item class="change-item staged">
-                    <mat-icon matListItemIcon [ngClass]="change.status">
+                    <mat-icon matListItemIcon [class]="(change.status | statusColor)">
                         {{ change.status === 'added' ? 'add_circle' : change.status === 'deleted' ? 'remove_circle' :
                         'edit' }}
                     </mat-icon>
@@ -59,7 +59,7 @@
             <mat-list dense>
                 @for (change of unstagedChanges; track change.path) {
                 <mat-list-item class="change-item">
-                    <mat-icon matListItemIcon [ngClass]="change.status">
+                    <mat-icon matListItemIcon [class]="(change.status | statusColor)">
                         {{ change.status === 'added' ? 'add_circle' : change.status === 'deleted' ? 'remove_circle' :
                         'edit' }}
                     </mat-icon>

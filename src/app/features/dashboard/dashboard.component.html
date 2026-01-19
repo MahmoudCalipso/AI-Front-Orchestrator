@@ -78,7 +78,7 @@
                                 <p>{{ project.language }} • {{ formatDate(project.created_at) }}</p>
                             </div>
                             <div class="project-actions">
-                                <span class="badge" [class]="'badge-' + getStatusColor(project.status)">
+                                <span class="badge" [class]="'badge-' + (project.status | statusColor)">
                                     {{ project.status }}
                                 </span>
                                 <button mat-icon-button>

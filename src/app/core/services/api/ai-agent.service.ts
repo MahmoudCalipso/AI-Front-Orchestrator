@@ -21,7 +21,9 @@ import {
   ProjectAnalyzeRequest,
   ProjectAnalyzeResponse,
   AddFeatureRequest,
-  AddFeatureResponse
+  AddFeatureResponse,
+  FigmaAnalyzeRequest,
+  FigmaAnalyzeResponse
 } from '../../models/ai-agent/ai-agent.model';
 
 /**
@@ -116,4 +118,15 @@ export class AiAgentService extends BaseApiService {
       timeout: 180000 // 3 minutes
     });
   }
+
+  /**
+   * Analyze Figma design
+   * POST /api/figma/analyze
+   */
+  analyzeFigma(request: FigmaAnalyzeRequest): Observable<FigmaAnalyzeResponse> {
+    return this.post<FigmaAnalyzeResponse>('/api/figma/analyze', request, {
+      timeout: 120000 // 2 minutes
+    });
+  }
+
 }

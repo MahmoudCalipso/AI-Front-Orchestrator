@@ -1,15 +1,17 @@
-import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MatStepperModule } from '@angular/material/stepper';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatStepper, MatStepperModule } from '@angular/material/stepper';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { HighlightDirective } from '../../../shared/directives/highlight.directive';
 import { MigrationService } from '../../../core/services/api/migration.service';
 import { DatabaseService } from '../../../core/services/api/database.service';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -37,7 +39,10 @@ interface MigrationFile {
     MatCardModule,
     MatProgressBarModule,
     MatTabsModule,
-    LoadingSpinnerComponent
+    LoadingSpinnerComponent,
+    FormsModule,
+    MatCheckboxModule,
+    HighlightDirective
   ],
   templateUrl: './migration-wizard.component.html',
   styleUrl: './migration-wizard.component.css'

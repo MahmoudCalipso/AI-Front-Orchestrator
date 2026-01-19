@@ -18,12 +18,11 @@
                 <mat-icon>{{ msg.role === 'user' ? 'person' : 'smart_toy' }}</mat-icon>
             </div>
             <div class="message-content">
-                <div class="message-text">{{ msg.content }}</div>
+                <div class="message-text" [innerHTML]="msg.content | safeHtml"></div>
 
-                <!-- Agentic Code Suggestion -->
                 @if (msg.isAgentic && msg.codeSnippet) {
                 <div class="agentic-block">
-                    <pre><code>{{ msg.codeSnippet }}</code></pre>
+                    <div appHighlight [code]="msg.codeSnippet" language="typescript"></div>
                     <button mat-flat-button color="accent" size="small" (click)="applySuggestion(msg.codeSnippet)">
                         <mat-icon>done_all</mat-icon>
                         Apply Changes

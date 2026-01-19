@@ -134,7 +134,7 @@
                             <h3>Vulnerabilities Found</h3>
                             @for (vuln of securityScan.vulnerabilities; track vuln.type) {
                             <div class="vulnerability-item">
-                                <span class="badge" [class]="'badge-' + getSeverityColor(vuln.severity)">
+                                <span class="badge" [class]="'badge-' + (vuln.severity | statusColor)">
                                     {{ vuln.severity }}
                                 </span>
                                 <div class="vuln-details">

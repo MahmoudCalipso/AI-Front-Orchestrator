@@ -1,14 +1,14 @@
 /**
  * AI Agent operation types
  */
-export type AgentOperation = 
-  | 'fix' 
-  | 'analyze' 
-  | 'test' 
-  | 'optimize' 
-  | 'document' 
-  | 'review' 
-  | 'explain' 
+export type AgentOperation =
+  | 'fix'
+  | 'analyze'
+  | 'test'
+  | 'optimize'
+  | 'document'
+  | 'review'
+  | 'explain'
   | 'refactor';
 
 /**
@@ -353,4 +353,75 @@ export interface AddFeatureResponse {
   feature_summary: string;
   integration_steps: string[];
   testing_recommendations: string[];
+}
+
+/**
+ * Figma analyze request
+ */
+export interface FigmaAnalyzeRequest {
+  figma_file_id: string;
+  figma_token?: string; // Optional if using system configured token
+  nodes?: string[];
+  extract_styles?: boolean;
+  extract_components?: boolean;
+}
+
+/**
+ * Figma analyze response
+ */
+export interface FigmaAnalyzeResponse {
+  project_name: string;
+  design_system: DesignSystem;
+  components: DesignComponent[];
+  pages: PageDefinition[];
+  assets: AssetDefinition[];
+  summary: string;
+}
+
+export interface DesignSystem {
+  colors: StyleDefinition[];
+  typography: StyleDefinition[];
+  spacing: number[];
+  grid: LayoutInfo;
+}
+
+export interface DesignComponent {
+  name: string;
+  id: string;
+  type: string;
+  code_snippet: string;
+  properties: { [key: string]: any };
+}
+
+export interface PageDefinition {
+  name: string;
+  id: string;
+  layout: LayoutInfo;
+  sections: SectionDefinition[];
+}
+
+export interface SectionDefinition {
+  name: string;
+  type: string;
+  content: any;
+}
+
+export interface AssetDefinition {
+  name: string;
+  url: string;
+  format: string;
+  scale: number;
+}
+
+export interface StyleDefinition {
+  name: string;
+  value: string | number;
+  type: string;
+}
+
+export interface LayoutInfo {
+  width: number;
+  height: number;
+  alignment: string;
+  padding: number | { [key: string]: number };
 }

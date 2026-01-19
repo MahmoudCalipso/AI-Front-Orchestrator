@@ -8,6 +8,7 @@ import { AiAgentService } from '../../../core/services/api/ai-agent.service';
 import { SecurityService } from '../../../core/services/api/security.service';
 import { ToastService } from '../../../shared/services/toast.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { StatusColorPipe } from '../../../shared/pipes/status-color.pipe';
 
 @Component({
     selector: 'app-code-analysis',
@@ -17,6 +18,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
         MatButtonModule,
         MatIconModule,
         MatTabsModule,
+        StatusColorPipe,
         LoadingSpinnerComponent
     ],
     templateUrl: './code-analysis.component.html',
@@ -89,15 +91,5 @@ export class CodeAnalysisComponent implements OnInit {
             this.loading = false;
             this.toast.success('Security scan completed');
         }, 2000);
-    }
-
-    getSeverityColor(severity: string): string {
-        const colors: { [key: string]: string } = {
-            'critical': 'error',
-            'high': 'error',
-            'medium': 'warning',
-            'low': 'info'
-        };
-        return colors[severity] || 'info';
     }
 }

@@ -34,7 +34,7 @@
                     <span class="res-age">{{ res.age }}</span>
                 </div>
             </div>
-            <div class="res-status" [ngClass]="getStatusClass(res.status)">
+            <div class="res-status" [class]="'status-' + (res.status | statusColor)">
                 <mat-icon>fiber_manual_record</mat-icon>
                 <span>{{ res.status }}</span>
             </div>

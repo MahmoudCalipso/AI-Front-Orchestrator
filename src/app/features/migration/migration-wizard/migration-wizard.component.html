@@ -241,24 +241,28 @@
                             <div class="code-diff">
                                 <mat-tab-group>
                                     <mat-tab label="Original">
-                                        <div class="code-panel">
-                                            <pre><code>{{ selectedFile.originalCode }}</code></pre>
+                                        <div class="code-container">
+                                            <div appHighlight [code]="selectedFile.originalCode"
+                                                [language]="sourceForm.value.sourceLanguage || 'typescript'"></div>
                                         </div>
                                     </mat-tab>
                                     <mat-tab label="Migrated">
-                                        <div class="code-panel">
-                                            <pre><code>{{ selectedFile.migratedCode }}</code></pre>
+                                        <div class="code-container">
+                                            <div appHighlight [code]="selectedFile.migratedCode"
+                                                [language]="targetForm.value.targetLanguage || 'typescript'"></div>
                                         </div>
                                     </mat-tab>
                                     <mat-tab label="Side by Side">
                                         <div class="code-comparison">
                                             <div class="code-column">
                                                 <h4>Original</h4>
-                                                <pre><code>{{ selectedFile.originalCode }}</code></pre>
+                                                <div class="code-block" appHighlight [code]="selectedFile.originalCode"
+                                                    [language]="sourceForm.value.sourceLanguage || 'typescript'"></div>
                                             </div>
                                             <div class="code-column">
-                                                <h4>Migrated</h4>
-                                                <pre><code>{{ selectedFile.migratedCode }}</code></pre>
+                                                <h4>Migrated (Angular 18+)</h4>
+                                                <div class="code-block" appHighlight [code]="selectedFile.migratedCode"
+                                                    [language]="targetForm.value.targetLanguage || 'typescript'"></div>
                                             </div>
                                         </div>
                                     </mat-tab>
