@@ -251,3 +251,23 @@ export interface MergeResponse {
   conflicts?: string[];
   message?: string;
 }
+
+/**
+ * Git Diff Request
+ */
+export interface GitDiffRequest {
+  workspace_id: string;
+  file_path: string;
+  base_commit?: string;
+  target_commit?: string;
+}
+
+/**
+ * Git Diff Response
+ */
+export interface GitDiffResponse {
+  file_path: string;
+  original_content: string;
+  modified_content: string;
+  diff_hunk?: string;
+}

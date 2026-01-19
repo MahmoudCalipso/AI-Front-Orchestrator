@@ -19,7 +19,8 @@
     </div>
 
     <!-- Current Metrics -->
-    <div class="metrics-grid" *ngIf="currentMetrics">
+    @if (currentMetrics) {
+    <div class="metrics-grid">
         <mat-card class="metric-card">
             <mat-card-content>
                 <div class="metric-icon cpu">
@@ -68,6 +69,7 @@
             </mat-card-content>
         </mat-card>
     </div>
+    }
 
     <!-- Charts -->
     <div class="charts-grid">
@@ -138,7 +140,8 @@
         </mat-card-header>
         <mat-card-content>
             <div class="build-list">
-                <div *ngFor="let build of buildHistory" class="build-item">
+                @for (build of buildHistory; track build.timestamp) {
+                <div class="build-item">
                     <div class="build-info">
                         <mat-icon class="build-icon">folder</mat-icon>
                         <div class="build-details">
@@ -153,9 +156,14 @@
                         </span>
                     </div>
                 </div>
+                } @empty {
+                <div class="empty-state">No builds found</div>
+                }
             </div>
         </mat-card-content>
     </mat-card>
 </div>
 
-<app-loading-spinner *ngIf="loading" [fullscreen]="true" message="Loading metrics..."></app-loading-spinner>
+@if (loading) {
+<app-loading-spinner [fullscreen]="true" message="Loading metrics..."></app-loading-spinner>
+}

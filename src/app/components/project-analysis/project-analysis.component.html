@@ -22,16 +22,21 @@
     <section class="results-panel">
       <div class="card result-card">
         <h3>Résultats de l'Analyse</h3>
-        <div class="empty-state" *ngIf="!results">
+        @if (!results) {
+        <div class="empty-state">
           <p>Lancez une analyse pour voir les résultats.</p>
         </div>
-        <div class="results-content" *ngIf="results">
-          <div class="issue-item" *ngFor="let issue of results.issues" [ngClass]="issue.severity">
+        } @else {
+        <div class="results-content">
+          @for (issue of results.issues; track issue.description) {
+          <div class="issue-item" [ngClass]="issue.severity">
             <span class="severity-badge">{{issue.severity}}</span>
             <p>{{issue.description}}</p>
             <code>{{issue.suggestion}}</code>
           </div>
+          }
         </div>
+        }
       </div>
     </section>
   </div>

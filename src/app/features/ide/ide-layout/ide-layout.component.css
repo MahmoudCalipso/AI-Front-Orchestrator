@@ -36,16 +36,63 @@
 
 /* File Explorer */
 .file-explorer {
-    width: 250px;
     background: var(--bg-secondary);
-    border-right: 1px solid var(--glass-border);
+    border-right: none;
 }
 
 .chat-sidebar {
-    width: 400px;
     background: var(--bg-secondary);
-    border-left: 1px solid var(--glass-border);
+    border-left: none;
     overflow: hidden;
+}
+
+.git-sidebar {
+    background: var(--bg-secondary);
+    border-right: none;
+    overflow: hidden;
+}
+
+.k8s-sidebar {
+    background: var(--bg-secondary);
+    border-right: none;
+    overflow: hidden;
+}
+
+/* Resize Gutters */
+.resize-gutter {
+    position: relative;
+    z-index: 1000;
+    transition: background 0.2s;
+    background: transparent;
+}
+
+.resize-gutter.vertical {
+    width: 4px;
+    height: 100%;
+    cursor: col-resize;
+    margin: 0 -2px;
+}
+
+.resize-gutter.vertical:hover,
+.resize-gutter.vertical:active {
+    background: var(--accent-500);
+}
+
+.resize-gutter.horizontal {
+    width: 100%;
+    height: 4px;
+    cursor: row-resize;
+    margin-top: -2px;
+}
+
+.resize-gutter.horizontal:hover,
+.resize-gutter.horizontal:active {
+    background: var(--accent-500);
+}
+
+.resize-gutter.right {
+    position: absolute;
+    right: 0;
 }
 
 /* IDE Content */

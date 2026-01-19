@@ -12,28 +12,45 @@
     </div>
 
     <div class="messages-list">
-        <div class="message-bubble" *ngFor="let msg of messages" [class.user]="msg.role === 'user'"
-            [class.ai]="msg.role === 'ai'">
+        @for (msg of messages; track msg.timestamp) {
+        <div class="message-bubble" [class.user]="msg.role === 'user'" [class.ai]="msg.role === 'ai'">
             <div class="message-avatar">
                 <mat-icon>{{ msg.role === 'user' ? 'person' : 'smart_toy' }}</mat-icon>
             </div>
             <div class="message-content">
                 <div class="message-text">{{ msg.content }}</div>
+
+                <!-- Agentic Code Suggestion -->
+                @if (msg.isAgentic && msg.codeSnippet) {
+                <div class="agentic-block">
+                    <pre><code>{{ msg.codeSnippet }}</code></pre>
+                    <button mat-flat-button color="accent" size="small" (click)="applySuggestion(msg.codeSnippet)">
+                        <mat-icon>done_all</mat-icon>
+                        Apply Changes
+                    </button>
+                </div>
+                }
+
                 <div class="message-time">{{ msg.timestamp | date:'shortTime' }}</div>
             </div>
         </div>
+        }
 
-        <div class="thinking-bubble" *ngIf="isThinking">
+        @if (isThinking) {
+        <div class="thinking-bubble">
             <mat-spinner diameter="20"></mat-spinner>
             <span>AI is thinking...</span>
         </div>
+        }
     </div>
 
     <div class="input-area">
-        <div class="context-indicator" *ngIf="contextFile">
+        @if (contextFile) {
+        <div class="context-indicator">
             <mat-icon>description</mat-icon>
             <span>Context: {{ contextFile }}</span>
         </div>
+        }
         <div class="input-wrapper">
             <textarea [(ngModel)]="userInput" (keyup.enter)="sendMessage()"
                 placeholder="Ask anything about your code..." rows="1"></textarea>

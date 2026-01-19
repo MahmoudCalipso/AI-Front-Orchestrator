@@ -1,0 +1,53 @@
+<div class="k8s-window-container glass-panel">
+    <div class="k8s-header">
+        <h3><mat-icon>cloud</mat-icon> Kubernetes</h3>
+        <button mat-icon-button (click)="loadResources()" [disabled]="isLoading">
+            <mat-icon [class.ani-spin]="isLoading">refresh</mat-icon>
+        </button>
+    </div>
+
+    <div class="ns-selector">
+        <mat-form-field appearance="outline" class="full-width dark-field">
+            <mat-label>Namespace</mat-label>
+            <mat-select [(ngModel)]="selectedNamespace" (selectionChange)="loadResources()">
+                @for (ns of namespaces; track ns) {
+                <mat-option [value]="ns">{{ ns }}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    @if (!isLoading) {
+    <div class="resource-list">
+        @for (res of resources; track res.name) {
+        <div class="resource-item">
+            <div class="res-icon">
+                <mat-icon [ngClass]="res.type.toLowerCase()">{{ res.type === 'Pod' ? 'layers' : res.type === 'Service' ?
+                    'settings_ethernet' : 'account_tree' }}</mat-icon>
+            </div>
+            <div class="res-info">
+                <div class="res-name">{{ res.name }}</div>
+                <div class="res-meta">
+                    <span class="res-type">{{ res.type }}</span> •
+                    <span class="res-age">{{ res.age }}</span>
+                </div>
+            </div>
+            <div class="res-status" [ngClass]="getStatusClass(res.status)">
+                <mat-icon>fiber_manual_record</mat-icon>
+                <span>{{ res.status }}</span>
+            </div>
+        </div>
+        } @empty {
+        <div class="empty-state">No resources found</div>
+        }
+    </div>
+    }
+
+    @if (isLoading) {
+    <div class="loading-overlay">
+        <mat-spinner diameter="30"></mat-spinner>
+    </div>
+    }
+</div>

@@ -22,44 +22,60 @@
                         <mat-label>Username</mat-label>
                         <input matInput formControlName="username" placeholder="johndoe">
                         <mat-icon matPrefix>person</mat-icon>
-                        <mat-error *ngIf="userForm.get('username')?.hasError('required')">
+                        @if (userForm.get('username')?.hasError('required')) {
+                        <mat-error>
                             Username is required
                         </mat-error>
-                        <mat-error *ngIf="userForm.get('username')?.hasError('minlength')">
+                        }
+                        @if (userForm.get('username')?.hasError('minlength')) {
+                        <mat-error>
                             Minimum 3 characters
                         </mat-error>
+                        }
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="full-width">
                         <mat-label>Email</mat-label>
                         <input matInput type="email" formControlName="email" placeholder="john@example.com">
                         <mat-icon matPrefix>email</mat-icon>
-                        <mat-error *ngIf="userForm.get('email')?.hasError('required')">
+                        @if (userForm.get('email')?.hasError('required')) {
+                        <mat-error>
                             Email is required
                         </mat-error>
-                        <mat-error *ngIf="userForm.get('email')?.hasError('email')">
+                        }
+                        @if (userForm.get('email')?.hasError('email')) {
+                        <mat-error>
                             Invalid email format
                         </mat-error>
+                        }
                     </mat-form-field>
 
-                    <mat-form-field appearance="outline" class="full-width" *ngIf="!editingUser">
+                    @if (!editingUser) {
+                    <mat-form-field appearance="outline" class="full-width">
                         <mat-label>Password</mat-label>
                         <input matInput type="password" formControlName="password">
                         <mat-icon matPrefix>lock</mat-icon>
-                        <mat-error *ngIf="userForm.get('password')?.hasError('required')">
+                        @if (userForm.get('password')?.hasError('required')) {
+                        <mat-error>
                             Password is required
                         </mat-error>
-                        <mat-error *ngIf="userForm.get('password')?.hasError('minlength')">
+                        }
+                        @if (userForm.get('password')?.hasError('minlength')) {
+                        <mat-error>
                             Minimum 8 characters
                         </mat-error>
+                        }
                     </mat-form-field>
+                    }
 
                     <mat-form-field appearance="outline" class="full-width">
                         <mat-label>Role</mat-label>
                         <mat-select formControlName="role">
-                            <mat-option *ngFor="let role of roles" [value]="role">
+                            @for (role of roles; track role) {
+                            <mat-option [value]="role">
                                 {{ role | titlecase }}
                             </mat-option>
+                            }
                         </mat-select>
                         <mat-icon matPrefix>badge</mat-icon>
                     </mat-form-field>
@@ -67,9 +83,11 @@
                     <mat-form-field appearance="outline" class="full-width">
                         <mat-label>Permissions</mat-label>
                         <mat-select formControlName="permissions" multiple>
-                            <mat-option *ngFor="let permission of availablePermissions" [value]="permission">
+                            @for (permission of availablePermissions; track permission) {
+                            <mat-option [value]="permission">
                                 {{ permission }}
                             </mat-option>
+                            }
                         </mat-select>
                         <mat-icon matPrefix>security</mat-icon>
                     </mat-form-field>
@@ -84,10 +102,12 @@
                             <mat-icon>{{ editingUser ? 'save' : 'add' }}</mat-icon>
                             {{ editingUser ? 'Update User' : 'Create User' }}
                         </button>
-                        <button mat-button (click)="resetForm()" *ngIf="editingUser">
+                        @if (editingUser) {
+                        <button mat-button (click)="resetForm()">
                             <mat-icon>cancel</mat-icon>
                             Cancel
                         </button>
+                        }
                     </div>
                 </form>
             </mat-card-content>
@@ -131,12 +151,16 @@
                         <th mat-header-cell *matHeaderCellDef>Permissions</th>
                         <td mat-cell *matCellDef="let user">
                             <mat-chip-set>
-                                <mat-chip *ngFor="let permission of user.permissions.slice(0, 2)">
+                                @for (permission of user.permissions.slice(0, 2); track permission) {
+                                <mat-chip>
                                     {{ permission }}
                                 </mat-chip>
-                                <mat-chip *ngIf="user.permissions.length > 2">
+                                }
+                                @if (user.permissions.length > 2) {
+                                <mat-chip>
                                     +{{ user.permissions.length - 2 }}
                                 </mat-chip>
+                                }
                             </mat-chip-set>
                         </td>
                     </ng-container>
@@ -174,4 +198,6 @@
     </div>
 </div>
 
-<app-loading-spinner *ngIf="loading" [fullscreen]="true" message="Loading users..."></app-loading-spinner>
+@if (loading) {
+<app-loading-spinner [fullscreen]="true" message="Loading users..."></app-loading-spinner>
+}

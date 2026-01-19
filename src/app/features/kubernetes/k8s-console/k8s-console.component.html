@@ -8,7 +8,8 @@
     </div>
 
     <!-- Cluster Info -->
-    <mat-card class="cluster-info-card" *ngIf="clusterInfo">
+    @if (clusterInfo) {
+    <mat-card class="cluster-info-card">
         <mat-card-header>
             <mat-card-title>
                 <mat-icon>dns</mat-icon>
@@ -36,6 +37,7 @@
             </div>
         </mat-card-content>
     </mat-card>
+    }
 
     <!-- Deploy Form -->
     <mat-card class="deploy-card">
@@ -87,8 +89,11 @@
 
                 <button mat-raised-button color="primary" type="submit" [disabled]="deployForm.invalid || deploying">
                     <mat-icon>cloud_upload</mat-icon>
-                    <span *ngIf="!deploying">Deploy to Kubernetes</span>
-                    <span *ngIf="deploying">Deploying...</span>
+                    @if (!deploying) {
+                    <span>Deploy to Kubernetes</span>
+                    } @else {
+                    <span>Deploying...</span>
+                    }
                 </button>
             </form>
         </mat-card-content>
@@ -223,9 +228,11 @@
                         <ng-container matColumnDef="ports">
                             <th mat-header-cell *matHeaderCellDef>Ports</th>
                             <td mat-cell *matCellDef="let service">
-                                <span *ngFor="let port of service.ports">
+                                @for (port of service.ports; track port.port) {
+                                <span>
                                     {{ port.port }}:{{ port.target_port }}
                                 </span>
+                                }
                             </td>
                         </ng-container>
 
@@ -238,4 +245,6 @@
     </mat-card>
 </div>
 
-<app-loading-spinner *ngIf="loading" [fullscreen]="true" message="Loading cluster resources..."></app-loading-spinner>
+@if (loading) {
+<app-loading-spinner [fullscreen]="true" message="Loading cluster resources..."></app-loading-spinner>
+}

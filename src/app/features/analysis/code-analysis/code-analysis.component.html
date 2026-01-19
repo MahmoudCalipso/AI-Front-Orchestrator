@@ -64,8 +64,10 @@
             <!-- Issues Tab -->
             <mat-tab label="Issues">
                 <div class="tab-content">
-                    <div *ngIf="analysisResult" class="issues-list">
-                        <div *ngFor="let issue of analysisResult.issues" class="issue-item">
+                    @if (analysisResult) {
+                    <div class="issues-list">
+                        @for (issue of analysisResult.issues; track issue.message) {
+                        <div class="issue-item">
                             <div class="issue-severity" [class]="'severity-' + issue.severity">
                                 <mat-icon>{{ issue.severity === 'high' ? 'error' : issue.severity === 'medium' ?
                                     'warning' : 'info' }}</mat-icon>
@@ -78,14 +80,17 @@
                                 <mat-icon>arrow_forward</mat-icon>
                             </button>
                         </div>
+                        }
                     </div>
+                    }
                 </div>
             </mat-tab>
 
             <!-- Complexity Tab -->
             <mat-tab label="Complexity">
                 <div class="tab-content">
-                    <div *ngIf="analysisResult" class="complexity-section">
+                    @if (analysisResult) {
+                    <div class="complexity-section">
                         <div class="complexity-stats">
                             <div class="stat-box">
                                 <h3>{{ analysisResult.complexity.average }}</h3>
@@ -98,22 +103,26 @@
                         </div>
                         <div class="complexity-files">
                             <h3>Most Complex Files</h3>
-                            <div *ngFor="let file of analysisResult.complexity.files" class="complexity-file">
+                            @for (file of analysisResult.complexity.files; track file.name) {
+                            <div class="complexity-file">
                                 <span class="file-name">{{ file.name }}</span>
                                 <div class="complexity-bar">
                                     <div class="complexity-fill" [style.width.%]="(file.complexity / 15) * 100"></div>
                                 </div>
                                 <span class="complexity-score">{{ file.complexity }}</span>
                             </div>
+                            }
                         </div>
                     </div>
+                    }
                 </div>
             </mat-tab>
 
             <!-- Security Tab -->
             <mat-tab label="Security">
                 <div class="tab-content">
-                    <div *ngIf="securityScan" class="security-section">
+                    @if (securityScan) {
+                    <div class="security-section">
                         <div class="security-score">
                             <div class="score-circle">
                                 <span class="score-value">{{ securityScan.score }}</span>
@@ -123,7 +132,8 @@
                         </div>
                         <div class="vulnerabilities-list">
                             <h3>Vulnerabilities Found</h3>
-                            <div *ngFor="let vuln of securityScan.vulnerabilities" class="vulnerability-item">
+                            @for (vuln of securityScan.vulnerabilities; track vuln.type) {
+                            <div class="vulnerability-item">
                                 <span class="badge" [class]="'badge-' + getSeverityColor(vuln.severity)">
                                     {{ vuln.severity }}
                                 </span>
@@ -133,12 +143,16 @@
                                     <p class="vuln-location">{{ vuln.location }}</p>
                                 </div>
                             </div>
+                            }
                         </div>
                     </div>
+                    }
                 </div>
             </mat-tab>
         </mat-tab-group>
     </mat-card>
 </div>
 
-<app-loading-spinner *ngIf="loading" [fullscreen]="true" message="Analyzing code..."></app-loading-spinner>
+@if (loading) {
+<app-loading-spinner [fullscreen]="true" message="Analyzing code..."></app-loading-spinner>
+}

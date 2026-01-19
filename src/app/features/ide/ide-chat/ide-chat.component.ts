@@ -6,11 +6,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ToastService } from '../../../shared/services/toast.service';
 
 export interface ChatMessage {
     role: 'user' | 'ai';
     content: string;
     timestamp: Date;
+    codeSnippet?: string; // For Agentic "Apply" feature
+    isAgentic?: boolean;
 }
 
 @Component({
@@ -53,21 +56,35 @@ export class IdeChatComponent {
         };
         this.messages.push(userMsg);
 
-        // Simulate AI thinking and response
         this.isThinking = true;
         const prompt = this.userInput;
         this.userInput = '';
 
         setTimeout(() => {
             this.isThinking = false;
+
+            // Logic to simulate Agentic response
+            const isRefactorRequest = prompt.toLowerCase().includes('fix') || prompt.toLowerCase().includes('refactor');
+
             const aiMsg: ChatMessage = {
                 role: 'ai',
-                content: `I received your request: "${prompt}". \n\nI can analyze ${this.contextFile ? this.contextFile : 'your project'} and suggest refactors. (Mock Response)`,
-                timestamp: new Date()
+                content: isRefactorRequest
+                    ? `I've analyzed the code in ${this.contextFile}. Here is a suggested improvement:`
+                    : `I received your request: "${prompt}". How else can I assist with your ${this.contextFile} file?`,
+                timestamp: new Date(),
+                isAgentic: isRefactorRequest,
+                codeSnippet: isRefactorRequest ? `// Optimized version of ${this.contextFile}\nexport class RefactoredCode {\n  // AI suggested optimization\n}` : undefined
             };
             this.messages.push(aiMsg);
         }, 1500);
     }
+
+    applySuggestion(code: string): void {
+        this.toast.success('AI suggestion applied to editor!');
+        // In real impl, this would emit to IdeLayout to update Monaco
+    }
+
+    private toast = inject(ToastService);
 
     clearChat(): void {
         this.messages = [];

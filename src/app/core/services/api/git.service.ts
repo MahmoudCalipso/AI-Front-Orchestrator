@@ -21,7 +21,9 @@ import {
   CreateBranchRequest,
   MergeRequest,
   MergeResponse,
-  GitProvider
+  GitProvider,
+  GitDiffRequest,
+  GitDiffResponse
 } from '../../models/git/git.model';
 
 @Injectable({
@@ -83,5 +85,9 @@ export class GitService extends BaseApiService {
 
   merge(request: MergeRequest): Observable<MergeResponse> {
     return this.post<MergeResponse>('/git/merge', request);
+  }
+
+  getDiff(workspaceId: string, filePath: string): Observable<GitDiffResponse> {
+    return this.get<GitDiffResponse>(`/git/diff/${workspaceId}?file_path=${filePath}`);
   }
 }

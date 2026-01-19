@@ -12,22 +12,28 @@
         </div>
     </div>
 
-    <app-loading-spinner *ngIf="loading" message="Loading dashboard..."></app-loading-spinner>
+    @if (loading) {
+    <app-loading-spinner message="Loading dashboard..."></app-loading-spinner>
+    }
 
-    <div *ngIf="!loading" class="dashboard-content animate-fadeIn">
+    @if (!loading) {
+    <div class="dashboard-content animate-fadeIn">
         <!-- Metrics Cards -->
         <div class="metrics-grid">
-            <mat-card *ngFor="let metric of metrics" class="metric-card" [class]="'metric-' + metric.color">
+            @for (metric of metrics; track metric.title) {
+            <mat-card class="metric-card" [class]="'metric-' + metric.color">
                 <mat-card-content>
                     <div class="metric-header">
                         <div class="metric-icon" [class]="'bg-' + metric.color">
                             <mat-icon>{{ metric.icon }}</mat-icon>
                         </div>
-                        <div class="metric-trend" *ngIf="metric.trend" [class.positive]="metric.trend > 0"
+                        @if (metric.trend) {
+                        <div class="metric-trend" [class.positive]="metric.trend > 0"
                             [class.negative]="metric.trend < 0">
                             <mat-icon>{{ metric.trend > 0 ? 'trending_up' : 'trending_down' }}</mat-icon>
                             <span>{{ Math.abs(metric.trend) }}%</span>
                         </div>
+                        }
                     </div>
                     <div class="metric-content">
                         <h3 class="metric-value">{{ metric.value }}</h3>
@@ -35,6 +41,7 @@
                     </div>
                 </mat-card-content>
             </mat-card>
+            }
         </div>
 
         <!-- Main Content Grid -->
@@ -49,16 +56,20 @@
                     <button mat-button routerLink="/storage">View All</button>
                 </mat-card-header>
                 <mat-card-content>
-                    <div *ngIf="recentProjects.length === 0" class="empty-state">
+                    @if (recentProjects.length === 0) {
+                    <div class="empty-state">
                         <mat-icon>folder_open</mat-icon>
                         <p>No projects yet</p>
                         <button mat-raised-button color="primary" routerLink="/generation">
                             Create Your First Project
                         </button>
                     </div>
+                    }
 
-                    <div *ngIf="recentProjects.length > 0" class="projects-list">
-                        <div *ngFor="let project of recentProjects" class="project-item">
+                    @if (recentProjects.length > 0) {
+                    <div class="projects-list">
+                        @for (project of recentProjects; track project.id) {
+                        <div class="project-item">
                             <div class="project-icon">
                                 <mat-icon>folder</mat-icon>
                             </div>
@@ -75,7 +86,9 @@
                                 </button>
                             </div>
                         </div>
+                        }
                     </div>
+                    }
                 </mat-card-content>
             </mat-card>
 
@@ -110,7 +123,8 @@
             </mat-card>
 
             <!-- System Health -->
-            <mat-card class="system-health-card" *ngIf="systemHealth">
+            @if (systemHealth) {
+            <mat-card class="system-health-card">
                 <mat-card-header>
                     <mat-card-title>
                         <mat-icon>monitor_heart</mat-icon>
@@ -143,6 +157,8 @@
                     </div>
                 </mat-card-content>
             </mat-card>
+            }
         </div>
     </div>
+    }
 </div>

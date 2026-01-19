@@ -23,12 +23,16 @@
                             <mat-label>Project Name</mat-label>
                             <input matInput formControlName="projectName" placeholder="my-awesome-app">
                             <mat-icon matPrefix>label</mat-icon>
-                            <mat-error *ngIf="descriptionForm.get('projectName')?.hasError('required')">
+                            @if (descriptionForm.get('projectName')?.hasError('required')) {
+                            <mat-error>
                                 Project name is required
                             </mat-error>
-                            <mat-error *ngIf="descriptionForm.get('projectName')?.hasError('minlength')">
+                            }
+                            @if (descriptionForm.get('projectName')?.hasError('minlength')) {
+                            <mat-error>
                                 Minimum 3 characters required
                             </mat-error>
+                            }
                         </mat-form-field>
 
                         <mat-form-field appearance="outline" class="full-width">
@@ -37,22 +41,30 @@
                                 placeholder="E.g., A RESTful API for an e-commerce platform with user authentication, product catalog, shopping cart, and payment integration..."></textarea>
                             <mat-icon matPrefix>description</mat-icon>
                             <mat-hint>Be as detailed as possible (minimum 20 characters)</mat-hint>
-                            <mat-error *ngIf="descriptionForm.get('description')?.hasError('required')">
+                            @if (descriptionForm.get('description')?.hasError('required')) {
+                            <mat-error>
                                 Description is required
                             </mat-error>
-                            <mat-error *ngIf="descriptionForm.get('description')?.hasError('minlength')">
+                            }
+                            @if (descriptionForm.get('description')?.hasError('minlength')) {
+                            <mat-error>
                                 Please provide more details (minimum 20 characters)
                             </mat-error>
+                            }
                         </mat-form-field>
 
                         <button mat-raised-button color="accent" (click)="analyzeDescription()"
                             [disabled]="descriptionForm.invalid || analyzing" class="analyze-button">
                             <mat-icon>psychology</mat-icon>
-                            <span *ngIf="!analyzing">Analyze with AI</span>
-                            <span *ngIf="analyzing">Analyzing...</span>
+                            @if (!analyzing) {
+                            <span>Analyze with AI</span>
+                            } @else {
+                            <span>Analyzing...</span>
+                            }
                         </button>
 
-                        <div *ngIf="analysisResult" class="analysis-result animate-fadeIn">
+                        @if (analysisResult) {
+                        <div class="analysis-result animate-fadeIn">
                             <h3>
                                 <mat-icon>check_circle</mat-icon>
                                 Analysis Complete
@@ -60,13 +72,16 @@
                             <div class="suggestions">
                                 <p><strong>Suggested Technologies:</strong></p>
                                 <mat-chip-set>
-                                    <mat-chip *ngFor="let lang of analysisResult.suggested_languages">
+                                    @for (lang of analysisResult.suggested_languages; track lang.name) {
+                                    <mat-chip>
                                         {{ lang.name }} - {{ lang.framework }}
                                     </mat-chip>
+                                    }
                                 </mat-chip-set>
                                 <p class="analysis-confidence">Confidence: {{ analysisResult.confidence }}%</p>
                             </div>
                         </div>
+                        }
                     </div>
 
                     <div class="step-actions">
@@ -91,33 +106,40 @@
                         <mat-form-field appearance="outline" class="full-width">
                             <mat-label>Programming Language</mat-label>
                             <mat-select formControlName="language" (selectionChange)="onLanguageChange($event.value)">
-                                <mat-option *ngFor="let lang of languages" [value]="lang.name">
+                                @for (lang of languages; track lang.name) {
+                                <mat-option [value]="lang.name">
                                     {{ lang.displayName }}
                                 </mat-option>
+                                }
                             </mat-select>
                             <mat-icon matPrefix>code</mat-icon>
                         </mat-form-field>
 
-                        <mat-form-field appearance="outline" class="full-width" *ngIf="frameworks.length > 0">
+                        @if (frameworks.length > 0) {
+                        <mat-form-field appearance="outline" class="full-width">
                             <mat-label>Framework</mat-label>
                             <mat-select formControlName="framework" (selectionChange)="onFrameworkChange($event.value)">
-                                <mat-option *ngFor="let fw of frameworks" [value]="fw.name">
+                                @for (fw of frameworks; track fw.name) {
+                                <mat-option [value]="fw.name">
                                     <div class="framework-option">
                                         <span class="fw-name">{{ fw.name }}</span>
                                         <span class="fw-version">v{{ fw.version }}</span>
                                     </div>
                                     <div class="fw-description">{{ fw.description }}</div>
                                 </mat-option>
+                                }
                             </mat-select>
                             <mat-icon matPrefix>layers</mat-icon>
                         </mat-form-field>
+                        }
 
-                        <mat-form-field appearance="outline" class="full-width"
-                            *ngIf="languageForm.get('framework')?.value">
+                        @if (languageForm.get('framework')?.value) {
+                        <mat-form-field appearance="outline" class="full-width">
                             <mat-label>Version</mat-label>
                             <input matInput formControlName="version" readonly>
                             <mat-icon matPrefix>tag</mat-icon>
                         </mat-form-field>
+                        }
                     </div>
 
                     <div class="step-actions">
@@ -206,7 +228,8 @@
                 <ng-template matStepLabel>Generate</ng-template>
 
                 <div class="step-content">
-                    <div *ngIf="!generating && !generationResult">
+                    @if (!generating && !generationResult) {
+                    <div>
                         <h2>Ready to Generate</h2>
                         <p class="step-description">Review your configuration and start generation.</p>
 
@@ -235,16 +258,20 @@
                             Generate Project
                         </button>
                     </div>
+                    }
 
-                    <div *ngIf="generating" class="generation-progress animate-fadeIn">
+                    @if (generating) {
+                    <div class="generation-progress animate-fadeIn">
                         <mat-icon class="progress-icon">hourglass_empty</mat-icon>
                         <h2>Generating Your Project...</h2>
                         <p>This may take a few moments. Please don't close this window.</p>
                         <mat-progress-bar mode="determinate" [value]="generationProgress"></mat-progress-bar>
                         <p class="progress-text">{{ generationProgress }}% Complete</p>
                     </div>
+                    }
 
-                    <div *ngIf="generationResult" class="generation-success animate-fadeIn">
+                    @if (generationResult) {
+                    <div class="generation-success animate-fadeIn">
                         <mat-icon class="success-icon">check_circle</mat-icon>
                         <h2>Project Generated Successfully!</h2>
                         <p>Your project has been created and is ready to use.</p>
@@ -271,21 +298,28 @@
                             </button>
                         </div>
                     </div>
+                    }
                 </div>
 
-                <div class="step-actions" *ngIf="!generating">
+                <div class="step-actions">
+                    @if (!generating) {
                     <button mat-button matStepperPrevious [disabled]="generating">
                         <mat-icon>arrow_back</mat-icon>
                         Back
                     </button>
-                    <button mat-button (click)="reset()" *ngIf="generationResult">
+                    }
+                    @if (generationResult && !generating) {
+                    <button mat-button (click)="reset()">
                         <mat-icon>refresh</mat-icon>
                         Start New Project
                     </button>
+                    }
                 </div>
             </mat-step>
         </mat-stepper>
     </mat-card>
 </div>
 
-<app-loading-spinner *ngIf="loading" [fullscreen]="true" message="Loading languages..."></app-loading-spinner>
+@if (loading) {
+<app-loading-spinner [fullscreen]="true" message="Loading languages..."></app-loading-spinner>
+}

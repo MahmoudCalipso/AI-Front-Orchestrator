@@ -37,7 +37,8 @@
     <section class="projects-section">
       <h2>Recent Projects</h2>
       <div class="projects-grid">
-        <div class="project-card" *ngFor="let project of recentProjects">
+        @for (project of recentProjects; track project.name) {
+        <div class="project-card">
           <div class="project-info">
             <h4>{{project.name}}</h4>
             <p>{{project.type}}</p>
@@ -46,9 +47,12 @@
             {{project.status}}
           </div>
           <div class="project-stacks">
-            <span *ngFor="let stack of project.stacks" class="stack-icon">{{stack}}</span>
+            @for (stack of project.stacks; track stack) {
+            <span class="stack-icon">{{stack}}</span>
+            }
           </div>
         </div>
+        }
       </div>
     </section>
 
@@ -63,10 +67,12 @@
     <section class="timeline-section">
       <h3>Activity Timeline</h3>
       <div class="timeline">
-        <div class="timeline-item" *ngFor="let item of activityTimeline">
+        @for (item of activityTimeline; track item.time) {
+        <div class="timeline-item">
           <span class="time">{{item.time}}</span>
           <span class="action"><strong>{{item.user}}</strong> {{item.action}}</span>
         </div>
+        }
       </div>
     </section>
   </main>

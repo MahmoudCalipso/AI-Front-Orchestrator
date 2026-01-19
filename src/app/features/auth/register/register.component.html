@@ -19,10 +19,11 @@
                         <input matInput type="text" formControlName="username" placeholder="johndoe"
                             autocomplete="username">
                         <mat-icon matPrefix>person</mat-icon>
-                        <mat-error
-                            *ngIf="registerForm.get('username')?.invalid && registerForm.get('username')?.touched">
+                        @if (registerForm.get('username')?.invalid && registerForm.get('username')?.touched) {
+                        <mat-error>
                             {{ getErrorMessage('username') }}
                         </mat-error>
+                        }
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="full-width">
@@ -30,9 +31,11 @@
                         <input matInput type="email" formControlName="email" placeholder="you@example.com"
                             autocomplete="email">
                         <mat-icon matPrefix>email</mat-icon>
-                        <mat-error *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+                        @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
+                        <mat-error>
                             {{ getErrorMessage('email') }}
                         </mat-error>
+                        }
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="full-width">
@@ -43,13 +46,15 @@
                         <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
                             <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
                         </button>
-                        <mat-error
-                            *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+                        @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
+                        <mat-error>
                             {{ getErrorMessage('password') }}
                         </mat-error>
+                        }
                     </mat-form-field>
 
-                    <div class="password-strength" *ngIf="registerForm.get('password')?.value">
+                    @if (registerForm.get('password')?.value) {
+                    <div class="password-strength">
                         <div class="strength-label">Password Strength:</div>
                         <div class="strength-bar">
                             <div class="strength-fill" [class.weak]="getPasswordStrength() === 'weak'"
@@ -61,6 +66,7 @@
                             {{ getPasswordStrength() | titlecase }}
                         </span>
                     </div>
+                    }
 
                     <mat-form-field appearance="outline" class="full-width">
                         <mat-label>Confirm Password</mat-label>
@@ -72,18 +78,23 @@
                             (click)="hideConfirmPassword = !hideConfirmPassword">
                             <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
                         </button>
-                        <mat-error *ngIf="registerForm.get('confirmPassword')?.touched">
+                        @if (registerForm.get('confirmPassword')?.touched) {
+                        <mat-error>
                             {{ getErrorMessage('confirmPassword') }}
                         </mat-error>
+                        }
                     </mat-form-field>
 
                     <button mat-raised-button color="primary" type="submit" class="register-button full-width"
                         [disabled]="loading">
-                        <span *ngIf="!loading">Create Account</span>
-                        <span *ngIf="loading" class="loading-text">
+                        @if (!loading) {
+                        <span>Create Account</span>
+                        } @else {
+                        <span class="loading-text">
                             <mat-icon class="spinner-icon">refresh</mat-icon>
                             Creating account...
                         </span>
+                        }
                     </button>
                 </form>
 
@@ -102,5 +113,7 @@
         </div>
     </div>
 
-    <app-loading-spinner *ngIf="loading" [fullscreen]="true" message="Creating your account..."></app-loading-spinner>
+    @if (loading) {
+    <app-loading-spinner [fullscreen]="true" message="Creating your account..."></app-loading-spinner>
+    }
 </div>

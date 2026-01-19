@@ -22,31 +22,39 @@
                             <mat-label>Project Path</mat-label>
                             <input matInput formControlName="projectPath" placeholder="/path/to/project">
                             <mat-icon matPrefix>folder</mat-icon>
-                            <mat-error *ngIf="sourceForm.get('projectPath')?.hasError('required')">
+                            @if (sourceForm.get('projectPath')?.hasError('required')) {
+                            <mat-error>
                                 Project path is required
                             </mat-error>
+                            }
                         </mat-form-field>
 
                         <mat-form-field appearance="outline" class="full-width">
                             <mat-label>Source Language</mat-label>
                             <mat-select formControlName="sourceLanguage"
                                 (selectionChange)="onSourceLanguageChange($event.value)">
-                                <mat-option *ngFor="let lang of frameworks" [value]="lang.name">
+                                @for (lang of frameworks; track lang.name) {
+                                <mat-option [value]="lang.name">
                                     {{ lang.display_name }}
                                 </mat-option>
+                                }
                             </mat-select>
                             <mat-icon matPrefix>code</mat-icon>
                         </mat-form-field>
 
-                        <mat-form-field appearance="outline" class="full-width" *ngIf="sourceFrameworks.length > 0">
+                        @if (sourceFrameworks.length > 0) {
+                        <mat-form-field appearance="outline" class="full-width">
                             <mat-label>Source Framework</mat-label>
                             <mat-select formControlName="sourceFramework">
-                                <mat-option *ngFor="let fw of sourceFrameworks" [value]="fw.name">
+                                @for (fw of sourceFrameworks; track fw.name) {
+                                <mat-option [value]="fw.name">
                                     {{ fw.name }} v{{ fw.version }}
                                 </mat-option>
+                                }
                             </mat-select>
                             <mat-icon matPrefix>layers</mat-icon>
                         </mat-form-field>
+                        }
                     </div>
 
                     <div class="step-actions">
@@ -72,30 +80,37 @@
                             <mat-label>Target Language</mat-label>
                             <mat-select formControlName="targetLanguage"
                                 (selectionChange)="onTargetLanguageChange($event.value)">
-                                <mat-option *ngFor="let lang of frameworks" [value]="lang.name">
+                                @for (lang of frameworks; track lang.name) {
+                                <mat-option [value]="lang.name">
                                     {{ lang.display_name }}
                                 </mat-option>
+                                }
                             </mat-select>
                             <mat-icon matPrefix>code</mat-icon>
                         </mat-form-field>
 
-                        <mat-form-field appearance="outline" class="full-width" *ngIf="targetFrameworks.length > 0">
+                        @if (targetFrameworks.length > 0) {
+                        <mat-form-field appearance="outline" class="full-width">
                             <mat-label>Target Framework</mat-label>
                             <mat-select formControlName="targetFramework"
                                 (selectionChange)="onTargetFrameworkChange($event.value)">
-                                <mat-option *ngFor="let fw of targetFrameworks" [value]="fw.name">
+                                @for (fw of targetFrameworks; track fw.name) {
+                                <mat-option [value]="fw.name">
                                     {{ fw.name }} v{{ fw.version }}
                                 </mat-option>
+                                }
                             </mat-select>
                             <mat-icon matPrefix>layers</mat-icon>
                         </mat-form-field>
+                        }
 
-                        <mat-form-field appearance="outline" class="full-width"
-                            *ngIf="targetForm.get('targetFramework')?.value">
+                        @if (targetForm.get('targetFramework')?.value) {
+                        <mat-form-field appearance="outline" class="full-width">
                             <mat-label>Version</mat-label>
                             <input matInput formControlName="targetVersion" readonly>
                             <mat-icon matPrefix>tag</mat-icon>
                         </mat-form-field>
+                        }
                     </div>
 
                     <div class="step-actions">
@@ -158,7 +173,8 @@
                 <ng-template matStepLabel>Migrate</ng-template>
 
                 <div class="step-content">
-                    <div *ngIf="!migrating && !migrationResult">
+                    @if (!migrating && !migrationResult) {
+                    <div>
                         <h2>Ready to Migrate</h2>
                         <p class="step-description">Review and start migration.</p>
 
@@ -186,16 +202,20 @@
                             Start Migration
                         </button>
                     </div>
+                    }
 
-                    <div *ngIf="migrating" class="migration-progress animate-fadeIn">
+                    @if (migrating) {
+                    <div class="migration-progress animate-fadeIn">
                         <mat-icon class="progress-icon">sync</mat-icon>
                         <h2>Migrating Your Project...</h2>
                         <p>This may take several minutes depending on project size.</p>
                         <mat-progress-bar mode="determinate" [value]="migrationProgress"></mat-progress-bar>
                         <p class="progress-text">{{ migrationProgress }}% Complete</p>
                     </div>
+                    }
 
-                    <div *ngIf="migrationResult" class="migration-results animate-fadeIn">
+                    @if (migrationResult) {
+                    <div class="migration-results animate-fadeIn">
                         <div class="results-header">
                             <mat-icon class="success-icon">check_circle</mat-icon>
                             <h2>Migration Complete!</h2>
@@ -206,16 +226,19 @@
                             <div class="file-list">
                                 <h3>Migrated Files</h3>
                                 <div class="file-list-items">
-                                    <div *ngFor="let file of migrationResult.migrated_files" class="file-item"
-                                        [class.selected]="selectedFile === file" (click)="selectFile(file)">
+                                    @for (file of migrationResult.migrated_files; track file.path) {
+                                    <div class="file-item" [class.selected]="selectedFile === file"
+                                        (click)="selectFile(file)">
                                         <mat-icon>description</mat-icon>
                                         <span class="file-path">{{ file.path }}</span>
                                         <span class="file-changes">{{ file.changes }} changes</span>
                                     </div>
+                                    }
                                 </div>
                             </div>
 
-                            <div class="code-diff" *ngIf="selectedFile">
+                            @if (selectedFile) {
+                            <div class="code-diff">
                                 <mat-tab-group>
                                     <mat-tab label="Original">
                                         <div class="code-panel">
@@ -241,6 +264,7 @@
                                     </mat-tab>
                                 </mat-tab-group>
                             </div>
+                            }
                         </div>
 
                         <div class="result-actions">
@@ -254,17 +278,22 @@
                             </button>
                         </div>
                     </div>
+                    }
                 </div>
 
-                <div class="step-actions" *ngIf="!migrating && !migrationResult">
+                <div class="step-actions">
+                    @if (!migrating && !migrationResult) {
                     <button mat-button matStepperPrevious>
                         <mat-icon>arrow_back</mat-icon>
                         Back
                     </button>
+                    }
                 </div>
             </mat-step>
         </mat-stepper>
     </mat-card>
 </div>
 
-<app-loading-spinner *ngIf="loading" [fullscreen]="true" message="Loading frameworks..."></app-loading-spinner>
+@if (loading) {
+<app-loading-spinner [fullscreen]="true" message="Loading frameworks..."></app-loading-spinner>
+}

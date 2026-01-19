@@ -1,0 +1,84 @@
+<div class="git-window-container glass-panel">
+    <div class="git-header">
+        <h3><mat-icon>source_control</mat-icon> Source Control</h3>
+        <div class="header-actions">
+            <button mat-icon-button (click)="sync()" [disabled]="isWorking" title="Sync Changes">
+                <mat-icon [class.rotate]="isWorking">sync</mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <div class="git-content" [class.loading]="isWorking">
+        <div class="commit-section">
+            <mat-form-field appearance="outline" class="full-width dark-field">
+                <mat-label>Commit message</mat-label>
+                <textarea matInput [(ngModel)]="commitMessage" placeholder="What did you change?" rows="3"></textarea>
+            </mat-form-field>
+
+            <button mat-flat-button color="primary" class="full-width commit-btn" (click)="commitAndPush()"
+                [disabled]="isWorking || !commitMessage">
+                @if (!isWorking) {
+                <mat-icon>publish</mat-icon>
+                } @else {
+                <mat-spinner diameter="20"></mat-spinner>
+                }
+                <span>Commit & Push</span>
+            </button>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="changes-list">
+            @if (stagedChanges.length > 0) {
+            <div class="section-label">Staged Changes</div>
+            <mat-list dense>
+                @for (change of stagedChanges; track change.path) {
+                <mat-list-item class="change-item staged">
+                    <mat-icon matListItemIcon [ngClass]="change.status">
+                        {{ change.status === 'added' ? 'add_circle' : change.status === 'deleted' ? 'remove_circle' :
+                        'edit' }}
+                    </mat-icon>
+                    <div matListItemTitle class="file-path">{{ change.path }}</div>
+                    <div matListItemMeta class="item-actions">
+                        <button mat-icon-button (click)="openFileDiff(change.path)" title="View Diff">
+                            <mat-icon>difference</mat-icon>
+                        </button>
+                        <button mat-icon-button (click)="toggleStage(change)"
+                            [title]="change.staged ? 'Unstage' : 'Stage'">
+                            <mat-icon>{{ change.staged ? 'remove' : 'add' }}</mat-icon>
+                        </button>
+                    </div>
+                </mat-list-item>
+                }
+            </mat-list>
+            }
+
+            <div class="section-label">Changes</div>
+            <mat-list dense>
+                @for (change of unstagedChanges; track change.path) {
+                <mat-list-item class="change-item">
+                    <mat-icon matListItemIcon [ngClass]="change.status">
+                        {{ change.status === 'added' ? 'add_circle' : change.status === 'deleted' ? 'remove_circle' :
+                        'edit' }}
+                    </mat-icon>
+                    <div matListItemTitle class="file-path">{{ change.path }}</div>
+                    <div matListItemMeta class="item-actions">
+                        <button mat-icon-button (click)="openFileDiff(change.path)" title="View Diff">
+                            <mat-icon>difference</mat-icon>
+                        </button>
+                        <button mat-icon-button (click)="toggleStage(change)" title="Stage">
+                            <mat-icon>add</mat-icon>
+                        </button>
+                    </div>
+                </mat-list-item>
+                } @empty {
+                @if (stagedChanges.length === 0) {
+                <div class="empty-state">No changes detected</div>
+                }
+                }
+            </mat-list>
+        </div>
+    </div>
+</div>

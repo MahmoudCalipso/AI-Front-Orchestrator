@@ -1,0 +1,34 @@
+@if (isVisible) {
+<div class="palette-overlay" (click)="close()">
+    <div class="palette-container glass-panel" (click)="$event.stopPropagation()">
+        <div class="palette-input-wrapper">
+            <mat-icon>search</mat-icon>
+            <input #searchInput type="text" [(ngModel)]="query" (ngModelChange)="filterCommands()"
+                (keydown)="onKeyDown($event)" placeholder="Type a command or search...">
+            <div class="shortcut-hint">Esc to close</div>
+        </div>
+
+        <div class="palette-results">
+            @for (cmd of filteredCommands; track cmd.id; let i = $index) {
+            <div class="command-item" [class.selected]="i === selectedIndex" (click)="selectCommand(cmd)"
+                (mouseenter)="selectedIndex = i">
+                <mat-icon class="cmd-icon">{{ cmd.icon || 'adjust' }}</mat-icon>
+                <div class="cmd-info">
+                    @if (cmd.category) {
+                    <span class="cmd-category">{{ cmd.category }}</span>
+                    }
+                    <span class="cmd-label">{{ cmd.label }}</span>
+                </div>
+                @if (cmd.shortcut) {
+                <div class="cmd-shortcut">{{ cmd.shortcut }}</div>
+                }
+            </div>
+            } @empty {
+            <div class="empty-state">
+                No commands found for "{{ query }}"
+            </div>
+            }
+        </div>
+    </div>
+</div>
+}

@@ -16,39 +16,29 @@
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Email Address</mat-label>
-            <input 
-              matInput 
-              type="email" 
-              formControlName="email"
-              placeholder="you@example.com"
-              autocomplete="email">
+            <input matInput type="email" formControlName="email" placeholder="you@example.com" autocomplete="email">
             <mat-icon matPrefix>email</mat-icon>
-            <mat-error *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+            @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+            <mat-error>
               {{ getErrorMessage('email') }}
             </mat-error>
+            }
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Password</mat-label>
-            <input 
-              matInput 
-              [type]="hidePassword ? 'password' : 'text'"
-              formControlName="password"
-              placeholder="Enter your password"
-              autocomplete="current-password">
+            <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password"
+              placeholder="Enter your password" autocomplete="current-password">
             <mat-icon matPrefix>lock</mat-icon>
-            <button 
-              mat-icon-button 
-              matSuffix 
-              type="button"
-              (click)="hidePassword = !hidePassword"
-              [attr.aria-label]="'Hide password'"
-              [attr.aria-pressed]="hidePassword">
+            <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword"
+              [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePassword">
               <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
             </button>
-            <mat-error *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+            @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+            <mat-error>
               {{ getErrorMessage('password') }}
             </mat-error>
+            }
           </mat-form-field>
 
           <div class="form-options">
@@ -58,17 +48,15 @@
             <a routerLink="/forgot-password" class="forgot-link">Forgot password?</a>
           </div>
 
-          <button 
-            mat-raised-button 
-            color="primary" 
-            type="submit"
-            class="login-button full-width"
-            [disabled]="loading">
-            <span *ngIf="!loading">Sign In</span>
-            <span *ngIf="loading" class="loading-text">
+          <button mat-raised-button color="primary" type="submit" class="login-button full-width" [disabled]="loading">
+            @if (!loading) {
+            <span>Sign In</span>
+            } @else {
+            <span class="loading-text">
               <mat-icon class="spinner-icon">refresh</mat-icon>
               Signing in...
             </span>
+            }
           </button>
         </form>
 
@@ -87,5 +75,7 @@
     </div>
   </div>
 
-  <app-loading-spinner *ngIf="loading" [fullscreen]="true" message="Signing you in..."></app-loading-spinner>
+  @if (loading) {
+  <app-loading-spinner [fullscreen]="true" message="Signing you in..."></app-loading-spinner>
+  }
 </div>

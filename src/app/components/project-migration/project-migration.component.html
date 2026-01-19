@@ -54,11 +54,13 @@
     <button class="btn-migrate">Lancer la Migration 🚀</button>
   </div>
 
-  <section class="progress-section" *ngIf="isMigrating">
+  @if (isMigrating) {
+  <section class="progress-section">
     <h3>Progression de la Migration</h3>
     <div class="progress-bar">
       <div class="progress-fill" [style.width.%]="migrationProgress"></div>
     </div>
     <p>{{currentStep}}</p>
   </section>
+  }
 </div>

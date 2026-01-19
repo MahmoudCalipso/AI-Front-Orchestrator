@@ -2,15 +2,19 @@
   <aside class="file-explorer">
     <div class="explorer-header">EXPLORATEUR</div>
     <ul class="file-list">
-      <li *ngFor="let file of files" (click)="openFile(file)">
+      @for (file of files; track file.name) {
+      <li (click)="openFile(file)">
         <span class="icon">📄</span> {{file.name}}
       </li>
+      }
     </ul>
   </aside>
 
   <main class="editor-area">
     <div class="editor-tabs">
-      <div class="tab active" *ngIf="activeFile">{{activeFile.name}}</div>
+      @if (activeFile) {
+      <div class="tab active">{{activeFile.name}}</div>
+      }
     </div>
     <div class="code-editor">
       <textarea [(ngModel)]="editorContent" (input)="onCodeChange()"></textarea>
@@ -18,7 +22,9 @@
     <div class="terminal-area">
       <div class="terminal-header">TERMINAL</div>
       <div class="terminal-output">
-        <div *ngFor="let line of terminalLines">{{line}}</div>
+        @for (line of terminalLines; track line) {
+        <div>{{line}}</div>
+        }
         <div class="input-line">
           <span class="prompt">$</span>
           <input type="text" (keyup.enter)="sendTerminalCommand($event)">
@@ -30,10 +36,12 @@
   <aside class="ai-assistant">
     <div class="assistant-header">ASSISTANT AI</div>
     <div class="chat-history">
-      <div class="message" *ngFor="let msg of chatMessages" [ngClass]="msg.role">
+      @for (msg of chatMessages; track msg.content) {
+      <div class="message" [ngClass]="msg.role">
         <strong>{{msg.role === 'user' ? 'Vous' : 'AI'}}:</strong>
         <p>{{msg.content}}</p>
       </div>
+      }
     </div>
     <div class="chat-input">
       <input type="text" placeholder="Demandez à l'IA..." (keyup.enter)="askAssistant($event)">

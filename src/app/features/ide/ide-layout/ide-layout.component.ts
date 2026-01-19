@@ -11,9 +11,15 @@ import { NestedTreeControl } from '@angular/cdk/tree';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
 import { IdeService } from '../../../core/services/api/ide.service';
+import { GitService } from '../../../core/services/api/git.service';
 import { ToastService } from '../../../shared/services/toast.service';
 import { IdeChatComponent } from '../ide-chat/ide-chat.component';
+import { GitWindowComponent } from '../git-window/git-window';
+import { K8sWindowComponent } from '../k8s-window/k8s-window';
+import { CommandPaletteComponent } from '../command-palette/command-palette';
+import { CommandService } from '../../../core/services/command.service';
 import { environment } from '../../../../environments/environment';
+import { HostListener } from '@angular/core';
 
 declare const monaco: any;
 
@@ -28,7 +34,9 @@ interface EditorGroup {
   id: string;
   files: FileNode[];
   activeFile: FileNode | null;
-  editorInstance?: any; // strict type removed for AMD usage
+  editorInstance?: any;
+  diffEditorInstance?: any;
+  isDiffMode?: boolean;
 }
 
 @Component({
@@ -41,7 +49,10 @@ interface EditorGroup {
     MatIconModule,
     MatTreeModule,
     MatTabsModule,
-    IdeChatComponent
+    IdeChatComponent,
+    GitWindowComponent,
+    K8sWindowComponent,
+    CommandPaletteComponent
   ],
   templateUrl: './ide-layout.component.html',
   styleUrl: './ide-layout.component.css'
@@ -51,11 +62,21 @@ export class IdeLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('terminalContainer', { static: false }) terminalContainer!: ElementRef;
 
   private ideService = inject(IdeService);
+  private gitService = inject(GitService);
   private toast = inject(ToastService);
   private route = inject(ActivatedRoute);
+  private commandService = inject(CommandService);
 
   workspaceId = 'demo-workspace';
   fileTree: FileNode[] = [];
+
+  // Layout Resizing (Phase 4)
+  explorerWidth = 260;
+  chatWidth = 350;
+  gitWidth = 300;
+  k8sWidth = 300;
+  bottomPanelHeight = 300;
+  isResizing = false;
 
   // Terminal
   private term!: Terminal;
@@ -72,14 +93,38 @@ export class IdeLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   editorGroups: EditorGroup[] = [];
   activeGroupId: string = '';
 
-  // Chat State
+  // Sidebars State
   isChatOpen = false;
+  isGitOpen = false;
+  isK8sOpen = false;
 
   toggleChat(): void {
     this.isChatOpen = !this.isChatOpen;
+    this.isGitOpen = false;
+    this.isK8sOpen = false;
     // Resize editors when layout changes
     setTimeout(() => {
-      this.editorGroups.forEach(g => g.editorInstance?.layout());
+      this.editorGroups.forEach(g => g.editorInstance?.layout() || g.diffEditorInstance?.layout());
+      this.fitAddon?.fit();
+    }, 300);
+  }
+
+  toggleGit(): void {
+    this.isGitOpen = !this.isGitOpen;
+    this.isChatOpen = false;
+    this.isK8sOpen = false;
+    setTimeout(() => {
+      this.editorGroups.forEach(g => g.editorInstance?.layout() || g.diffEditorInstance?.layout());
+      this.fitAddon?.fit();
+    }, 300);
+  }
+
+  toggleK8s(): void {
+    this.isK8sOpen = !this.isK8sOpen;
+    this.isChatOpen = false;
+    this.isGitOpen = false;
+    setTimeout(() => {
+      this.editorGroups.forEach(g => g.editorInstance?.layout() || g.diffEditorInstance?.layout());
       this.fitAddon?.fit();
     }, 300);
   }
@@ -96,6 +141,73 @@ export class IdeLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     this.loadMonacoLoader();
+    this.registerCommands();
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  handleShortcuts(event: KeyboardEvent): void {
+    // Ctrl+Shift+P (Command Palette)
+    if (event.ctrlKey && event.shiftKey && event.key === 'P') {
+      event.preventDefault();
+      this.commandService.togglePalette();
+    }
+    // Ctrl+P (Quick Open - also Command Palette for now)
+    if (event.ctrlKey && event.key === 'p' && !event.shiftKey) {
+      event.preventDefault();
+      this.commandService.togglePalette();
+    }
+    // Ctrl+S (Save)
+    if (event.ctrlKey && event.key === 's') {
+      event.preventDefault();
+      this.saveFile();
+    }
+  }
+
+  registerCommands(): void {
+    this.commandService.register({
+      id: 'toggle-chat',
+      label: 'Toggle AI Assistant',
+      category: 'View',
+      shortcut: 'Ctrl+Shift+L',
+      icon: 'smart_toy',
+      execute: () => this.toggleChat()
+    });
+    this.commandService.register({
+      id: 'toggle-git',
+      label: 'Toggle Git Source Control',
+      category: 'View',
+      icon: 'source_control',
+      execute: () => this.toggleGit()
+    });
+    this.commandService.register({
+      id: 'toggle-k8s',
+      label: 'Toggle Kubernetes Explorer',
+      category: 'View',
+      icon: 'cloud',
+      execute: () => this.toggleK8s()
+    });
+    this.commandService.register({
+      id: 'save-file',
+      label: 'Save Active File',
+      category: 'File',
+      shortcut: 'Ctrl+S',
+      icon: 'save',
+      execute: () => this.saveFile()
+    });
+    this.commandService.register({
+      id: 'split-right',
+      label: 'Split Editor Right',
+      category: 'Editor',
+      icon: 'vertical_split',
+      execute: () => this.splitEditor('vertical')
+    });
+    this.commandService.register({
+      id: 'format-code',
+      label: 'Format Document',
+      category: 'Editor',
+      icon: 'format_align_left',
+      execute: () => this.formatCode()
+    });
   }
 
   loadMonacoLoader(): void {
@@ -146,36 +258,93 @@ export class IdeLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  handleGitDiff(path: string): void {
+    const group = this.getActiveGroup();
+    if (!group) return;
+
+    this.gitService.getDiff(this.workspaceId, path).subscribe({
+      next: (diff) => {
+        this.showDiffEditor(group, diff.original_content, diff.modified_content, path);
+      },
+      error: () => this.toast.error('Failed to load diff for ' + path)
+    });
+  }
+
+  showDiffEditor(group: EditorGroup, original: string, modified: string, path: string): void {
+    group.isDiffMode = true;
+    const container = this.editorContainers.toArray()[this.editorGroups.indexOf(group)].nativeElement;
+
+    if (group.editorInstance) {
+      group.editorInstance.dispose();
+      group.editorInstance = null;
+    }
+
+    group.diffEditorInstance = monaco.editor.createDiffEditor(container, {
+      theme: 'vs-dark',
+      automaticLayout: true,
+      readOnly: false,
+      renderSideBySide: true
+    });
+
+    const originalModel = monaco.editor.createModel(original, this.getLanguageFromPath(path));
+    const modifiedModel = monaco.editor.createModel(modified, this.getLanguageFromPath(path));
+
+    group.diffEditorInstance.setModel({
+      original: originalModel,
+      modified: modifiedModel
+    });
+  }
+
+  refreshEditorContainer(group: EditorGroup): void {
+    const index = this.editorGroups.indexOf(group);
+    const container = this.editorContainers.toArray()[index].nativeElement;
+    this.createEditor(container, group);
+  }
+
   initTerminal(): void {
     this.term = new Terminal({
       fontFamily: 'Fira Code, monospace',
-      fontSize: 14,
+      fontSize: 13,
       cursorBlink: true,
+      allowProposedApi: true,
       theme: {
-        background: '#1e1e1e',
-        foreground: '#ffffff',
-        cursor: '#00ff88',
-        selectionBackground: 'rgba(0, 255, 136, 0.3)'
+        background: '#151515',
+        foreground: '#e0e0e0',
+        cursor: '#4facfe',
+        selectionBackground: 'rgba(79, 172, 254, 0.3)',
+        black: '#151515',
+        red: '#ff5555',
+        green: '#50fa7b',
+        yellow: '#f1fa8c',
+        blue: '#6272a4',
+        magenta: '#bd93f9',
+        cyan: '#8be9fd',
+        white: '#f8f8f2'
       }
     });
 
     this.fitAddon = new FitAddon();
     this.term.loadAddon(this.fitAddon);
 
-    // Create container
     if (this.terminalContainer && this.terminalContainer.nativeElement) {
-      this.terminalContainer.nativeElement.innerHTML = ''; // Clear placeholder
+      this.terminalContainer.nativeElement.innerHTML = '';
       this.term.open(this.terminalContainer.nativeElement);
       this.fitAddon.fit();
     }
 
+    // Professional Boot Sequence
+    this.term.write('\x1b[34m[SYSTEM]\x1b[0m Initializing AI Orchestrator Terminal...\r\n');
+    this.term.write('\x1b[36mAI-ORCH-OS v2026.1.0-POWERFUL\x1b[0m\r\n');
+    this.term.write('\x1b[90m--------------------------------------------------\x1b[0m\r\n');
+
     // Connect to Backend Session
     this.ideService.createTerminal({ workspace_id: this.workspaceId }).subscribe({
       next: (session) => {
+        this.term.write('\x1b[32m[OK]\x1b[0m Terminal Session Established: \x1b[33m' + session.session_id + '\x1b[0m\r\n');
         this.connectTerminalSocket(session.session_id);
       },
       error: (err) => {
-        this.term.write('\x1b[31mFailed to create terminal session\x1b[0m\r\n');
+        this.term.write('\x1b[31m[ERROR]\x1b[0m Critical failure in backend handshake.\r\n');
         console.error(err);
       }
     });
@@ -189,12 +358,17 @@ export class IdeLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   connectTerminalSocket(sessionId: string): void {
-    // Use environment wsUrl
     const url = `${environment.wsUrl}/ws/terminal/${sessionId}`;
     this.socket = new WebSocket(url);
 
     this.socket.onopen = () => {
-      this.term.write('\x1b[32mConnected to AI terminal\x1b[0m\r\n');
+      const languageProfile = this.getProjectLanguageProfile();
+      this.term.write('\x1b[32m[OK]\x1b[0m Secure WebSocket Handshake Verified.\r\n');
+      this.term.write('\x1b[34m[INFO]\x1b[0m Detected Project stack:\r\n');
+      languageProfile.forEach(lang => {
+        this.term.write(`      \x1b[90m->\x1b[0m \x1b[35m${lang}\x1b[0m\r\n`);
+      });
+      this.term.write('\x1b[90m--------------------------------------------------\x1b[0m\r\n\r\n');
       this.fitAddon.fit();
     };
 
@@ -205,14 +379,46 @@ export class IdeLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
           this.term.write(msg.data);
         }
       } catch (e) {
-        // If raw text
         this.term.write(event.data);
       }
     };
 
     this.socket.onclose = () => {
-      this.term.write('\r\n\x1b[31mConnection closed\x1b[0m\r\n');
+      this.term.write('\r\n\x1b[31m[DISCONNECTED]\x1b[0m Session closed by host.\r\n');
     };
+  }
+
+  private getProjectLanguageProfile(): string[] {
+    const languages = new Set<string>();
+
+    const scanNode = (nodes: FileNode[]) => {
+      nodes.forEach(node => {
+        if (node.isDirectory && node.children) {
+          scanNode(node.children);
+        } else {
+          const ext = node.name.split('.').pop()?.toLowerCase();
+          if (ext === 'java' || node.name === 'pom.xml' || node.name === 'build.gradle') languages.add('Java/JVM');
+          if (ext === 'py' || node.name === 'requirements.txt' || node.name === 'pyproject.toml') languages.add('Python');
+          if (ext === 'ts' || ext === 'js' || node.name === 'package.json') languages.add('Node.js/TypeScript');
+          if (ext === 'go' || node.name === 'go.mod') languages.add('Go (Golang)');
+          if (ext === 'rs' || node.name === 'Cargo.toml') languages.add('Rust');
+          if (ext === 'cs' || ext === 'csproj' || ext === 'sln') languages.add('C#/.NET');
+          if (ext === 'cpp' || ext === 'hpp' || ext === 'c' || ext === 'h') languages.add('C/C++');
+          if (ext === 'php' || node.name === 'composer.json') languages.add('PHP');
+          if (ext === 'rb' || node.name === 'Gemfile') languages.add('Ruby');
+          if (ext === 'swift') languages.add('Swift');
+          if (ext === 'kt' || ext === 'kts') languages.add('Kotlin');
+          if (ext === 'dockerfile' || node.name.toLowerCase() === 'dockerfile') languages.add('Docker/DevOps');
+          if (ext === 'yaml' || ext === 'yml') languages.add('YAML/Configuration');
+        }
+      });
+    };
+
+    if (this.fileTree.length > 0) {
+      scanNode(this.fileTree);
+    }
+
+    return languages.size > 0 ? Array.from(languages) : ['Universal Polyglot'];
   }
 
   ngOnDestroy(): void {
@@ -318,10 +524,19 @@ export class IdeLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   openFile(file: FileNode): void {
-    if (file.isDirectory) return;
-
     const group = this.getActiveGroup();
     if (!group) return;
+
+    // Reset Diff Mode if active
+    if (group.isDiffMode) {
+      if (group.diffEditorInstance) {
+        group.diffEditorInstance.dispose();
+        group.diffEditorInstance = null;
+      }
+      group.isDiffMode = false;
+      // Re-initialize normal editor
+      this.refreshEditorContainer(group);
+    }
 
     if (!group.files.find(f => f.path === file.path)) {
       group.files.push(file);
@@ -381,5 +596,31 @@ export class IdeLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     const ext = path.split('.').pop()?.toLowerCase();
     const map: any = { ts: 'typescript', js: 'javascript', html: 'html', css: 'css', json: 'json', md: 'markdown' };
     return map[ext || ''] || 'plaintext';
+  }
+
+  // Phase 4: Resizing Handlers
+  startResizing(event: MouseEvent, edge: string): void {
+    event.preventDefault();
+    this.isResizing = true;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      if (edge === 'explorer') this.explorerWidth = moveEvent.clientX;
+      if (edge === 'chat') this.chatWidth = window.innerWidth - moveEvent.clientX;
+      if (edge === 'git') this.gitWidth = window.innerWidth - moveEvent.clientX;
+      if (edge === 'k8s') this.k8sWidth = window.innerWidth - moveEvent.clientX;
+      if (edge === 'bottom') this.bottomPanelHeight = window.innerHeight - moveEvent.clientY;
+
+      this.editorGroups.forEach(g => g.editorInstance?.layout() || g.diffEditorInstance?.layout());
+      this.fitAddon?.fit();
+    };
+
+    const onMouseUp = () => {
+      this.isResizing = false;
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
   }
 }

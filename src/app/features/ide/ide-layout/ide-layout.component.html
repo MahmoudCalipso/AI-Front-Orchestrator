@@ -21,6 +21,14 @@
             Run
         </button>
         <span class="spacer-sm"></span>
+        <button mat-icon-button (click)="toggleGit()" [class.accent-color]="isGitOpen"
+            matTooltip="Toggle Source Control">
+            <mat-icon>source_control</mat-icon>
+        </button>
+        <button mat-icon-button (click)="toggleK8s()" [class.accent-color]="isK8sOpen"
+            matTooltip="Toggle Kubernetes Explorer">
+            <mat-icon>cloud</mat-icon>
+        </button>
         <button mat-icon-button (click)="toggleChat()" [class.accent-color]="isChatOpen" matTooltip="Toggle AI Chat">
             <mat-icon>chat</mat-icon>
         </button>
@@ -28,7 +36,7 @@
 
     <mat-sidenav-container class="ide-container">
         <!-- File Explorer -->
-        <mat-sidenav mode="side" opened class="file-explorer">
+        <mat-sidenav mode="side" opened class="file-explorer" [style.width.px]="explorerWidth">
             <div class="explorer-header">
                 <span>Explorer</span>
             </div>
@@ -54,63 +62,76 @@
             </mat-tree>
         </mat-sidenav>
 
+        <!-- Resize Gutter (Left) -->
+        <div class="resize-gutter vertical" (mousedown)="startResizing($event, 'explorer')"></div>
+
+        <!-- Git Sidebar -->
+        <mat-sidenav position="start" mode="side" [opened]="isGitOpen" class="git-sidebar" [style.width.px]="gitWidth">
+            <app-git-window [workspaceId]="workspaceId" (openDiff)="handleGitDiff($event)"></app-git-window>
+        </mat-sidenav>
+
+        <!-- K8s Sidebar -->
+        <mat-sidenav position="start" mode="side" [opened]="isK8sOpen" class="k8s-sidebar" [style.width.px]="k8sWidth">
+            <app-k8s-window></app-k8s-window>
+        </mat-sidenav>
+
         <!-- Right Chat Sidebar -->
-        <mat-sidenav position="end" mode="side" [opened]="isChatOpen" class="chat-sidebar">
+        <mat-sidenav position="end" mode="side" [opened]="isChatOpen" class="chat-sidebar" [style.width.px]="chatWidth">
             <app-ide-chat [contextFile]="getActiveGroup()?.activeFile?.name || null" (closeChat)="toggleChat()">
             </app-ide-chat>
         </mat-sidenav>
 
+        <!-- Resize Gutter (Right) -->
+        @if (isChatOpen || isGitOpen) {
+        <div class="resize-gutter vertical right" (mousedown)="startResizing($event, isChatOpen ? 'chat' : 'git')">
+        </div>
+        }
+
         <!-- Main Content -->
         <mat-sidenav-content class="ide-content">
-            <!-- Editor Area with Split Support -->
+            <!-- Editor Area -->
             <div class="editor-area">
                 <div class="editor-groups-container">
-                    <div class="editor-group" *ngFor="let group of editorGroups"
-                        [class.active-group]="group.id === activeGroupId" (click)="activeGroupId = group.id">
+                    @for (group of editorGroups; track group.id) {
+                    <div class="editor-group" [class.active-group]="group.id === activeGroupId"
+                        (click)="activeGroupId = group.id">
 
-                        <!-- Group Header (Tabs & Actions) -->
                         <div class="group-header">
                             <div class="tabs-container">
-                                <div class="editor-tab" *ngFor="let file of group.files"
-                                    [class.active]="group.activeFile?.path === file.path"
+                                @for (file of group.files; track file.path) {
+                                <div class="editor-tab" [class.active]="group.activeFile?.path === file.path"
                                     (click)="setActiveFile(file, group)">
                                     <span class="file-name">{{ file.name }}</span>
                                     <span class="close-icon" (click)="closeFile(file, group, $event)">×</span>
                                 </div>
+                                }
                             </div>
                             <div class="group-actions">
                                 <button mat-icon-button (click)="splitEditor('vertical')" matTooltip="Split Right">
                                     <mat-icon>vertical_split</mat-icon>
                                 </button>
-                                <button mat-icon-button *ngIf="editorGroups.length > 1"
-                                    (click)="closeEditorGroup(group.id)" matTooltip="Close Group">
+                                @if (editorGroups.length > 1) {
+                                <button mat-icon-button (click)="closeEditorGroup(group.id)" matTooltip="Close Group">
                                     <mat-icon>close</mat-icon>
                                 </button>
+                                }
                             </div>
                         </div>
 
-                        <!-- Monaco Editor Instance -->
                         <div class="monaco-container" #editorContainer></div>
                     </div>
+                    }
                 </div>
             </div>
 
-            <div class="editor-panel">
-                <div #editorContainer class="monaco-editor-container"></div>
-            </div>
+            <!-- Resize Gutter (Bottom) -->
+            <div class="resize-gutter horizontal" (mousedown)="startResizing($event, 'bottom')"></div>
 
             <!-- Bottom Panel -->
-            <div class="bottom-panel">
+            <div class="bottom-panel" [style.height.px]="bottomPanelHeight">
                 <mat-tab-group>
                     <mat-tab label="Terminal">
-                        <div #terminalContainer class="terminal-container">
-                            <div class="terminal-placeholder">
-                                <mat-icon>terminal</mat-icon>
-                                <p>Terminal (xterm.js integration coming soon)</p>
-                                <p class="terminal-demo">$ npm install</p>
-                                <p class="terminal-demo">$ npm run dev</p>
-                            </div>
-                        </div>
+                        <div #terminalContainer class="terminal-container"></div>
                     </mat-tab>
                     <mat-tab label="Problems">
                         <div class="problems-panel">
@@ -131,4 +152,7 @@
             </div>
         </mat-sidenav-content>
     </mat-sidenav-container>
+
+    <!-- Phase 5: Command Palette -->
+    <app-command-palette></app-command-palette>
 </div>
