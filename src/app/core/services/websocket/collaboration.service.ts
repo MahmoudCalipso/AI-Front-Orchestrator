@@ -7,7 +7,7 @@ import {
   CollaborationMessage,
   UserPresence,
   EditOperation,
-  ChatMessage,
+  CollaborationChatMessage,
   SyncRequest,
   SyncResponse
 } from '../../models/websocket/websocket.model';
@@ -34,9 +34,9 @@ export class CollaborationService extends BaseWebSocketService {
   ): Observable<CollaborationMessage> {
     this.userId = userId;
     this.username = username;
-    
+
     const url = `${environment.wsUrl}/api/collaboration/${sessionId}`;
-    
+
     const messages$ = this.connect({
       url,
       reconnect: true,
@@ -121,7 +121,7 @@ export class CollaborationService extends BaseWebSocketService {
    * Send chat message
    */
   sendChatMessage(content: string, replyTo?: string): void {
-    const chatMessage: ChatMessage = {
+    const chatMessage: CollaborationChatMessage = {
       message_id: this.generateId(),
       user_id: this.userId,
       username: this.username,

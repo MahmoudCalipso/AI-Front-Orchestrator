@@ -204,10 +204,10 @@ export class MonitoringDashboardComponent implements OnInit, AfterViewInit, OnDe
 
   loadBuildHistory(): void {
     this.monitoringService.getBuildHistory(10).subscribe({
-      next: (history) => {
+      next: (history: any[]) => {
         this.buildHistory = history;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Failed to load build history from API:', error);
         this.buildHistory = [];
       }

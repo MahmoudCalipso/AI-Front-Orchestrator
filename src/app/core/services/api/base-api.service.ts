@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError, retry, timeout } from 'rxjs/operators';
+import { Observable, throwError, catchError, retry, timeout } from 'rxjs';
 import { environment } from '@environments/environment';
 
 /**
@@ -47,7 +46,7 @@ export class BaseApiService {
    */
   protected buildParams(params?: { [key: string]: any }): HttpParams {
     let httpParams = new HttpParams();
-    
+
     if (params) {
       Object.keys(params).forEach(key => {
         const value = params[key];
@@ -56,7 +55,7 @@ export class BaseApiService {
         }
       });
     }
-    
+
     return httpParams;
   }
 
@@ -75,8 +74,8 @@ export class BaseApiService {
         params: this.buildParams(params)
       }
     ).pipe(
-      timeout(options?.timeout || this.defaultTimeout),
-      retry(environment.retryAttempts),
+      (timeout(options?.timeout || this.defaultTimeout) as any),
+      (retry(environment.retryAttempts) as any),
       catchError(this.handleError)
     );
   }
@@ -96,7 +95,7 @@ export class BaseApiService {
         headers: this.getHeaders(options?.headers)
       }
     ).pipe(
-      timeout(options?.timeout || this.defaultTimeout),
+      (timeout(options?.timeout || this.defaultTimeout) as any),
       catchError(this.handleError)
     );
   }
@@ -116,7 +115,7 @@ export class BaseApiService {
         headers: this.getHeaders(options?.headers)
       }
     ).pipe(
-      timeout(options?.timeout || this.defaultTimeout),
+      (timeout(options?.timeout || this.defaultTimeout) as any),
       catchError(this.handleError)
     );
   }
@@ -136,7 +135,7 @@ export class BaseApiService {
         headers: this.getHeaders(options?.headers)
       }
     ).pipe(
-      timeout(options?.timeout || this.defaultTimeout),
+      (timeout(options?.timeout || this.defaultTimeout) as any),
       catchError(this.handleError)
     );
   }
@@ -156,7 +155,7 @@ export class BaseApiService {
         params: this.buildParams(params)
       }
     ).pipe(
-      timeout(options?.timeout || this.defaultTimeout),
+      (timeout(options?.timeout || this.defaultTimeout) as any),
       catchError(this.handleError)
     );
   }
@@ -166,23 +165,23 @@ export class BaseApiService {
    */
   private handleError(error: any): Observable<never> {
     let errorMessage = 'An error occurred';
-    
+
     if (error.error instanceof ErrorEvent) {
       // Client-side error
       errorMessage = `Error: ${error.error.message}`;
     } else {
       // Server-side error
       errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
-      
+
       if (error.error?.message) {
         errorMessage = error.error.message;
       }
     }
-    
+
     if (environment.enableLogging) {
       console.error('API Error:', errorMessage, error);
     }
-    
+
     return throwError(() => ({
       status: error.status,
       message: errorMessage,

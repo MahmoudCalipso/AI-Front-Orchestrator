@@ -11,6 +11,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../../core/services/api/auth.service';
 import { ToastService } from '../../../shared/services/toast.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
@@ -40,6 +41,7 @@ interface User {
         MatChipsModule,
         MatDialogModule,
         MatCheckboxModule,
+        MatTooltipModule,
         LoadingSpinnerComponent
     ],
     templateUrl: './user-management.component.html',

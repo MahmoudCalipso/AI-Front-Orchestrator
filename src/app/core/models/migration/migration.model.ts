@@ -54,7 +54,7 @@ export interface TechStack {
 /**
  * Migration strategy
  */
-export type MigrationStrategy = 
+export type MigrationStrategy =
   | 'big-bang'        // Migrate everything at once
   | 'strangler-fig'   // Gradual migration
   | 'parallel-run'    // Run both versions
@@ -71,6 +71,7 @@ export interface MigrationWorkflowResponse {
   phases: MigrationPhase[];
   estimated_completion?: string;
   results?: MigrationResults;
+  migrated_files?: any[];
 }
 
 /**
@@ -85,7 +86,7 @@ export interface MigrationPhase {
   started_at?: string;
   completed_at?: string;
   components: string[];
-  issues?: Issue[];
+  issues?: MigrationIssue[];
 }
 
 /**
@@ -135,13 +136,14 @@ export interface PerformanceMetrics {
 /**
  * Issue during migration
  */
-export interface Issue {
+export interface MigrationIssue {
   type: 'error' | 'warning' | 'info';
-  severity: 'critical' | 'high' | 'medium' | 'low';
   message: string;
   file?: string;
   line?: number;
+  code?: string;
   suggestion?: string;
+  auto_fixable: boolean;
 }
 
 /**

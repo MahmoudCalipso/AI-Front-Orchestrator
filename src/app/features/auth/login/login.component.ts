@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -33,6 +33,7 @@ export class LoginComponent {
     private fb = inject(FormBuilder);
     private authService = inject(AuthService);
     private router = inject(Router);
+    private route = inject(ActivatedRoute);
     private toast = inject(ToastService);
 
     loginForm: FormGroup;
@@ -50,12 +51,13 @@ export class LoginComponent {
     onSubmit(): void {
         if (this.loginForm.valid) {
             this.loading = true;
-            const { email, password } = this.loginForm.value;
+            const { email: username, password } = this.loginForm.value;
 
-            this.authService.login({ email, password }).subscribe({
-                next: (response) => {
-                    this.toast.success('Login successful!');
-                    this.router.navigate(['/dashboard']);
+            this.authService.login({ username, password }).subscribe({
+                next: () => {
+                    // Navigate based on return URL or default
+                    const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+                    this.router.navigate([returnUrl]);
                 },
                 error: (error) => {
                     this.loading = false;

@@ -306,7 +306,7 @@ export interface DiagnosticRelatedInformation {
 /**
  * Refactor request
  */
-export interface RefactorRequest {
+export interface WorkspaceRefactorRequest {
   workspace_id: string;
   file: string;
   range: Range;
@@ -317,7 +317,7 @@ export interface RefactorRequest {
 /**
  * Refactor response
  */
-export interface RefactorResponse {
+export interface WorkspaceRefactorResponse {
   success: boolean;
   changes: WorkspaceEdit;
   message?: string;

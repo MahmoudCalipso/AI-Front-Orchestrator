@@ -42,6 +42,8 @@ export class DashboardComponent implements OnInit {
     recentProjects: any[] = [];
     systemHealth: any = null;
 
+    protected readonly Math = Math;
+
     ngOnInit(): void {
         this.loadDashboardData();
     }
@@ -85,13 +87,15 @@ export class DashboardComponent implements OnInit {
         this.storageService.getStorageStats().subscribe({
             next: (stats) => {
                 this.metrics[0].value = stats.total_projects || 0;
-                this.metrics[3].value = `${(stats.total_size_gb || 0).toFixed(2)} GB`;
+                // Assuming total_size is in bytes, convert to GB
+                const sizeGB = (stats.total_size || 0) / (1024 * 1024 * 1024);
+                this.metrics[3].value = `${sizeGB.toFixed(2)} GB`;
             },
             error: (error) => console.error('Failed to load storage stats', error)
         });
 
         // Load recent projects
-        this.storageService.listProjects(1, 5).subscribe({
+        this.storageService.listProjects({ page: 1, pageSize: 5 }).subscribe({
             next: (response) => {
                 this.recentProjects = response.projects || [];
             },

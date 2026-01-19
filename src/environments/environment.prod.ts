@@ -7,20 +7,21 @@ export const environment = {
   // API Endpoints
   endpoints: {
     auth: '/api/v1/auth',
-    generation: '/api',
-    migration: '/api',
-    storage: '/api/storage',
-    kubernetes: '/api/k8s',
-    monitoring: '/api/monitoring',
-    ide: '/api/ide',
-    git: '/api/git',
-    database: '/api/registry',
-    security: '/api/security',
-    lifecycle: '/api/lifecycle',
-    docker: '/api/docker',
-    collaboration: '/api/collaboration',
-    workspace: '/api/workspaces'
+    generation: '/api/v1/generation',
+    migration: '/api/v1/migration',
+    analysis: '/api/v1/analysis',
+    kubernetes: '/api/v1/kubernetes',
+    storage: '/api/v1/storage',
+    monitoring: '/api/v1/monitoring',
+    settings: '/api/v1/settings',
+    ide: '/api/v1/ide',
+    workspace: '/api/v1/workspace'
   },
+  enableLogging: false,
+  retryAttempts: 3,
+  retryDelay: 1000,
+  defaultTimeout: 30000,
+  apiKey: '',
 
   // WebSocket Endpoints
   websockets: {

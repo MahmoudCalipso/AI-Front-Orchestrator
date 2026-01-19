@@ -85,11 +85,11 @@ export interface TerminalResize {
 /**
  * Monitoring stream message types
  */
-export type MonitoringMessageType = 
-  | 'metrics' 
-  | 'alert' 
-  | 'log' 
-  | 'event' 
+export type MonitoringMessageType =
+  | 'metrics'
+  | 'alert'
+  | 'log'
+  | 'event'
   | 'health';
 
 /**
@@ -197,7 +197,7 @@ export interface EditOperation {
 /**
  * Chat message
  */
-export interface ChatMessage {
+export interface CollaborationChatMessage {
   message_id: string;
   user_id: string;
   username: string;

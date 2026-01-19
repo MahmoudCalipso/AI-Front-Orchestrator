@@ -1,15 +1,192 @@
 .dashboard-container {
     height: 100vh;
     overflow-y: auto;
-    background: var(--bg-primary);
-    padding: var(--spacing-xl);
+    background: var(--bg-dark);
+    /* Ensure dark bg */
+    padding: 32px;
 }
 
 .dashboard-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: var(--spacing-xl);
+    margin-bottom: 32px;
+}
+
+.dashboard-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    background: var(--gradient-main);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.3));
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin: 0;
+}
+
+.dashboard-content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+/* Metrics Grid - Glass Cards */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+}
+
+.metric-card.mat-mdc-card {
+    background: var(--glass-bg) !important;
+    border: 1px solid var(--glass-border) !important;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+    border-color: var(--accent-primary) !important;
+    transform: translateY(-5px);
+    box-shadow: 0 10 30px rgba(168, 85, 247, 0.2) !important;
+}
+
+.metric-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    /* Default fallback */
+}
+
+/* Specific glowing icons */
+.metric-icon.bg-primary {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.8), rgba(59, 130, 246, 0.8));
+    box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+}
+
+.metric-icon.bg-accent {
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.8), rgba(244, 63, 94, 0.8));
+    box-shadow: 0 0 15px rgba(236, 72, 153, 0.4);
+}
+
+.metric-icon.bg-success {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.8), rgba(5, 150, 105, 0.8));
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+}
+
+.metric-icon.bg-warning {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.8), rgba(217, 119, 6, 0.8));
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+}
+
+.metric-value {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-top: 10px;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 24px;
+}
+
+/* Material Card Global Override already in styles.scss, but specific overrides here */
+mat-card-title {
+    color: var(--text-primary);
+}
+
+.project-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    transition: all 0.2s;
+    margin-bottom: 8px;
+}
+
+.project-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--accent-secondary);
+}
+
+.project-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 8px;
+    color: var(--accent-secondary);
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.action-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.03) !important;
+    /* Override mat-button bg */
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 16px !important;
+    height: auto !important;
+}
+
+.action-button:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: var(--accent-primary) !important;
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
+}
+
+.action-button mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    color: var(--accent-primary);
+}
+
+/* Health Bars */
+.health-bar {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.health-fill {
+    height: 100%;
+    background: var(--gradient-main);
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 16px;
+    }
+
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .dashboard-header h1 {

@@ -14,6 +14,7 @@ import { MigrationService } from '../../../core/services/api/migration.service';
 import { DatabaseService } from '../../../core/services/api/database.service';
 import { ToastService } from '../../../shared/services/toast.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { MigrationStrategy } from '../../../core/models/migration/migration.model';
 
 interface MigrationFile {
   path: string;
@@ -137,17 +138,18 @@ export class MigrationWizardComponent implements OnInit {
 
     const request = {
       project_path: this.sourceForm.value.projectPath,
-      source_language: this.sourceForm.value.sourceLanguage,
-      source_framework: this.sourceForm.value.sourceFramework,
-      target_language: this.targetForm.value.targetLanguage,
-      target_framework: this.targetForm.value.targetFramework,
-      target_version: this.targetForm.value.targetVersion,
-      options: {
-        preserve_structure: this.configForm.value.preserveStructure,
-        update_dependencies: this.configForm.value.updateDependencies,
-        generate_tests: this.configForm.value.generateTests,
-        optimize_code: this.configForm.value.optimizeCode
-      }
+      source_stack: {
+        language: this.sourceForm.value.sourceLanguage,
+        framework: this.sourceForm.value.sourceFramework
+      },
+      target_stack: {
+        language: this.targetForm.value.targetLanguage,
+        framework: this.targetForm.value.targetFramework,
+        version: this.targetForm.value.targetVersion
+      },
+      migration_strategy: 'strangler-fig' as MigrationStrategy, // Default strategy
+      include_dependencies: this.configForm.value.updateDependencies,
+      dry_run: false
     };
 
     // Simulate progress

@@ -6,7 +6,6 @@ import {
   WorkspaceResponse,
   FileTreeNode,
   FileContentResponse,
-  FileWriteRequest,
   TerminalCreateRequest,
   TerminalSessionResponse,
   DebugSessionRequest,
@@ -16,9 +15,10 @@ import {
   CompletionResponse,
   HoverRequest,
   HoverResponse,
-  DiagnosticsResponse,
-  RefactorRequest as IdeRefactorRequest,
-  RefactorResponse as IdeRefactorResponse
+  WorkspaceRefactorRequest as IdeRefactorRequest,
+  WorkspaceRefactorResponse as IdeRefactorResponse,
+  FileWriteRequest,
+  DiagnosticsResponse
 } from '../../models/ide/ide.model';
 
 @Injectable({
@@ -80,5 +80,14 @@ export class IdeService extends BaseApiService {
 
   refactor(workspaceId: string, path: string, request: IdeRefactorRequest): Observable<IdeRefactorResponse> {
     return this.post<IdeRefactorResponse>(`/api/ide/intelligence/refactor/${workspaceId}/${path}`, request);
+  }
+
+  // Compatibility methods for IdeLayoutComponent
+  getProjectStructure(workspaceId: string): Observable<any> {
+    return this.get<any>(`/api/ide/tree/${workspaceId}`);
+  }
+
+  updateFileContent(workspaceId: string, path: string, data: { content: string }): Observable<void> {
+    return this.writeFile(workspaceId, path, data.content);
   }
 }

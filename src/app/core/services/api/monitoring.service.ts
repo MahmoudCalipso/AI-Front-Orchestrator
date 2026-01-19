@@ -48,6 +48,10 @@ export class MonitoringService extends BaseApiService {
     return this.get<BuildsListResponse>('/api/monitoring/builds', params);
   }
 
+  getBuildHistory(limit: number): Observable<any[]> {
+    return this.get<any[]>('/api/monitoring/builds', { pageSize: limit });
+  }
+
   /**
    * Get build details
    * GET /api/monitoring/builds/{build_id}

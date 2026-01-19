@@ -2,106 +2,106 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap");
 
+/* Global Premium Theme - AntiGravity inspired */
 :root {
   --bg-dark: #0a0b10;
-  --card-bg: rgba(255, 255, 255, 0.03);
-  --border-color: rgba(255, 255, 255, 0.1);
+  --bg-secondary: #13141f;
+  --glass-bg: rgba(20, 20, 30, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: blur(12px);
+
   --text-primary: #ffffff;
   --text-secondary: #94a3b8;
-  --accent-purple: #a855f7;
-  --accent-blue: #3b82f6;
-  --gradient-primary: linear-gradient(135deg, #a855f7, #3b82f6);
+
+  --accent-primary: #a855f7;
+  /* Purple */
+  --accent-secondary: #3b82f6;
+  /* Blue */
+  --accent-glow: 0 0 15px rgba(59, 130, 246, 0.5);
+
+  --gradient-main: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%);
+  --gradient-dark: linear-gradient(180deg, rgba(20, 20, 30, 0) 0%, rgba(20, 20, 30, 0.8) 100%);
 }
 
 body {
-  margin: 0;
-  padding: 0;
   background-color: var(--bg-dark);
   color: var(--text-primary);
-  font-family: "Inter", sans-serif;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  overflow: hidden;
+  /* App feel */
 }
 
-.card {
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
-  padding: 24px;
-  margin-bottom: 20px;
+/* Glassmorphism Utilities */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
 }
 
-.form-group {
-  margin-bottom: 20px;
-  label { display: block; color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 8px; }
-  input, textarea, select {
-    width: 100%;
-    padding: 12px 16px;
+/* Material Overrides */
+.mat-mdc-card {
+  background-color: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 16px !important;
+  backdrop-filter: var(--glass-blur);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+  color: var(--text-primary) !important;
+}
+
+.mat-mdc-icon-button {
+  color: var(--text-secondary) !important;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: var(--text-primary) !important;
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    color: #fff;
-    font-size: 1rem;
-    &:focus { outline: none; border-color: var(--accent-blue); }
   }
-  textarea { min-height: 120px; resize: vertical; }
 }
 
-.btn-primary, .btn-generate, .btn-migrate {
-  background: var(--gradient-primary);
-  color: white;
-  border: none;
-  padding: 14px 28px;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.2s;
-  &:hover { transform: translateY(-2px); }
+.mat-mdc-raised-button.mat-primary {
+  background: var(--gradient-main) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  border-radius: 8px !important;
 }
 
-.page-header {
-  margin-bottom: 40px;
-  h1 { font-size: 2.5rem; margin: 0; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  p { color: var(--text-secondary); font-size: 1.1rem; margin-top: 10px; }
+.mat-toolbar {
+  background: rgba(10, 11, 16, 0.8) !important;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--glass-border);
 }
 
-/* IDE Specific Styles */
+.mat-drawer-container {
+  background: var(--bg-dark) !important;
+}
+
+.mat-drawer {
+  background: var(--bg-secondary) !important;
+  border-right: 1px solid var(--glass-border) !important;
+}
+
+/* IDE Specific Global Overrides */
 .ide-container {
-  display: grid;
-  grid-template-columns: 250px 1fr 300px;
-  height: calc(100vh - 40px);
-  background: #050608;
-  
-  .file-explorer, .ai-assistant {
-    background: #0d0e14;
-    border-right: 1px solid var(--border-color);
-    padding: 15px;
-  }
-  
-  .editor-area {
-    display: flex;
-    flex-direction: column;
-    .code-editor {
-      flex: 1;
-      textarea {
-        width: 100%;
-        height: 100%;
-        background: transparent;
-        border: none;
-        color: #d1d5db;
-        font-family: "Fira Code", monospace;
-        padding: 20px;
-        font-size: 14px;
-        resize: none;
-        &:focus { outline: none; }
-      }
-    }
-    .terminal-area {
-      height: 200px;
-      background: #000;
-      border-top: 1px solid var(--border-color);
-      padding: 10px;
-      font-family: "Fira Code", monospace;
-      font-size: 12px;
-      overflow-y: auto;
-    }
-  }
+  height: 100vh;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }

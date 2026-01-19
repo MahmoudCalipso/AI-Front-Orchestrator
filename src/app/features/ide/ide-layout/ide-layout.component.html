@@ -8,58 +8,93 @@
             AI Orchestrator IDE
         </span>
         <span class="spacer"></span>
-        <button mat-icon-button (click)="saveFile()" [disabled]="!currentFile">
+        <button mat-icon-button (click)="saveFile()" [disabled]="!getActiveGroup()?.activeFile"
+            matTooltip="Save File (Ctrl+S)">
             <mat-icon>save</mat-icon>
         </button>
-        <button mat-icon-button (click)="formatCode()" [disabled]="!currentFile">
+        <button mat-icon-button (click)="formatCode()" [disabled]="!getActiveGroup()?.activeFile"
+            matTooltip="Format Code">
             <mat-icon>format_align_left</mat-icon>
         </button>
-        <button mat-icon-button (click)="runCode()">
+        <button mat-flat-button color="primary" (click)="runCode()">
             <mat-icon>play_arrow</mat-icon>
+            Run
+        </button>
+        <span class="spacer-sm"></span>
+        <button mat-icon-button (click)="toggleChat()" [class.accent-color]="isChatOpen" matTooltip="Toggle AI Chat">
+            <mat-icon>chat</mat-icon>
         </button>
     </mat-toolbar>
 
-    <mat-sidenav-container class="ide-sidenav-container">
+    <mat-sidenav-container class="ide-container">
         <!-- File Explorer -->
         <mat-sidenav mode="side" opened class="file-explorer">
             <div class="explorer-header">
-                <h3>
-                    <mat-icon>folder</mat-icon>
-                    Explorer
-                </h3>
+                <span>Explorer</span>
             </div>
-
-            <div class="file-tree">
-                <ng-container *ngFor="let node of fileTree">
+            <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+                <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
+                    <button mat-icon-button disabled></button>
                     <div class="file-node" (click)="openFile(node)">
-                        <mat-icon>{{ node.isDirectory ? 'folder' : 'description' }}</mat-icon>
-                        <span>{{ node.name }}</span>
+                        <mat-icon class="type-icon">{{ node.isDirectory ? 'folder' : 'description' }}</mat-icon>
+                        {{ node.name }}
                     </div>
-                    <div class="file-children" *ngIf="node.isDirectory && node.children">
-                        <div *ngFor="let child of node.children" class="file-node child" (click)="openFile(child)">
-                            <mat-icon>{{ child.isDirectory ? 'folder' : 'description' }}</mat-icon>
-                            <span>{{ child.name }}</span>
-                        </div>
+                </mat-tree-node>
+                <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding>
+                    <button mat-icon-button matTreeNodeToggle>
+                        <mat-icon class="mat-icon-rtl-mirror">
+                            {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+                        </mat-icon>
+                    </button>
+                    <div class="file-node" (click)="openFile(node)">
+                        <mat-icon class="type-icon">folder</mat-icon>
+                        {{ node.name }}
                     </div>
-                </ng-container>
-            </div>
+                </mat-tree-node>
+            </mat-tree>
+        </mat-sidenav>
+
+        <!-- Right Chat Sidebar -->
+        <mat-sidenav position="end" mode="side" [opened]="isChatOpen" class="chat-sidebar">
+            <app-ide-chat [contextFile]="getActiveGroup()?.activeFile?.name || null" (closeChat)="toggleChat()">
+            </app-ide-chat>
         </mat-sidenav>
 
         <!-- Main Content -->
         <mat-sidenav-content class="ide-content">
-            <!-- Open Files Tabs -->
-            <div class="open-files-tabs" *ngIf="openFiles.length > 0">
-                <div *ngFor="let file of openFiles" class="file-tab" [class.active]="currentFile === file"
-                    (click)="openFile(file)">
-                    <mat-icon class="file-icon">description</mat-icon>
-                    <span class="file-name">{{ file.name }}</span>
-                    <button mat-icon-button class="close-button" (click)="closeFile(file, $event)">
-                        <mat-icon>close</mat-icon>
-                    </button>
+            <!-- Editor Area with Split Support -->
+            <div class="editor-area">
+                <div class="editor-groups-container">
+                    <div class="editor-group" *ngFor="let group of editorGroups"
+                        [class.active-group]="group.id === activeGroupId" (click)="activeGroupId = group.id">
+
+                        <!-- Group Header (Tabs & Actions) -->
+                        <div class="group-header">
+                            <div class="tabs-container">
+                                <div class="editor-tab" *ngFor="let file of group.files"
+                                    [class.active]="group.activeFile?.path === file.path"
+                                    (click)="setActiveFile(file, group)">
+                                    <span class="file-name">{{ file.name }}</span>
+                                    <span class="close-icon" (click)="closeFile(file, group, $event)">×</span>
+                                </div>
+                            </div>
+                            <div class="group-actions">
+                                <button mat-icon-button (click)="splitEditor('vertical')" matTooltip="Split Right">
+                                    <mat-icon>vertical_split</mat-icon>
+                                </button>
+                                <button mat-icon-button *ngIf="editorGroups.length > 1"
+                                    (click)="closeEditorGroup(group.id)" matTooltip="Close Group">
+                                    <mat-icon>close</mat-icon>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Monaco Editor Instance -->
+                        <div class="monaco-container" #editorContainer></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Editor -->
             <div class="editor-panel">
                 <div #editorContainer class="monaco-editor-container"></div>
             </div>

@@ -1,0 +1,46 @@
+<div class="chat-container">
+    <div class="chat-header">
+        <h3>AI Assistant</h3>
+        <div class="header-actions">
+            <button mat-icon-button (click)="clearChat()" matTooltip="Clear Chat">
+                <mat-icon>delete_outline</mat-icon>
+            </button>
+            <button mat-icon-button (click)="closeChat.emit()" matTooltip="Close">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <div class="messages-list">
+        <div class="message-bubble" *ngFor="let msg of messages" [class.user]="msg.role === 'user'"
+            [class.ai]="msg.role === 'ai'">
+            <div class="message-avatar">
+                <mat-icon>{{ msg.role === 'user' ? 'person' : 'smart_toy' }}</mat-icon>
+            </div>
+            <div class="message-content">
+                <div class="message-text">{{ msg.content }}</div>
+                <div class="message-time">{{ msg.timestamp | date:'shortTime' }}</div>
+            </div>
+        </div>
+
+        <div class="thinking-bubble" *ngIf="isThinking">
+            <mat-spinner diameter="20"></mat-spinner>
+            <span>AI is thinking...</span>
+        </div>
+    </div>
+
+    <div class="input-area">
+        <div class="context-indicator" *ngIf="contextFile">
+            <mat-icon>description</mat-icon>
+            <span>Context: {{ contextFile }}</span>
+        </div>
+        <div class="input-wrapper">
+            <textarea [(ngModel)]="userInput" (keyup.enter)="sendMessage()"
+                placeholder="Ask anything about your code..." rows="1"></textarea>
+            <button mat-icon-button color="primary" (click)="sendMessage()"
+                [disabled]="!userInput.trim() || isThinking">
+                <mat-icon>send</mat-icon>
+            </button>
+        </div>
+    </div>
+</div>

@@ -54,7 +54,7 @@ export interface ProjectDetails extends ProjectMetadata {
   files: ProjectFile[];
   structure: any;
   dependencies?: string[];
-  build_info?: BuildInfo;
+  build_info?: ProjectBuildSummary;
   deployment_info?: DeploymentInfo;
 }
 
@@ -72,9 +72,9 @@ export interface ProjectFile {
 }
 
 /**
- * Build information
+ * Build information summary
  */
-export interface BuildInfo {
+export interface ProjectBuildSummary {
   last_build: string;
   build_status: 'success' | 'failed' | 'pending';
   build_duration: number;

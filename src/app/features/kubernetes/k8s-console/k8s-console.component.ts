@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatMenuModule } from '@angular/material/menu';
 import { KubernetesService } from '../../../core/services/api/kubernetes.service';
 import { ToastService } from '../../../shared/services/toast.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
@@ -26,6 +27,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
         MatSelectModule,
         MatTableModule,
         MatTabsModule,
+        MatMenuModule,
         LoadingSpinnerComponent
     ],
     templateUrl: './k8s-console.component.html',
@@ -44,6 +46,8 @@ export class K8sConsoleComponent implements OnInit {
     pods: any[] = [];
     services: any[] = [];
     clusterInfo: any = null;
+
+    protected readonly Math = Math;
 
     displayedDeploymentColumns = ['name', 'replicas', 'ready', 'status', 'actions'];
     displayedPodColumns = ['name', 'status', 'node', 'ip', 'actions'];
