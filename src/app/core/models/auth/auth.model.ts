@@ -1,50 +1,95 @@
 /**
- * User registration request
+ * User registration request - matches backend UserRegister schema
  */
 export interface RegisterRequest {
-  username: string;
   email: string;
   password: string;
-  full_name?: string;
-  organization?: string;
+  full_name: string;
+  tenant_name: string;
 }
 
 /**
- * User login request
+ * User login request - matches backend UserLogin schema
  */
 export interface LoginRequest {
-  username: string;
+  email: string;
   password: string;
-  remember_me?: boolean;
 }
 
 /**
- * Auth response
+ * Token response from backend
  */
-export interface AuthResponse {
+export interface TokenResponse {
   access_token: string;
   refresh_token: string;
-  token_type: 'Bearer';
   expires_in: number;
-  user: UserInfo;
 }
 
 /**
- * User information
+ * Auth response with user info
+ */
+export interface AuthResponse extends TokenResponse {
+  user?: UserInfo;
+}
+
+/**
+ * User information - matches backend UserResponse
  */
 export interface UserInfo {
-  user_id: string;
-  username: string;
+  id: string;
+  tenant_id: string;
   email: string;
   full_name?: string;
-  organization?: string;
-  roles: string[];
-  permissions: string[];
+  role: UserRole;
+  is_active: boolean;
   created_at: string;
   last_login?: string;
-  avatar_url?: string;
+  credentials_accepted?: boolean;
+}
+
+/**
+ * User roles
+ */
+export type UserRole = 'admin' | 'enterprise' | 'developer';
+
+/**
+ * Me response - matches backend MeResponse
+ */
+export interface MeResponse {
+  user: UserInfo;
+  tenant: TenantInfo;
+  permissions: string[];
+  external_accounts: ExternalAccount[];
+}
+
+/**
+ * Tenant information
+ */
+export interface TenantInfo {
+  id: string;
+  name: string;
+  plan: 'free' | 'pro' | 'enterprise';
+  storage_quota_gb: number;
+  storage_used_gb: number;
+  storage_usage_percent: number;
+  workbench_quota: number;
+  api_rate_limit: number;
   is_active: boolean;
-  is_verified: boolean;
+  created_at: string;
+}
+
+/**
+ * External account (OAuth connections)
+ */
+export interface ExternalAccount {
+  id: string;
+  provider: string;
+  provider_user_id: string;
+  username?: string;
+  email?: string;
+  avatar_url?: string;
+  scopes: string[];
+  created_at: string;
 }
 
 /**
@@ -71,44 +116,31 @@ export interface ChangePasswordRequest {
 }
 
 /**
- * Password reset request
+ * Forgot password request
  */
-export interface ResetPasswordRequest {
+export interface ForgotPasswordRequest {
   email: string;
 }
 
 /**
- * Password reset confirm
+ * Password reset request
  */
-export interface ResetPasswordConfirmRequest {
+export interface PasswordResetRequest {
   token: string;
   new_password: string;
 }
 
 /**
- * JWT token payload
- */
-export interface JWTPayload {
-  sub: string;
-  username: string;
-  email: string;
-  roles: string[];
-  iat: number;
-  exp: number;
-  jti?: string;
-}
-
-/**
- * API key
+ * API key - matches backend APIKeyResponse
  */
 export interface ApiKey {
-  key_id: string;
-  key: string;
+  id: string;
   name: string;
-  scopes: string[];
+  key?: string; // Only returned on creation
   created_at: string;
   expires_at?: string;
   last_used?: string;
+  usage_count: number;
   is_active: boolean;
 }
 
@@ -117,7 +149,6 @@ export interface ApiKey {
  */
 export interface CreateApiKeyRequest {
   name: string;
-  scopes: string[];
   expires_in_days?: number;
 }
 
@@ -132,4 +163,12 @@ export interface SessionInfo {
   created_at: string;
   last_activity: string;
   is_current: boolean;
+}
+
+/**
+ * OAuth connect response
+ */
+export interface OAuthConnectResponse {
+  auth_url: string;
+  state: string;
 }

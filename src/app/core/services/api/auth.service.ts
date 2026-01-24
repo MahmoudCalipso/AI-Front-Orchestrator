@@ -1,17 +1,21 @@
-import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject, tap } from 'rxjs';
+import { Injectable, signal, computed } from '@angular/core';
+import { Observable, BehaviorSubject, tap, catchError, of } from 'rxjs';
 import { BaseApiService } from './base-api.service';
 import {
   RegisterRequest,
   LoginRequest,
-  AuthResponse,
+  TokenResponse,
+  MeResponse,
   UserInfo,
+  TenantInfo,
   RefreshTokenRequest,
-  LogoutRequest,
   ChangePasswordRequest,
+  ForgotPasswordRequest,
+  PasswordResetRequest,
   CreateApiKeyRequest,
   ApiKey,
-  SessionInfo
+  OAuthConnectResponse,
+  ExternalAccount
 } from '../../models/auth/auth.model';
 
 @Injectable({
@@ -19,111 +23,224 @@ import {
 })
 export class AuthService extends BaseApiService {
   private currentUserSubject = new BehaviorSubject<UserInfo | null>(null);
+  private currentTenantSubject = new BehaviorSubject<TenantInfo | null>(null);
+  private permissionsSubject = new BehaviorSubject<string[]>([]);
+  private externalAccountsSubject = new BehaviorSubject<ExternalAccount[]>([]);
+
   public currentUser$ = this.currentUserSubject.asObservable();
+  public currentTenant$ = this.currentTenantSubject.asObservable();
+  public permissions$ = this.permissionsSubject.asObservable();
+  public externalAccounts$ = this.externalAccountsSubject.asObservable();
 
-  private tokenKey = 'access_token';
-  private refreshTokenKey = 'refresh_token';
+  // Signals for reactive state
+  public isAuthenticated = signal(this.hasValidToken());
+  public isLoading = signal(false);
 
-  register(request: RegisterRequest): Observable<AuthResponse> {
-    return this.post<AuthResponse>('/api/v1/auth/register', request).pipe(
+  private readonly TOKEN_KEY = 'access_token';
+  private readonly REFRESH_TOKEN_KEY = 'refresh_token';
+  private readonly TOKEN_EXPIRY_KEY = 'token_expiry';
+
+  /**
+   * Register a new user
+   * POST /auth/register
+   */
+  register(request: RegisterRequest): Observable<TokenResponse> {
+    return this.post<TokenResponse>('/auth/register', request).pipe(
       tap(response => this.handleAuthSuccess(response))
     );
   }
 
-  login(request: LoginRequest): Observable<AuthResponse> {
-    return this.post<AuthResponse>('/api/v1/auth/login', request).pipe(
+  /**
+   * Login with email and password
+   * POST /auth/login
+   */
+  login(request: LoginRequest): Observable<TokenResponse> {
+    return this.post<TokenResponse>('/auth/login', request).pipe(
       tap(response => this.handleAuthSuccess(response))
     );
   }
 
-  refreshToken(request: RefreshTokenRequest): Observable<AuthResponse> {
-    return this.post<AuthResponse>('/api/v1/auth/refresh', request).pipe(
-      tap(response => this.handleAuthSuccess(response))
+  /**
+   * Refresh access token
+   * POST /auth/refresh
+   */
+  refreshToken(): Observable<TokenResponse> {
+    const refreshToken = this.getRefreshToken();
+    if (!refreshToken) {
+      return of({} as TokenResponse);
+    }
+
+    const request: RefreshTokenRequest = { refresh_token: refreshToken };
+    return this.post<TokenResponse>('/auth/refresh', request).pipe(
+      tap(response => this.handleAuthSuccess(response)),
+      catchError(error => {
+        this.handleLogout();
+        throw error;
+      })
     );
   }
 
-  logout(request?: LogoutRequest): Observable<void> {
-    return this.post<void>('/api/v1/auth/logout', request || {}).pipe(
+  /**
+   * Logout current user
+   * POST /auth/logout
+   */
+  logout(): Observable<{ message: string }> {
+    return this.post<{ message: string }>('/auth/logout', {}).pipe(
       tap(() => this.handleLogout())
     );
   }
 
-  getCurrentUser(): Observable<UserInfo> {
-    return this.get<UserInfo>('/api/v1/auth/me').pipe(
-      tap(user => this.currentUserSubject.next(user))
+  /**
+   * Get current user information
+   * GET /auth/me
+   */
+  getCurrentUser(): Observable<MeResponse> {
+    return this.get<MeResponse>('/auth/me').pipe(
+      tap(response => {
+        this.currentUserSubject.next(response.user);
+        this.currentTenantSubject.next(response.tenant);
+        this.permissionsSubject.next(response.permissions);
+        this.externalAccountsSubject.next(response.external_accounts);
+      })
     );
   }
 
   /**
-   * List all users (admin only)
-   * GET /api/users
+   * Change password
+   * POST /auth/change-password
    */
-  listUsers(): Observable<UserInfo[]> {
-    return this.get<UserInfo[]>('/api/users');
+  changePassword(request: ChangePasswordRequest): Observable<{ message: string }> {
+    return this.post<{ message: string }>('/auth/change-password', request);
   }
 
   /**
-   * Update user (admin only)
-   * PUT /api/users/:id
+   * Accept credentials/terms
+   * POST /auth/accept-credentials
    */
-  updateUser(userId: string, data: Partial<UserInfo>): Observable<UserInfo> {
-    return this.put<UserInfo>(`/api/users/${userId}`, data);
+  acceptCredentials(): Observable<{ message: string }> {
+    return this.post<{ message: string }>('/auth/accept-credentials', {});
   }
 
   /**
-   * Delete user (admin only)
-   * DELETE /api/users/:id
+   * Request password reset
+   * POST /auth/forgot-password
    */
-  deleteUser(userId: string): Observable<void> {
-    return this.delete<void>(`/api/users/${userId}`);
+  forgotPassword(request: ForgotPasswordRequest): Observable<{ message: string }> {
+    return this.post<{ message: string }>('/auth/forgot-password', request);
   }
 
-  changePassword(request: ChangePasswordRequest): Observable<void> {
-    return this.post<void>('/api/v1/auth/change-password', request);
+  /**
+   * Reset password with token
+   * POST /auth/reset-password
+   */
+  resetPassword(request: PasswordResetRequest): Observable<{ message: string }> {
+    return this.post<{ message: string }>('/auth/reset-password', request);
   }
 
+  // ==================== OAuth External Accounts ====================
+
+  /**
+   * Connect external account (GitHub, GitLab, etc.)
+   * GET /auth/external/connect/{provider}
+   */
+  connectExternalAccount(provider: string): Observable<OAuthConnectResponse> {
+    return this.get<OAuthConnectResponse>(`/auth/external/connect/${provider}`);
+  }
+
+  // ==================== API Keys ====================
+
+  /**
+   * Create a new API key
+   * POST /auth/api-keys
+   */
   createApiKey(request: CreateApiKeyRequest): Observable<ApiKey> {
-    return this.post<ApiKey>('/api/v1/auth/api-keys', request);
+    return this.post<ApiKey>('/auth/api-keys', request);
   }
 
+  /**
+   * List all API keys
+   * GET /auth/api-keys
+   */
   listApiKeys(): Observable<ApiKey[]> {
-    return this.get<ApiKey[]>('/api/v1/auth/api-keys');
+    return this.get<ApiKey[]>('/auth/api-keys');
   }
 
-  revokeApiKey(keyId: string): Observable<void> {
-    return this.delete<void>(`/api/v1/auth/api-keys/${keyId}`);
+  /**
+   * Revoke an API key
+   * DELETE /auth/api-keys/{key_id}
+   */
+  revokeApiKey(keyId: string): Observable<{ message: string }> {
+    return this.delete<{ message: string }>(`/auth/api-keys/${keyId}`);
   }
 
-  listSessions(): Observable<SessionInfo[]> {
-    return this.get<SessionInfo[]>('/api/v1/auth/sessions');
-  }
+  // ==================== Helper Methods ====================
 
-  revokeSession(sessionId: string): Observable<void> {
-    return this.delete<void>(`/api/v1/auth/sessions/${sessionId}`);
-  }
+  private handleAuthSuccess(response: TokenResponse): void {
+    localStorage.setItem(this.TOKEN_KEY, response.access_token);
+    localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refresh_token);
 
-  // Helper methods
-  private handleAuthSuccess(response: AuthResponse): void {
-    localStorage.setItem(this.tokenKey, response.access_token);
-    localStorage.setItem(this.refreshTokenKey, response.refresh_token);
-    this.currentUserSubject.next(response.user);
+    // Calculate and store expiry time
+    const expiryTime = Date.now() + (response.expires_in * 1000);
+    localStorage.setItem(this.TOKEN_EXPIRY_KEY, expiryTime.toString());
+
+    this.isAuthenticated.set(true);
+
+    // Fetch user info after successful auth
+    this.getCurrentUser().subscribe();
   }
 
   private handleLogout(): void {
-    localStorage.removeItem(this.tokenKey);
-    localStorage.removeItem(this.refreshTokenKey);
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.REFRESH_TOKEN_KEY);
+    localStorage.removeItem(this.TOKEN_EXPIRY_KEY);
+
     this.currentUserSubject.next(null);
+    this.currentTenantSubject.next(null);
+    this.permissionsSubject.next([]);
+    this.externalAccountsSubject.next([]);
+    this.isAuthenticated.set(false);
   }
 
   getToken(): string | null {
-    return localStorage.getItem(this.tokenKey);
+    return localStorage.getItem(this.TOKEN_KEY);
   }
 
   getRefreshToken(): string | null {
-    return localStorage.getItem(this.refreshTokenKey);
+    return localStorage.getItem(this.REFRESH_TOKEN_KEY);
   }
 
-  isAuthenticated(): boolean {
-    return !!this.getToken();
+  hasValidToken(): boolean {
+    const token = this.getToken();
+    const expiry = localStorage.getItem(this.TOKEN_EXPIRY_KEY);
+
+    if (!token || !expiry) return false;
+
+    return Date.now() < parseInt(expiry, 10);
+  }
+
+  isTokenExpiringSoon(): boolean {
+    const expiry = localStorage.getItem(this.TOKEN_EXPIRY_KEY);
+    if (!expiry) return true;
+
+    // Check if token expires in less than 5 minutes
+    const fiveMinutes = 5 * 60 * 1000;
+    return Date.now() > (parseInt(expiry, 10) - fiveMinutes);
+  }
+
+  hasPermission(permission: string): boolean {
+    return this.permissionsSubject.value.includes(permission);
+  }
+
+  hasRole(role: string): boolean {
+    const user = this.currentUserSubject.value;
+    return user?.role === role;
+  }
+
+  isAdmin(): boolean {
+    return this.hasRole('admin');
+  }
+
+  isEnterprise(): boolean {
+    return this.hasRole('enterprise') || this.hasRole('admin');
   }
 }

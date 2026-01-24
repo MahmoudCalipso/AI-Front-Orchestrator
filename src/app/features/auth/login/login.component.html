@@ -1,81 +1,151 @@
 <div class="login-container">
-  <div class="login-card-wrapper animate-fadeIn">
-    <div class="logo-section">
-      <div class="logo-icon">
-        <mat-icon>code</mat-icon>
+  <div class="login-card glass-panel animate-fadeInUp">
+    <div class="login-header">
+      <div class="logo">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="48" height="48" rx="16" fill="url(#logo-gradient)"/>
+          <path d="M24 16L32 24L24 32L16 24L24 16Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 12L16 16" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M36 12L32 16" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 36L16 32" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M36 36L32 32" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="logo-gradient" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#8B5CF6"/>
+              <stop offset="1" stop-color="#3B82F6"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <h1 class="app-name">AI Orchestrator</h1>
       </div>
-      <h1 class="gradient-text">AI Orchestrator</h1>
-      <p class="subtitle">Platform-as-a-Service for AI-Powered Development</p>
+      <p class="welcome-text">Welcome back! Sign in to your account</p>
     </div>
 
-    <mat-card class="login-card">
-      <mat-card-content>
-        <h2>Welcome Back</h2>
-        <p class="login-description">Sign in to continue to your workspace</p>
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <div class="input-group">
+        <label for="email">Email Address</label>
+        <div class="input-wrapper">
+          <mat-icon class="input-icon">email</mat-icon>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="your@email.com"
+            class="input"
+            required
+          >
+        </div>
+        @if (loginForm.get('email')?.invalid && (loginForm.get('email')?.dirty || loginForm.get('email')?.touched)) {
+          <p class="error-message">Please enter a valid email address</p>
+        }
+      </div>
 
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Email Address</mat-label>
-            <input matInput type="email" formControlName="email" placeholder="you@example.com" autocomplete="email">
-            <mat-icon matPrefix>email</mat-icon>
-            @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
-            <mat-error>
-              {{ getErrorMessage('email') }}
-            </mat-error>
-            }
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Password</mat-label>
-            <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password"
-              placeholder="Enter your password" autocomplete="current-password">
-            <mat-icon matPrefix>lock</mat-icon>
-            <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword"
-              [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePassword">
-              <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
-            </button>
-            @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
-            <mat-error>
-              {{ getErrorMessage('password') }}
-            </mat-error>
-            }
-          </mat-form-field>
-
-          <div class="form-options">
-            <mat-checkbox formControlName="rememberMe">
-              Remember me
-            </mat-checkbox>
-            <a routerLink="/forgot-password" class="forgot-link">Forgot password?</a>
-          </div>
-
-          <button mat-raised-button color="primary" type="submit" class="login-button full-width" [disabled]="loading">
-            @if (!loading) {
-            <span>Sign In</span>
-            } @else {
-            <span class="loading-text">
-              <mat-icon class="spinner-icon">refresh</mat-icon>
-              Signing in...
-            </span>
-            }
+      <div class="input-group">
+        <label for="password">Password</label>
+        <div class="input-wrapper">
+          <mat-icon class="input-icon">lock</mat-icon>
+          <input
+            id="password"
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="••••••••"
+            class="input"
+            required
+          >
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="togglePasswordVisibility()"
+            mat-icon-button
+          >
+            <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
-        </form>
-
-        <div class="divider">
-          <span>or</span>
         </div>
+        @if (loginForm.get('password')?.invalid && (loginForm.get('password')?.dirty || loginForm.get('password')?.touched)) {
+          <p class="error-message">Password is required</p>
+        }
+      </div>
 
-        <div class="register-section">
-          <p>Don't have an account? <a routerLink="/register" class="register-link">Create one</a></p>
+      <div class="form-options">
+        <div class="remember-me">
+          <mat-checkbox formControlName="rememberMe" class="checkbox">
+            Remember me
+          </mat-checkbox>
         </div>
-      </mat-card-content>
-    </mat-card>
+        <button
+          type="button"
+          class="forgot-password"
+          routerLink="/forgot-password"
+          mat-button
+        >
+          Forgot password?
+        </button>
+      </div>
 
-    <div class="footer-text">
-      <p>© 2026 AI Orchestrator. All rights reserved.</p>
-    </div>
+      <button
+        type="submit"
+        class="btn btn-primary login-button"
+        [disabled]="loginForm.invalid || isLoading"
+        mat-raised-button
+      >
+        @if (isLoading) {
+          <mat-spinner diameter="20" strokeWidth="2"></mat-spinner>
+          <span>Signing in...</span>
+        } @else {
+          <span>Sign In</span>
+          <mat-icon>arrow_forward</mat-icon>
+        }
+      </button>
+
+      <div class="divider">
+        <span>or continue with</span>
+      </div>
+
+      <div class="social-login">
+        <button
+          type="button"
+          class="social-button github"
+          (click)="connectGitHub()"
+          mat-raised-button
+        >
+          <mat-icon svgIcon="github"></mat-icon>
+          <span>GitHub</span>
+        </button>
+        <button
+          type="button"
+          class="social-button google"
+          (click)="connectGoogle()"
+          mat-raised-button
+        >
+          <mat-icon svgIcon="google"></mat-icon>
+          <span>Google</span>
+        </button>
+      </div>
+
+      <div class="signup-prompt">
+        <p>Don't have an account? <a routerLink="/register">Sign up</a></p>
+      </div>
+    </form>
   </div>
 
-  @if (loading) {
-  <app-loading-spinner [fullscreen]="true" message="Signing you in..."></app-loading-spinner>
-  }
+  <div class="login-illustration">
+    <div class="illustration-content">
+      <h2>AI-Powered Development</h2>
+      <p>Generate, analyze, and deploy code with intelligent automation</p>
+      <div class="feature-icons">
+        <div class="feature-icon">
+          <mat-icon>auto_awesome</mat-icon>
+          <span>AI Generation</span>
+        </div>
+        <div class="feature-icon">
+          <mat-icon>code</mat-icon>
+          <span>Smart IDE</span>
+        </div>
+        <div class="feature-icon">
+          <mat-icon>cloud_upload</mat-icon>
+          <span>Cloud Deploy</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

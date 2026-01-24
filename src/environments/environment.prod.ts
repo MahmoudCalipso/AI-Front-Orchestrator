@@ -1,53 +1,19 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.yourdomain.com',
-  wsUrl: 'wss://api.yourdomain.com',
-  apiVersion: 'v1',
-
-  // API Endpoints
-  endpoints: {
-    auth: '/api/v1/auth',
-    generation: '/api/v1/generation',
-    migration: '/api/v1/migration',
-    analysis: '/api/v1/analysis',
-    kubernetes: '/api/v1/kubernetes',
-    storage: '/api/v1/storage',
-    monitoring: '/api/v1/monitoring',
-    settings: '/api/v1/settings',
-    ide: '/api/v1/ide',
-    workspace: '/api/v1/workspace'
-  },
-  enableLogging: false,
-  retryAttempts: 3,
-  retryDelay: 1000,
-  defaultTimeout: 30000,
+  apiUrl: 'https://api.ai-orchestrator.io',
+  wsUrl: 'wss://api.ai-orchestrator.io',
   apiKey: '',
+  defaultTimeout: 30000,
+  retryAttempts: 3,
+  enableLogging: false,
 
-  // WebSocket Endpoints
-  websockets: {
-    workbench: '/ws/workbench',
-    terminal: '/ws/terminal',
-    monitoring: '/ws/monitoring',
-    collaboration: '/ws/collaboration'
-  },
-
-  // Feature Flags
+  // Feature flags
   features: {
-    enableRealTimeCollaboration: true,
-    enableWebSocketMonitoring: true,
-    enableAIAssistant: true,
-    enableKubernetes: true,
-    enableGitIntegration: true
-  },
-
-  // Configuration
-  config: {
-    requestTimeout: 30000, // 30 seconds
-    retryAttempts: 3,
-    retryDelay: 1000, // 1 second
-    maxFileSize: 10485760, // 10 MB
-    allowedFileTypes: ['.ts', '.js', '.py', '.java', '.go', '.rs', '.cpp', '.c', '.html', '.css', '.json', '.xml', '.yaml', '.yml', '.md'],
-    defaultPageSize: 20,
-    maxPageSize: 100
+    aiChat: true,
+    collaboration: true,
+    kubernetes: true,
+    monitoring: true,
+    gitIntegration: true,
+    databaseExplorer: true
   }
 };

@@ -1,25 +1,50 @@
 /**
- * Workspace creation request
+ * IDE Workspace request
  */
-export interface WorkspaceCreateRequest {
-  name: string;
-  description?: string;
-  template?: string;
-  language?: string;
-  framework?: string;
-  initialize_git?: boolean;
+export interface IDEWorkspaceRequest {
+  workspace_id: string;
+  project_path?: string;
 }
 
 /**
- * Workspace response
+ * IDE Workspace response
  */
-export interface WorkspaceResponse {
-  workspace_id: string;
+export interface IDEWorkspace {
+  id: string;
   name: string;
   path: string;
   created_at: string;
-  status: 'active' | 'suspended' | 'terminated';
-  owner: string;
+  last_accessed?: string;
+}
+
+/**
+ * File write request
+ */
+export interface IDEFileWriteRequest {
+  content: string;
+}
+
+/**
+ * File info
+ */
+export interface FileInfo {
+  name: string;
+  path: string;
+  type: 'file' | 'directory';
+  size?: number;
+  modified?: string;
+  extension?: string;
+}
+
+/**
+ * File content response
+ */
+export interface FileContentResponse {
+  path: string;
+  content: string;
+  language?: string;
+  encoding?: string;
+  size: number;
 }
 
 /**
@@ -29,99 +54,48 @@ export interface FileTreeNode {
   name: string;
   path: string;
   type: 'file' | 'directory';
-  size?: number;
   children?: FileTreeNode[];
-  language?: string;
-  readonly?: boolean;
+  extension?: string;
+  size?: number;
 }
 
 /**
- * File content request
+ * Terminal request
  */
-export interface FileContentRequest {
+export interface IDETerminalRequest {
   workspace_id: string;
-  path: string;
-  encoding?: string;
+  shell?: string;
 }
 
 /**
- * File content response
+ * Terminal session
  */
-export interface FileContentResponse {
-  content: string;
-  path: string;
-  language: string;
-  size: number;
-  last_modified: string;
-  readonly: boolean;
-}
-
-/**
- * File write request
- */
-export interface FileWriteRequest {
-  workspace_id: string;
-  path: string;
-  content: string;
-  create_directories?: boolean;
-  encoding?: string;
-}
-
-/**
- * Terminal session request
- */
-export interface TerminalCreateRequest {
-  workspace_id: string;
-  shell?: 'bash' | 'sh' | 'powershell' | 'cmd';
-  cwd?: string;
-  env?: { [key: string]: string };
-}
-
-/**
- * Terminal session response
- */
-export interface TerminalSessionResponse {
+export interface TerminalSession {
   session_id: string;
   workspace_id: string;
   shell: string;
-  cwd: string;
-  status: 'active' | 'closed';
-  pid: number;
+  created_at: string;
 }
 
 /**
- * Debug session request
+ * Debug request
  */
-export interface DebugSessionRequest {
+export interface IDEDebugRequest {
   workspace_id: string;
-  file: string;
-  configuration?: DebugConfiguration;
-}
-
-/**
- * Debug configuration
- */
-export interface DebugConfiguration {
-  type: string;
-  request: 'launch' | 'attach';
-  name: string;
-  program?: string;
+  language: string;
+  program: string;
   args?: string[];
-  cwd?: string;
-  env?: { [key: string]: string };
-  stopOnEntry?: boolean;
 }
 
 /**
- * Debug session response
+ * Debug session
  */
-export interface DebugSessionResponse {
+export interface DebugSession {
   session_id: string;
   workspace_id: string;
+  language: string;
   status: 'running' | 'paused' | 'stopped';
-  breakpoints: Breakpoint[];
-  variables?: Variable[];
-  stack_trace?: StackFrame[];
+  breakpoints?: Breakpoint[];
 }
 
 /**
@@ -132,173 +106,113 @@ export interface Breakpoint {
   file: string;
   line: number;
   condition?: string;
-  hit_count?: number;
   enabled: boolean;
 }
 
 /**
- * Variable
+ * DAP (Debug Adapter Protocol) message
  */
-export interface Variable {
-  name: string;
-  value: string;
-  type: string;
-  scope: 'local' | 'global' | 'closure';
-}
-
-/**
- * Stack frame
- */
-export interface StackFrame {
-  id: number;
-  name: string;
-  file: string;
-  line: number;
-  column: number;
-}
-
-/**
- * DAP (Debug Adapter Protocol) request
- */
-export interface DAPRequest {
-  session_id: string;
-  command: string;
-  arguments?: any;
+export interface DAPMessage {
+  type: 'request' | 'response' | 'event';
+  command?: string;
+  seq: number;
+  request_seq?: number;
+  success?: boolean;
+  body?: any;
 }
 
 /**
  * Code completion request
  */
 export interface CompletionRequest {
-  workspace_id: string;
-  file: string;
-  position: Position;
-  context?: string;
-  trigger?: string;
+  offset: number;
+  language?: string;
 }
 
 /**
- * Position in file
- */
-export interface Position {
-  line: number;
-  character: number;
-}
-
-/**
- * Code completion response
- */
-export interface CompletionResponse {
-  completions: CompletionItem[];
-  is_incomplete: boolean;
-}
-
-/**
- * Completion item
+ * Code completion item
  */
 export interface CompletionItem {
   label: string;
-  kind: CompletionItemKind;
+  kind: CompletionKind;
   detail?: string;
   documentation?: string;
-  insert_text: string;
-  sort_text?: string;
-  filter_text?: string;
+  insertText: string;
+  sortText?: string;
 }
 
-/**
- * Completion item kind
- */
-export enum CompletionItemKind {
-  Text = 1,
-  Method = 2,
-  Function = 3,
-  Constructor = 4,
-  Field = 5,
-  Variable = 6,
-  Class = 7,
-  Interface = 8,
-  Module = 9,
-  Property = 10,
-  Unit = 11,
-  Value = 12,
-  Enum = 13,
-  Keyword = 14,
-  Snippet = 15,
-  Color = 16,
-  File = 17,
-  Reference = 18,
-  Folder = 19,
-  EnumMember = 20,
-  Constant = 21,
-  Struct = 22,
-  Event = 23,
-  Operator = 24,
-  TypeParameter = 25
-}
+export type CompletionKind =
+  | 'text'
+  | 'method'
+  | 'function'
+  | 'constructor'
+  | 'field'
+  | 'variable'
+  | 'class'
+  | 'interface'
+  | 'module'
+  | 'property'
+  | 'unit'
+  | 'value'
+  | 'enum'
+  | 'keyword'
+  | 'snippet'
+  | 'color'
+  | 'file'
+  | 'reference'
+  | 'folder'
+  | 'constant'
+  | 'struct'
+  | 'event'
+  | 'operator'
+  | 'type_parameter';
 
 /**
- * Hover request
+ * Hover info request
  */
 export interface HoverRequest {
-  workspace_id: string;
-  file: string;
-  position: Position;
+  symbol: string;
+  language?: string;
 }
 
 /**
- * Hover response
+ * Hover info response
  */
-export interface HoverResponse {
+export interface HoverInfo {
   contents: string;
-  range?: Range;
-}
-
-/**
- * Range in file
- */
-export interface Range {
-  start: Position;
-  end: Position;
-}
-
-/**
- * Diagnostics response
- */
-export interface DiagnosticsResponse {
-  diagnostics: Diagnostic[];
-  file: string;
+  range?: {
+    start: { line: number; character: number };
+    end: { line: number; character: number };
+  };
 }
 
 /**
  * Diagnostic
  */
 export interface Diagnostic {
-  range: Range;
+  range: {
+    start: { line: number; character: number };
+    end: { line: number; character: number };
+  };
   severity: DiagnosticSeverity;
-  code?: string;
+  code?: string | number;
   source?: string;
   message: string;
-  related_information?: DiagnosticRelatedInformation[];
+  relatedInformation?: DiagnosticRelatedInfo[];
 }
 
-/**
- * Diagnostic severity
- */
-export enum DiagnosticSeverity {
-  Error = 1,
-  Warning = 2,
-  Information = 3,
-  Hint = 4
-}
+export type DiagnosticSeverity = 'error' | 'warning' | 'information' | 'hint';
 
 /**
- * Diagnostic related information
+ * Diagnostic related info
  */
-export interface DiagnosticRelatedInformation {
+export interface DiagnosticRelatedInfo {
   location: {
-    file: string;
-    range: Range;
+    uri: string;
+    range: {
+      start: { line: number; character: number };
+      end: { line: number; character: number };
+    };
   };
   message: string;
 }
@@ -306,36 +220,37 @@ export interface DiagnosticRelatedInformation {
 /**
  * Refactor request
  */
-export interface WorkspaceRefactorRequest {
-  workspace_id: string;
-  file: string;
-  range: Range;
-  refactor_type: 'rename' | 'extract' | 'inline' | 'move';
-  new_name?: string;
+export interface RefactorRequest {
+  instruction: string;
+  language?: string;
 }
 
 /**
  * Refactor response
  */
-export interface WorkspaceRefactorResponse {
-  success: boolean;
-  changes: WorkspaceEdit;
-  message?: string;
+export interface RefactorResponse {
+  original: string;
+  refactored: string;
+  changes: RefactorChange[];
 }
 
 /**
- * Workspace edit
+ * Refactor change
  */
-export interface WorkspaceEdit {
-  changes: {
-    [file: string]: TextEdit[];
+export interface RefactorChange {
+  type: 'insert' | 'delete' | 'replace';
+  range: {
+    start: { line: number; character: number };
+    end: { line: number; character: number };
   };
+  text?: string;
 }
 
 /**
- * Text edit
+ * Standard response
  */
-export interface TextEdit {
-  range: Range;
-  new_text: string;
+export interface StandardResponse {
+  status: string;
+  result?: any;
+  message?: string;
 }
