@@ -17,11 +17,14 @@ import {
   CompletionItem,
   HoverRequest,
   HoverInfo,
-  Diagnostic,
-  RefactorRequest,
-  RefactorResponse,
-  StandardResponse
+  Diagnostic
 } from '../../models/ide/ide.model';
+import {
+  RefactorRequest,
+  RefactorResponse
+} from '../../models/ai-agent/ai-agent.model';
+import { StandardResponse } from '../../models/common/api-response.model';
+import { GitDiffResponse } from '../../models/git/git.model';
 
 /**
  * IDE Service
@@ -32,7 +35,39 @@ import {
 })
 export class IDEService extends BaseApiService {
 
-  // ==================== Workspace ====================
+  /**
+   * Get project structure
+   * GET /ide/structure/{workspace_id}
+   */
+  getProjectStructure(workspaceId: string): Observable<{ files: FileTreeNode[] }> {
+    return this.get<{ files: FileTreeNode[] }>(`/ide/structure/${workspaceId}`);
+  }
+
+  /**
+   * Get file content
+   * GET /ide/files/{workspace_id}/{path}
+   */
+  getFileContent(workspaceId: string, filePath: string): Observable<FileContentResponse> {
+    return this.get<FileContentResponse>(`/ide/files/${workspaceId}/${encodeURIComponent(filePath)}`);
+  }
+
+  /**
+   * Update file content
+   * PATCH /ide/files/{workspace_id}/{path}
+   */
+  updateFileContent(workspaceId: string, filePath: string, request: IDEFileWriteRequest): Observable<StandardResponse> {
+    return this.patch<StandardResponse>(`/ide/files/${workspaceId}/${encodeURIComponent(filePath)}`, request);
+  }
+
+  /**
+   * Create terminal session
+   * POST /ide/terminal
+   */
+  createTerminal(request: IDETerminalRequest): Observable<TerminalSession & StandardResponse> {
+    return this.post<TerminalSession & StandardResponse>('/ide/terminal', request);
+  }
+
+  // ==================== Debugging ====================
 
   /**
    * Create IDE workspace
@@ -83,16 +118,6 @@ export class IDEService extends BaseApiService {
    */
   getFileTree(workspaceId: string): Observable<FileTreeNode> {
     return this.get<FileTreeNode>(`/ide/tree/${workspaceId}`);
-  }
-
-  // ==================== Terminal ====================
-
-  /**
-   * Create terminal session
-   * POST /ide/terminal
-   */
-  createTerminal(request: IDETerminalRequest): Observable<StandardResponse> {
-    return this.post<StandardResponse>('/ide/terminal', request);
   }
 
   // ==================== Debugging ====================
@@ -174,5 +199,12 @@ export class IDEService extends BaseApiService {
       request,
       { timeout: 60000 }
     );
+  }
+
+  /**
+   * Search files in workspace
+   */
+  searchFiles(workspaceId: string, query: string): Observable<any> {
+    return this.get(`/ide/search/${workspaceId}`, { query });
   }
 }

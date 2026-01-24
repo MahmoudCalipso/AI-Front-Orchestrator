@@ -1,0 +1,456 @@
+<div class="enhanced-generation-container">
+    <div class="wizard-header">
+        <h1>
+            <mat-icon>auto_awesome</mat-icon>
+            Full-Stack Project Generator
+        </h1>
+        <p class="subtitle">Create complete applications with backend, frontend, mobile, and database</p>
+    </div>
+
+    <app-card customClass="wizard-main-card">
+        <mat-stepper [linear]="true" #stepper>
+            <!-- Step 1: Project Description -->
+            <mat-step [stepControl]="descriptionForm">
+                <form [formGroup]="descriptionForm">
+                    <ng-template matStepLabel>Project Overview</ng-template>
+
+                    <div class="step-content">
+                        <h2>Describe Your Full-Stack Application</h2>
+                        <p class="step-description">Tell us what you want to build, and we'll help you choose the
+                            perfect tech stack</p>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Project Name</mat-label>
+                            <input matInput formControlName="projectName" placeholder="my-fullstack-app">
+                            <mat-icon matPrefix>label</mat-icon>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Project Description</mat-label>
+                            <textarea matInput formControlName="description" rows="6"
+                                placeholder="E.g., A social media platform with real-time chat, user profiles, post sharing, and mobile apps for iOS and Android..."></textarea>
+                            <mat-icon matPrefix>description</mat-icon>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Project Type</mat-label>
+                            <mat-select formControlName="projectType">
+                                <mat-option value="web">Web Application</mat-option>
+                                <mat-option value="mobile">Mobile Application</mat-option>
+                                <mat-option value="fullstack">Full-Stack (Web + Mobile)</mat-option>
+                                <mat-option value="api">API/Backend Only</mat-option>
+                                <mat-option value="desktop">Desktop Application</mat-option>
+                            </mat-select>
+                            <mat-icon matPrefix>apps</mat-icon>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="step-actions">
+                        <app-button variant="secondary" disabled>Back</app-button>
+                        <app-button variant="primary" (clicked)="stepper.next()" [disabled]="descriptionForm.invalid">
+                            Next
+                        </app-button>
+                    </div>
+                </form>
+            </mat-step>
+
+            <!-- Step 2: Backend Selection -->
+            <mat-step [stepControl]="backendForm">
+                <form [formGroup]="backendForm">
+                    <ng-template matStepLabel>Backend Stack</ng-template>
+
+                    <div class="step-content">
+                        <h2>Choose Your Backend Technology</h2>
+                        <p class="step-description">Select the programming language and framework for your server-side
+                            logic</p>
+
+                        <div class="tech-grid">
+                            @for (backend of backendOptions; track backend.id) {
+                            <div class="tech-card" [class.selected]="backendForm.get('language')?.value === backend.id"
+                                (click)="selectBackend(backend)">
+                                <div class="tech-icon" [style.background]="backend.color">
+                                    <mat-icon>{{ backend.icon }}</mat-icon>
+                                </div>
+                                <h4>{{ backend.name }}</h4>
+                                <p>{{ backend.description }}</p>
+                                @if (backendForm.get('language')?.value === backend.id) {
+                                <mat-icon class="check-icon">check_circle</mat-icon>
+                                }
+                            </div>
+                            }
+                        </div>
+
+                        @if (backendForm.get('language')?.value) {
+                        <div class="framework-selection">
+                            <h3>Select Framework</h3>
+                            <div class="framework-chips">
+                                @for (framework of getBackendFrameworks(); track framework.id) {
+                                <div class="framework-chip"
+                                    [class.selected]="backendForm.get('framework')?.value === framework.id"
+                                    (click)="selectBackendFramework(framework)">
+                                    <span>{{ framework.name }}</span>
+                                    <span class="version">v{{ framework.version }}</span>
+                                </div>
+                                }
+                            </div>
+                        </div>
+                        }
+                    </div>
+
+                    <div class="step-actions">
+                        <app-button variant="secondary" (clicked)="stepper.previous()">Back</app-button>
+                        <app-button variant="primary" (clicked)="stepper.next()" [disabled]="backendForm.invalid">
+                            Next
+                        </app-button>
+                    </div>
+                </form>
+            </mat-step>
+
+            <!-- Step 3: Frontend Selection -->
+            <mat-step [stepControl]="frontendForm">
+                <form [formGroup]="frontendForm">
+                    <ng-template matStepLabel>Frontend Stack</ng-template>
+
+                    <div class="step-content">
+                        <h2>Choose Your Frontend Technology</h2>
+                        <p class="step-description">Select the framework for your user interface</p>
+
+                        <div class="tech-grid">
+                            @for (frontend of frontendOptions; track frontend.id) {
+                            <div class="tech-card"
+                                [class.selected]="frontendForm.get('framework')?.value === frontend.id"
+                                (click)="selectFrontend(frontend)">
+                                <div class="tech-icon" [style.background]="frontend.color">
+                                    <mat-icon>{{ frontend.icon }}</mat-icon>
+                                </div>
+                                <h4>{{ frontend.name }}</h4>
+                                <p>{{ frontend.description }}</p>
+                                @if (frontendForm.get('framework')?.value === frontend.id) {
+                                <mat-icon class="check-icon">check_circle</mat-icon>
+                                }
+                            </div>
+                            }
+                        </div>
+
+                        @if (frontendForm.get('framework')?.value) {
+                        <div class="ui-library-selection">
+                            <h3>UI Component Library (Optional)</h3>
+                            <div class="framework-chips">
+                                @for (lib of getUILibraries(); track lib.id) {
+                                <div class="framework-chip"
+                                    [class.selected]="frontendForm.get('uiLibrary')?.value === lib.id"
+                                    (click)="selectUILibrary(lib)">
+                                    <span>{{ lib.name }}</span>
+                                </div>
+                                }
+                            </div>
+                        </div>
+                        }
+                    </div>
+
+                    <div class="step-actions">
+                        <app-button variant="secondary" (clicked)="stepper.previous()">Back</app-button>
+                        <app-button variant="primary" (clicked)="stepper.next()" [disabled]="frontendForm.invalid">
+                            Next
+                        </app-button>
+                    </div>
+                </form>
+            </mat-step>
+
+            <!-- Step 4: Mobile Selection -->
+            <mat-step [stepControl]="mobileForm">
+                <form [formGroup]="mobileForm">
+                    <ng-template matStepLabel>Mobile Apps</ng-template>
+
+                    <div class="step-content">
+                        <h2>Mobile Application Setup</h2>
+                        <p class="step-description">Configure mobile apps for iOS and Android</p>
+
+                        <div class="mobile-toggle">
+                            <mat-checkbox formControlName="includeMobile">Include Mobile Applications</mat-checkbox>
+                        </div>
+
+                        @if (mobileForm.get('includeMobile')?.value) {
+                        <div class="tech-grid">
+                            @for (mobile of mobileOptions; track mobile.id) {
+                            <div class="tech-card" [class.selected]="mobileForm.get('framework')?.value === mobile.id"
+                                (click)="selectMobile(mobile)">
+                                <div class="tech-icon" [style.background]="mobile.color">
+                                    <mat-icon>{{ mobile.icon }}</mat-icon>
+                                </div>
+                                <h4>{{ mobile.name }}</h4>
+                                <p>{{ mobile.description }}</p>
+                                @if (mobileForm.get('framework')?.value === mobile.id) {
+                                <mat-icon class="check-icon">check_circle</mat-icon>
+                                }
+                            </div>
+                            }
+                        </div>
+
+                        <div class="platform-selection">
+                            <h3>Target Platforms</h3>
+                            <div class="checkbox-group">
+                                <mat-checkbox formControlName="ios">iOS</mat-checkbox>
+                                <mat-checkbox formControlName="android">Android</mat-checkbox>
+                            </div>
+                        </div>
+                        }
+                    </div>
+
+                    <div class="step-actions">
+                        <app-button variant="secondary" (clicked)="stepper.previous()">Back</app-button>
+                        <app-button variant="primary" (clicked)="stepper.next()">
+                            Next
+                        </app-button>
+                    </div>
+                </form>
+            </mat-step>
+
+            <!-- Step 5: Database Selection -->
+            <mat-step [stepControl]="databaseForm">
+                <form [formGroup]="databaseForm">
+                    <ng-template matStepLabel>Database</ng-template>
+
+                    <div class="step-content">
+                        <h2>Choose Your Database</h2>
+                        <p class="step-description">Select the database system for data persistence</p>
+
+                        <div class="tech-grid">
+                            @for (db of databaseOptions; track db.id) {
+                            <div class="tech-card" [class.selected]="databaseForm.get('type')?.value === db.id"
+                                (click)="selectDatabase(db)">
+                                <div class="tech-icon" [style.background]="db.color">
+                                    <mat-icon>{{ db.icon }}</mat-icon>
+                                </div>
+                                <h4>{{ db.name }}</h4>
+                                <p>{{ db.description }}</p>
+                                <span class="db-type-badge">{{ db.type }}</span>
+                                @if (databaseForm.get('type')?.value === db.id) {
+                                <mat-icon class="check-icon">check_circle</mat-icon>
+                                }
+                            </div>
+                            }
+                        </div>
+
+                        @if (databaseForm.get('type')?.value) {
+                        <div class="db-config">
+                            <h3>Database Configuration</h3>
+                            <div class="config-options">
+                                <mat-checkbox formControlName="includeORM">Include ORM/ODM</mat-checkbox>
+                                <mat-checkbox formControlName="includeMigrations">Include Migrations</mat-checkbox>
+                                <mat-checkbox formControlName="includeSeeding">Include Sample Data
+                                    Seeding</mat-checkbox>
+                            </div>
+                        </div>
+                        }
+                    </div>
+
+                    <div class="step-actions">
+                        <app-button variant="secondary" (clicked)="stepper.previous()">Back</app-button>
+                        <app-button variant="primary" (clicked)="stepper.next()" [disabled]="databaseForm.invalid">
+                            Next
+                        </app-button>
+                    </div>
+                </form>
+            </mat-step>
+
+            <!-- Step 6: Additional Features -->
+            <mat-step [stepControl]="featuresForm">
+                <form [formGroup]="featuresForm">
+                    <ng-template matStepLabel>Features</ng-template>
+
+                    <div class="step-content">
+                        <h2>Additional Features</h2>
+                        <p class="step-description">Enhance your project with additional capabilities</p>
+
+                        <div class="features-grid">
+                            <div class="feature-category">
+                                <h3>Authentication & Security</h3>
+                                <mat-checkbox formControlName="auth">User Authentication (JWT/OAuth)</mat-checkbox>
+                                <mat-checkbox formControlName="rbac">Role-Based Access Control</mat-checkbox>
+                                <mat-checkbox formControlName="twoFactor">Two-Factor Authentication</mat-checkbox>
+                            </div>
+
+                            <div class="feature-category">
+                                <h3>DevOps & Deployment</h3>
+                                <mat-checkbox formControlName="docker">Docker Configuration</mat-checkbox>
+                                <mat-checkbox formControlName="cicd">CI/CD Pipeline</mat-checkbox>
+                                <mat-checkbox formControlName="kubernetes">Kubernetes Manifests</mat-checkbox>
+                            </div>
+
+                            <div class="feature-category">
+                                <h3>Testing & Quality</h3>
+                                <mat-checkbox formControlName="unitTests">Unit Tests</mat-checkbox>
+                                <mat-checkbox formControlName="e2eTests">End-to-End Tests</mat-checkbox>
+                                <mat-checkbox formControlName="linting">Linting & Formatting</mat-checkbox>
+                            </div>
+
+                            <div class="feature-category">
+                                <h3>Documentation</h3>
+                                <mat-checkbox formControlName="apiDocs">API Documentation
+                                    (Swagger/OpenAPI)</mat-checkbox>
+                                <mat-checkbox formControlName="readme">Comprehensive README</mat-checkbox>
+                                <mat-checkbox formControlName="contributing">Contributing Guidelines</mat-checkbox>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-actions">
+                        <app-button variant="secondary" (clicked)="stepper.previous()">Back</app-button>
+                        <app-button variant="primary" (clicked)="stepper.next()">
+                            Review & Generate
+                        </app-button>
+                    </div>
+                </form>
+            </mat-step>
+
+            <!-- Step 7: Review & Generate -->
+            <mat-step>
+                <ng-template matStepLabel>Generate</ng-template>
+
+                <div class="step-content">
+                    @if (!generating && !generationResult) {
+                    <div class="review-section">
+                        <h2>Review Your Configuration</h2>
+                        <p class="step-description">Verify your selections before generating the project</p>
+
+                        <div class="review-grid">
+                            <app-card customClass="review-card">
+                                <h3><mat-icon>info</mat-icon> Project Details</h3>
+                                <div class="review-item">
+                                    <strong>Name:</strong> {{ descriptionForm.value.projectName }}
+                                </div>
+                                <div class="review-item">
+                                    <strong>Type:</strong> {{ descriptionForm.value.projectType }}
+                                </div>
+                            </app-card>
+
+                            <app-card customClass="review-card">
+                                <h3><mat-icon>dns</mat-icon> Backend</h3>
+                                <div class="review-item">
+                                    <strong>Language:</strong> {{ getBackendName() }}
+                                </div>
+                                <div class="review-item">
+                                    <strong>Framework:</strong> {{ getBackendFrameworkName() }}
+                                </div>
+                            </app-card>
+
+                            <app-card customClass="review-card">
+                                <h3><mat-icon>web</mat-icon> Frontend</h3>
+                                <div class="review-item">
+                                    <strong>Framework:</strong> {{ getFrontendName() }}
+                                </div>
+                                <div class="review-item">
+                                    <strong>UI Library:</strong> {{ getUILibraryName() || 'None' }}
+                                </div>
+                            </app-card>
+
+                            @if (mobileForm.value.includeMobile) {
+                            <app-card customClass="review-card">
+                                <h3><mat-icon>phone_android</mat-icon> Mobile</h3>
+                                <div class="review-item">
+                                    <strong>Framework:</strong> {{ getMobileName() }}
+                                </div>
+                                <div class="review-item">
+                                    <strong>Platforms:</strong>
+                                    {{ mobileForm.value.ios ? 'iOS' : '' }}
+                                    {{ mobileForm.value.ios && mobileForm.value.android ? ', ' : '' }}
+                                    {{ mobileForm.value.android ? 'Android' : '' }}
+                                </div>
+                            </app-card>
+                            }
+
+                            <app-card customClass="review-card">
+                                <h3><mat-icon>storage</mat-icon> Database</h3>
+                                <div class="review-item">
+                                    <strong>Type:</strong> {{ getDatabaseName() }}
+                                </div>
+                                <div class="review-item">
+                                    <strong>ORM:</strong> {{ databaseForm.value.includeORM ? 'Yes' : 'No' }}
+                                </div>
+                            </app-card>
+
+                            <app-card customClass="review-card">
+                                <h3><mat-icon>extension</mat-icon> Features</h3>
+                                <div class="feature-list">
+                                    @if (featuresForm.value.auth) { <span class="feature-tag">Authentication</span> }
+                                    @if (featuresForm.value.docker) { <span class="feature-tag">Docker</span> }
+                                    @if (featuresForm.value.cicd) { <span class="feature-tag">CI/CD</span> }
+                                    @if (featuresForm.value.unitTests) { <span class="feature-tag">Tests</span> }
+                                    @if (featuresForm.value.apiDocs) { <span class="feature-tag">API Docs</span> }
+                                </div>
+                            </app-card>
+                        </div>
+
+                        <app-button variant="primary" size="lg" [fullWidth]="true" (clicked)="generateProject()"
+                            class="generate-btn">
+                            <mat-icon>rocket_launch</mat-icon>
+                            Generate Full-Stack Project
+                        </app-button>
+                    </div>
+                    }
+
+                    @if (generating) {
+                    <div class="generation-progress">
+                        <mat-icon class="progress-icon">hourglass_empty</mat-icon>
+                        <h2>Generating Your Full-Stack Application...</h2>
+                        <p>This may take a few minutes. We're creating your entire tech stack.</p>
+                        <mat-progress-bar mode="determinate" [value]="generationProgress"></mat-progress-bar>
+                        <p class="progress-text">{{ generationProgress }}% Complete - {{ currentGenerationStep }}</p>
+                    </div>
+                    }
+
+                    @if (generationResult) {
+                    <div class="generation-success">
+                        <mat-icon class="success-icon">check_circle</mat-icon>
+                        <h2>Project Generated Successfully!</h2>
+                        <p>Your full-stack application is ready to use</p>
+
+                        <div class="result-stats">
+                            <div class="stat-item">
+                                <mat-icon>folder</mat-icon>
+                                <span>{{ generationResult.files_created }} files</span>
+                            </div>
+                            <div class="stat-item">
+                                <mat-icon>code</mat-icon>
+                                <span>{{ generationResult.total_lines }} lines</span>
+                            </div>
+                            <div class="stat-item">
+                                <mat-icon>timer</mat-icon>
+                                <span>{{ generationResult.duration }}s</span>
+                            </div>
+                        </div>
+
+                        <div class="result-actions">
+                            <app-button variant="primary" (clicked)="downloadProject()">
+                                <mat-icon>download</mat-icon>
+                                Download Project
+                            </app-button>
+                            <app-button variant="accent" (clicked)="viewInIDE()">
+                                <mat-icon>code</mat-icon>
+                                Open in IDE
+                            </app-button>
+                            <app-button variant="secondary" (clicked)="viewDocumentation()">
+                                <mat-icon>description</mat-icon>
+                                View Docs
+                            </app-button>
+                        </div>
+                    </div>
+                    }
+                </div>
+
+                <div class="step-actions">
+                    @if (!generating && !generationResult) {
+                    <app-button variant="secondary" (clicked)="stepper.previous()">Back</app-button>
+                    }
+                    @if (generationResult) {
+                    <app-button variant="secondary" (clicked)="reset()">
+                        <mat-icon>refresh</mat-icon>
+                        Create Another Project
+                    </app-button>
+                    }
+                </div>
+            </mat-step>
+        </mat-stepper>
+    </app-card>
+</div>

@@ -9,7 +9,7 @@
         </div>
         <mat-form-field appearance="outline" class="time-range-selector">
             <mat-label>Time Range</mat-label>
-            <mat-select [(value)]="timeRange" (selectionChange)="onTimeRangeChange($event.value)">
+            <mat-select [value]="timeRange()" (selectionChange)="onTimeRangeChange($event.value)">
                 <mat-option value="15m">Last 15 minutes</mat-option>
                 <mat-option value="1h">Last hour</mat-option>
                 <mat-option value="6h">Last 6 hours</mat-option>
@@ -19,7 +19,7 @@
     </div>
 
     <!-- Current Metrics -->
-    @if (currentMetrics) {
+    @if (currentMetrics()) {
     <div class="metrics-grid">
         <mat-card class="metric-card">
             <mat-card-content>
@@ -27,7 +27,7 @@
                     <mat-icon>memory</mat-icon>
                 </div>
                 <div class="metric-details">
-                    <h3>{{ currentMetrics.cpu_usage }}%</h3>
+                    <h3>{{ currentMetrics().cpu_usage }}%</h3>
                     <p>CPU Usage</p>
                 </div>
             </mat-card-content>
@@ -39,7 +39,7 @@
                     <mat-icon>storage</mat-icon>
                 </div>
                 <div class="metric-details">
-                    <h3>{{ currentMetrics.memory_usage }}%</h3>
+                    <h3>{{ currentMetrics().memory_usage }}%</h3>
                     <p>Memory Usage</p>
                 </div>
             </mat-card-content>
@@ -51,7 +51,7 @@
                     <mat-icon>trending_up</mat-icon>
                 </div>
                 <div class="metric-details">
-                    <h3>{{ currentMetrics.active_requests }}</h3>
+                    <h3>{{ currentMetrics().active_requests }}</h3>
                     <p>Active Requests</p>
                 </div>
             </mat-card-content>
@@ -63,7 +63,7 @@
                     <mat-icon>speed</mat-icon>
                 </div>
                 <div class="metric-details">
-                    <h3>{{ currentMetrics.avg_response_time }}ms</h3>
+                    <h3>{{ currentMetrics().avg_response_time }}ms</h3>
                     <p>Avg Response Time</p>
                 </div>
             </mat-card-content>
@@ -140,7 +140,7 @@
         </mat-card-header>
         <mat-card-content>
             <div class="build-list">
-                @for (build of buildHistory; track build.timestamp) {
+                @for (build of buildHistory(); track build.timestamp) {
                 <div class="build-item">
                     <div class="build-info">
                         <mat-icon class="build-icon">folder</mat-icon>
@@ -164,6 +164,6 @@
     </mat-card>
 </div>
 
-@if (loading) {
+@if (loading()) {
 <app-loading-spinner [fullscreen]="true" message="Loading metrics..."></app-loading-spinner>
 }

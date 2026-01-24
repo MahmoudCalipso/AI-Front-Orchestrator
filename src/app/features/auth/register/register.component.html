@@ -40,11 +40,11 @@
 
                     <mat-form-field appearance="outline" class="full-width">
                         <mat-label>Password</mat-label>
-                        <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password"
+                        <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password"
                             placeholder="Create a strong password" autocomplete="new-password">
                         <mat-icon matPrefix>lock</mat-icon>
-                        <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
-                            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                        <button mat-icon-button matSuffix type="button" (click)="hidePassword.set(!hidePassword())">
+                            <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
                         </button>
                         @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
                         <mat-error>
@@ -70,13 +70,13 @@
 
                     <mat-form-field appearance="outline" class="full-width">
                         <mat-label>Confirm Password</mat-label>
-                        <input matInput [type]="hideConfirmPassword ? 'password' : 'text'"
+                        <input matInput [type]="hideConfirmPassword() ? 'password' : 'text'"
                             formControlName="confirmPassword" placeholder="Confirm your password"
                             autocomplete="new-password">
                         <mat-icon matPrefix>lock</mat-icon>
                         <button mat-icon-button matSuffix type="button"
-                            (click)="hideConfirmPassword = !hideConfirmPassword">
-                            <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                            (click)="hideConfirmPassword.set(!hideConfirmPassword())">
+                            <mat-icon>{{ hideConfirmPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
                         </button>
                         @if (registerForm.get('confirmPassword')?.touched) {
                         <mat-error>
@@ -86,8 +86,8 @@
                     </mat-form-field>
 
                     <button mat-raised-button color="primary" type="submit" class="register-button full-width"
-                        [disabled]="loading">
-                        @if (!loading) {
+                        [disabled]="loading()">
+                        @if (!loading()) {
                         <span>Create Account</span>
                         } @else {
                         <span class="loading-text">
@@ -113,7 +113,7 @@
         </div>
     </div>
 
-    @if (loading) {
+    @if (loading()) {
     <app-loading-spinner [fullscreen]="true" message="Creating your account..."></app-loading-spinner>
     }
 </div>

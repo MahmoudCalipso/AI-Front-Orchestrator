@@ -1,160 +1,179 @@
 <div class="project-list-container">
-    <div class="page-header">
-        <div>
+    <div class="list-header">
+        <div class="header-left">
             <h1>
                 <mat-icon>folder</mat-icon>
                 My Projects
             </h1>
-            <p class="subtitle">Manage and organize your projects</p>
+            <p class="subtitle">{{ totalProjectCount() }} projects</p>
         </div>
-        <button mat-raised-button color="primary" routerLink="/generation">
-            <mat-icon>add</mat-icon>
-            New Project
-        </button>
+        <div class="header-actions">
+            <app-button variant="primary" (clicked)="createProject()">
+                <mat-icon>add</mat-icon>
+                New Project
+            </app-button>
+        </div>
     </div>
 
-    <!-- Storage Stats -->
-    @if (storageStats) {
-    <mat-card class="storage-stats-card">
-        <mat-card-content>
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <mat-icon>folder</mat-icon>
-                    <div class="stat-details">
-                        <h3>{{ storageStats.total_projects }}</h3>
-                        <p>Total Projects</p>
-                    </div>
-                </div>
-                <div class="stat-item">
-                    <mat-icon>storage</mat-icon>
-                    <div class="stat-details">
-                        <h3>{{ storageStats.total_size_gb.toFixed(2) }} GB</h3>
-                        <p>Storage Used</p>
-                    </div>
-                </div>
-                <div class="stat-item">
-                    <mat-icon>pie_chart</mat-icon>
-                    <div class="stat-details">
-                        <h3>{{ storageStats.used_percentage.toFixed(1) }}%</h3>
-                        <p>Usage</p>
-                    </div>
-                </div>
+    <!-- Filters & Search -->
+    <app-card customClass="filters-card">
+        <div class="filters-section">
+            <mat-form-field appearance="outline" class="search-field">
+                <mat-label>Search projects</mat-label>
+                <input matInput [ngModel]="searchFilter()" (ngModelChange)="searchFilter.set($event); onSearchChange()"
+                    placeholder="Search by name...">
+                <mat-icon matPrefix>search</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Language</mat-label>
+                <mat-select [ngModel]="selectedLanguage()" (selectionChange)="selectedLanguage.set($event.value)">
+                    <mat-option value="">All Languages</mat-option>
+                    <mat-option value="javascript">JavaScript</mat-option>
+                    <mat-option value="typescript">TypeScript</mat-option>
+                    <mat-option value="python">Python</mat-option>
+                    <mat-option value="java">Java</mat-option>
+                    <mat-option value="go">Go</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Framework</mat-label>
+                <mat-select [ngModel]="selectedFramework()" (selectionChange)="selectedFramework.set($event.value)">
+                    <mat-option value="">All Frameworks</mat-option>
+                    <mat-option value="react">React</mat-option>
+                    <mat-option value="angular">Angular</mat-option>
+                    <mat-option value="vue">Vue</mat-option>
+                    <mat-option value="express">Express</mat-option>
+                    <mat-option value="fastapi">FastAPI</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Status</mat-label>
+                <mat-select [ngModel]="selectedStatus()" (selectionChange)="selectedStatus.set($event.value)">
+                    <mat-option value="">All Status</mat-option>
+                    <mat-option value="active">Active</mat-option>
+                    <mat-option value="archived">Archived</mat-option>
+                    <mat-option value="building">Building</mat-option>
+                    <mat-option value="error">Error</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <div class="view-toggle">
+                <mat-button-toggle-group [ngModel]="viewMode()" (ngModelChange)="viewMode.set($event)">
+                    <mat-button-toggle value="grid">
+                        <mat-icon>grid_view</mat-icon>
+                    </mat-button-toggle>
+                    <mat-button-toggle value="list">
+                        <mat-icon>view_list</mat-icon>
+                    </mat-button-toggle>
+                </mat-button-toggle-group>
             </div>
-        </mat-card-content>
-    </mat-card>
+        </div>
+    </app-card>
+
+    <!-- Projects Grid/List -->
+    @if (loading()) {
+    <div class="loading-state">
+        <mat-spinner></mat-spinner>
+        <p>Loading projects...</p>
+    </div>
     }
 
-    <!-- Filters -->
-    <mat-card class="filters-card">
-        <mat-card-content>
-            <div class="filters-row">
-                <mat-form-field appearance="outline" class="search-field">
-                    <mat-label>Search projects</mat-label>
-                    <input matInput [(ngModel)]="searchQuery" (ngModelChange)="applyFilters()"
-                        placeholder="Search by name, language, or framework">
-                    <mat-icon matPrefix>search</mat-icon>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="filter-field">
-                    <mat-label>Language</mat-label>
-                    <mat-select [(value)]="filterLanguage" (selectionChange)="applyFilters()">
-                        <mat-option value="all">All Languages</mat-option>
-                        @for (lang of languages; track lang) {
-                        <mat-option [value]="lang">{{ lang }}</mat-option>
-                        }
-                    </mat-select>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="filter-field">
-                    <mat-label>Status</mat-label>
-                    <mat-select [(value)]="filterStatus" (selectionChange)="applyFilters()">
-                        <mat-option value="all">All Status</mat-option>
-                        <mat-option value="active">Active</mat-option>
-                        <mat-option value="archived">Archived</mat-option>
-                    </mat-select>
-                </mat-form-field>
-            </div>
-        </mat-card-content>
-    </mat-card>
-
-    <!-- Projects Grid -->
-    <div class="projects-grid">
-        @for (project of filteredProjects; track project.project_id) {
-        <mat-card class="project-card">
-            <mat-card-header>
-                <div class="project-header">
-                    <div class="project-icon">
-                        <mat-icon>folder</mat-icon>
-                    </div>
-                    <div class="project-info">
-                        <h3>{{ project.project_name }}</h3>
-                        <p>{{ formatDate(project.created_at) }}</p>
-                    </div>
-                    <span class="badge" [class]="'badge-' + getStatusColor(project.status)">
-                        {{ project.status }}
-                    </span>
+    @if (!loading() && filteredProjects().length > 0) {
+    <div [class]="viewMode() === 'grid' ? 'projects-grid' : 'projects-list'">
+        @for (project of filteredProjects(); track project.id) {
+        <app-card [hoverable]="true" [clickable]="true" customClass="project-card" (click)="openProject(project)">
+            <div class="project-header">
+                <div class="project-icon" [style.background]="getProjectColor(project.language)">
+                    <mat-icon>{{ getProjectIcon(project.language) }}</mat-icon>
                 </div>
-            </mat-card-header>
-            <mat-card-content>
-                <div class="project-details">
-                    <div class="detail-item">
-                        <mat-icon>code</mat-icon>
-                        <span>{{ project.language }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <mat-icon>layers</mat-icon>
-                        <span>{{ project.framework }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <mat-icon>storage</mat-icon>
-                        <span>{{ project.size_mb.toFixed(1) }} MB</span>
-                    </div>
+                <div class="project-info">
+                    <h3>{{ project.project_name }}</h3>
+                    <p class="project-meta">{{ project.language }} • {{ formatDate(project.created_at) }}</p>
                 </div>
-            </mat-card-content>
-            <mat-card-actions>
-                <button mat-button (click)="openProject(project)">
-                    <mat-icon>code</mat-icon>
-                    Open in IDE
-                </button>
-                <button mat-icon-button [matMenuTriggerFor]="menu">
+                <button mat-icon-button [matMenuTriggerFor]="menu" (click)="$event.stopPropagation()">
                     <mat-icon>more_vert</mat-icon>
                 </button>
                 <mat-menu #menu="matMenu">
+                    <button mat-menu-item (click)="openInIDE(project)">
+                        <mat-icon>code</mat-icon>
+                        <span>Open in IDE</span>
+                    </button>
                     <button mat-menu-item (click)="downloadProject(project)">
                         <mat-icon>download</mat-icon>
-                        Download
+                        <span>Download</span>
                     </button>
-                    @if (project.status === 'active') {
+                    <button mat-menu-item (click)="duplicateProject(project)">
+                        <mat-icon>content_copy</mat-icon>
+                        <span>Duplicate</span>
+                    </button>
+                    <mat-divider></mat-divider>
                     <button mat-menu-item (click)="archiveProject(project)">
                         <mat-icon>archive</mat-icon>
-                        Archive
+                        <span>Archive</span>
                     </button>
-                    }
-                    <button mat-menu-item (click)="deleteProject(project)" class="delete-action">
+                    <button mat-menu-item (click)="deleteProject(project)" class="danger">
                         <mat-icon>delete</mat-icon>
-                        Delete
+                        <span>Delete</span>
                     </button>
                 </mat-menu>
-            </mat-card-actions>
-        </mat-card>
-        } @empty {
-        @if (!loading) {
-        <div class="empty-state">
-            <mat-icon>folder_open</mat-icon>
-            <h2>No projects found</h2>
-            <p>{{ searchQuery ? 'Try adjusting your filters' : 'Create your first project to get started' }}</p>
-            @if (!searchQuery) {
-            <button mat-raised-button color="primary" routerLink="/generation">
-                <mat-icon>add</mat-icon>
-                Create Project
-            </button>
-            }
-        </div>
-        }
+            </div>
+
+            <div class="project-body">
+                <p class="project-description">{{ project.description || 'No description' }}</p>
+
+                <div class="project-tags">
+                    @if (project.framework) {
+                    <span class="tag">{{ project.framework }}</span>
+                    }
+                    @if (project.database) {
+                    <span class="tag">{{ project.database }}</span>
+                    }
+                </div>
+
+                <div class="project-stats">
+                    <div class="stat">
+                        <mat-icon>folder</mat-icon>
+                        <span>{{ project.file_count || 0 }} files</span>
+                    </div>
+                    <div class="stat">
+                        <mat-icon>storage</mat-icon>
+                        <span>{{ formatSize(project.size_bytes) }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-footer">
+                <span class="status-badge" [class]="'status-' + project.status">
+                    {{ project.status }}
+                </span>
+                <span class="last-modified">Updated {{ formatRelativeTime(project.updated_at) }}</span>
+            </div>
+        </app-card>
         }
     </div>
-</div>
+    }
 
-@if (loading) {
-<app-loading-spinner [fullscreen]="true" message="Loading projects..."></app-loading-spinner>
-}
+    @if (!loading() && filteredProjects().length === 0) {
+    <div class="empty-state">
+        <mat-icon>folder_open</mat-icon>
+        <h2>No projects found</h2>
+        <p>{{ searchFilter() ? 'Try adjusting your filters' : 'Create your first project to get started' }}</p>
+        <app-button variant="primary" (clicked)="createProject()">
+            <mat-icon>add</mat-icon>
+            Create Project
+        </app-button>
+    </div>
+    }
+
+    <!-- Pagination -->
+    @if (totalProjectCount() > pageSize()) {
+    <div class="pagination">
+        <mat-paginator [length]="totalProjectCount()" [pageSize]="pageSize()" [pageSizeOptions]="[12, 24, 48]"
+            (page)="onPageChange($event)">
+        </mat-paginator>
+    </div>
+    }
+</div>

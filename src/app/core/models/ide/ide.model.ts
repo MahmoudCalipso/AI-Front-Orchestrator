@@ -77,6 +77,7 @@ export interface TerminalSession {
   created_at: string;
 }
 
+
 /**
  * Debug request
  */
@@ -217,40 +218,4 @@ export interface DiagnosticRelatedInfo {
   message: string;
 }
 
-/**
- * Refactor request
- */
-export interface RefactorRequest {
-  instruction: string;
-  language?: string;
-}
 
-/**
- * Refactor response
- */
-export interface RefactorResponse {
-  original: string;
-  refactored: string;
-  changes: RefactorChange[];
-}
-
-/**
- * Refactor change
- */
-export interface RefactorChange {
-  type: 'insert' | 'delete' | 'replace';
-  range: {
-    start: { line: number; character: number };
-    end: { line: number; character: number };
-  };
-  text?: string;
-}
-
-/**
- * Standard response
- */
-export interface StandardResponse {
-  status: string;
-  result?: any;
-  message?: string;
-}

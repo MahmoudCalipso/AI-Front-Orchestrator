@@ -59,9 +59,11 @@ export class CollaborationService extends BaseWebSocketService {
   private joinSession(): void {
     this.send({
       type: 'join',
-      user_id: this.userId,
-      username: this.username,
-      timestamp: new Date().toISOString()
+      payload: {
+        user_id: this.userId,
+        username: this.username
+      },
+      timestamp: Date.now()
     });
   }
 
@@ -71,9 +73,11 @@ export class CollaborationService extends BaseWebSocketService {
   leaveSession(): void {
     this.send({
       type: 'leave',
-      user_id: this.userId,
-      username: this.username,
-      timestamp: new Date().toISOString()
+      payload: {
+        user_id: this.userId,
+        username: this.username
+      },
+      timestamp: Date.now()
     });
     this.disconnect();
   }
@@ -84,10 +88,12 @@ export class CollaborationService extends BaseWebSocketService {
   sendEdit(operation: EditOperation): void {
     this.send({
       type: 'edit',
-      user_id: this.userId,
-      username: this.username,
-      data: operation,
-      timestamp: new Date().toISOString()
+      payload: {
+        user_id: this.userId,
+        username: this.username,
+        ...operation
+      },
+      timestamp: Date.now()
     });
   }
 
@@ -97,10 +103,14 @@ export class CollaborationService extends BaseWebSocketService {
   updateCursor(file: string, line: number, column: number): void {
     this.send({
       type: 'cursor',
-      user_id: this.userId,
-      username: this.username,
-      data: { file, line, column },
-      timestamp: new Date().toISOString()
+      payload: {
+        user_id: this.userId,
+        username: this.username,
+        file,
+        line,
+        column
+      },
+      timestamp: Date.now()
     });
   }
 
@@ -110,10 +120,14 @@ export class CollaborationService extends BaseWebSocketService {
   updateSelection(file: string, start: any, end: any): void {
     this.send({
       type: 'selection',
-      user_id: this.userId,
-      username: this.username,
-      data: { file, start, end },
-      timestamp: new Date().toISOString()
+      payload: {
+        user_id: this.userId,
+        username: this.username,
+        file,
+        start,
+        end
+      },
+      timestamp: Date.now()
     });
   }
 
@@ -126,16 +140,14 @@ export class CollaborationService extends BaseWebSocketService {
       user_id: this.userId,
       username: this.username,
       content,
-      timestamp: new Date().toISOString(),
+      timestamp: Date.now(),
       reply_to: replyTo
     };
 
     this.send({
       type: 'chat',
-      user_id: this.userId,
-      username: this.username,
-      data: chatMessage,
-      timestamp: new Date().toISOString()
+      payload: chatMessage,
+      timestamp: Date.now()
     });
   }
 
@@ -150,10 +162,12 @@ export class CollaborationService extends BaseWebSocketService {
 
     this.send({
       type: 'sync',
-      user_id: this.userId,
-      username: this.username,
-      data: syncRequest,
-      timestamp: new Date().toISOString()
+      payload: {
+        user_id: this.userId,
+        username: this.username,
+        ...syncRequest
+      },
+      timestamp: Date.now()
     });
   }
 

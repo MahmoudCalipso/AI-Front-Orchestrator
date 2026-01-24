@@ -1,0 +1,222 @@
+<div class="user-profile-container">
+    <div class="profile-header">
+        <h1>
+            <mat-icon>person</mat-icon>
+            User Profile
+        </h1>
+        <p class="subtitle">Manage your account settings and preferences</p>
+    </div>
+
+    <div class="profile-content">
+        <!-- Profile Card -->
+        <app-card [hoverable]="false" customClass="profile-main-card">
+            <div class="profile-avatar-section">
+                <div class="avatar-container">
+                    <img [src]="user?.avatar_url || '/assets/default-avatar.png'" alt="Profile Avatar" class="avatar">
+                    <button mat-mini-fab color="primary" class="avatar-edit-btn" (click)="uploadAvatar()">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                </div>
+                <div class="profile-info">
+                    <h2>{{ user?.username }}</h2>
+                    <p class="email">{{ user?.email }}</p>
+                    <span class="role-badge" [class]="'role-' + user?.role">{{ user?.role }}</span>
+                </div>
+            </div>
+        </app-card>
+
+        <!-- Profile Details Form -->
+        <app-card customClass="profile-details-card">
+            <h3>
+                <mat-icon>info</mat-icon>
+                Profile Information
+            </h3>
+
+            <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+                <div class="form-grid">
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Username</mat-label>
+                        <input matInput formControlName="username" placeholder="Enter username">
+                        <mat-icon matPrefix>person</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Email</mat-label>
+                        <input matInput formControlName="email" type="email" placeholder="Enter email">
+                        <mat-icon matPrefix>email</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Bio</mat-label>
+                        <textarea matInput formControlName="bio" rows="4"
+                            placeholder="Tell us about yourself"></textarea>
+                        <mat-icon matPrefix>description</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Organization</mat-label>
+                        <input matInput formControlName="organization" placeholder="Company or organization">
+                        <mat-icon matPrefix>business</mat-icon>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-actions">
+                    <app-button variant="secondary" (clicked)="resetForm()">Cancel</app-button>
+                    <app-button variant="primary" type="submit" [disabled]="profileForm.invalid || saving"
+                        [loading]="saving">
+                        Save Changes
+                    </app-button>
+                </div>
+            </form>
+        </app-card>
+
+        <!-- Preferences Card -->
+        <app-card customClass="preferences-card">
+            <h3>
+                <mat-icon>settings</mat-icon>
+                Preferences
+            </h3>
+
+            <form [formGroup]="preferencesForm">
+                <div class="preference-item">
+                    <div class="preference-label">
+                        <mat-icon>palette</mat-icon>
+                        <span>Theme</span>
+                    </div>
+                    <mat-button-toggle-group formControlName="theme" class="theme-toggle">
+                        <mat-button-toggle value="dark">Dark</mat-button-toggle>
+                        <mat-button-toggle value="light">Light</mat-button-toggle>
+                        <mat-button-toggle value="auto">Auto</mat-button-toggle>
+                    </mat-button-toggle-group>
+                </div>
+
+                <div class="preference-item">
+                    <div class="preference-label">
+                        <mat-icon>language</mat-icon>
+                        <span>Language</span>
+                    </div>
+                    <mat-form-field appearance="outline">
+                        <mat-select formControlName="language">
+                            <mat-option value="en">English</mat-option>
+                            <mat-option value="fr">Français</mat-option>
+                            <mat-option value="es">Español</mat-option>
+                            <mat-option value="de">Deutsch</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <div class="preference-item">
+                    <div class="preference-label">
+                        <mat-icon>notifications</mat-icon>
+                        <span>Notifications</span>
+                    </div>
+                    <div class="checkbox-group">
+                        <mat-checkbox formControlName="notifications_enabled">Enable notifications</mat-checkbox>
+                        <mat-checkbox formControlName="email_notifications">Email notifications</mat-checkbox>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <app-button variant="primary" (clicked)="savePreferences()" [loading]="savingPreferences">
+                        Save Preferences
+                    </app-button>
+                </div>
+            </form>
+        </app-card>
+
+        <!-- Security Card -->
+        <app-card customClass="security-card">
+            <h3>
+                <mat-icon>security</mat-icon>
+                Security
+            </h3>
+
+            <div class="security-section">
+                <div class="security-item">
+                    <div class="security-info">
+                        <h4>Password</h4>
+                        <p>Last changed: {{ user?.password_changed_at || 'Never' }}</p>
+                    </div>
+                    <app-button variant="secondary" (clicked)="changePassword()">
+                        Change Password
+                    </app-button>
+                </div>
+
+                <div class="security-item">
+                    <div class="security-info">
+                        <h4>Two-Factor Authentication</h4>
+                        <p>{{ user?.two_factor_enabled ? 'Enabled' : 'Not enabled' }}</p>
+                    </div>
+                    <app-button [variant]="user?.two_factor_enabled ? 'danger' : 'primary'" (clicked)="toggle2FA()">
+                        {{ user?.two_factor_enabled ? 'Disable' : 'Enable' }}
+                    </app-button>
+                </div>
+
+                <div class="security-item">
+                    <div class="security-info">
+                        <h4>API Keys</h4>
+                        <p>Manage your API access keys</p>
+                    </div>
+                    <app-button variant="secondary" (clicked)="manageAPIKeys()">
+                        Manage Keys
+                    </app-button>
+                </div>
+            </div>
+        </app-card>
+
+        <!-- Activity Card -->
+        <app-card customClass="activity-card">
+            <h3>
+                <mat-icon>history</mat-icon>
+                Recent Activity
+            </h3>
+
+            <div class="activity-list">
+                @for (activity of recentActivity; track activity.id) {
+                <div class="activity-item">
+                    <div class="activity-icon" [class]="'activity-' + activity.type">
+                        <mat-icon>{{ getActivityIcon(activity.type) }}</mat-icon>
+                    </div>
+                    <div class="activity-details">
+                        <p class="activity-description">{{ activity.description }}</p>
+                        <span class="activity-time">{{ formatTime(activity.timestamp) }}</span>
+                    </div>
+                </div>
+                }
+                @if (recentActivity.length === 0) {
+                <div class="empty-state">
+                    <mat-icon>inbox</mat-icon>
+                    <p>No recent activity</p>
+                </div>
+                }
+            </div>
+        </app-card>
+    </div>
+</div>
+
+<!-- Password Change Modal -->
+<app-modal [isOpen]="showPasswordModal" title="Change Password" (closed)="showPasswordModal = false">
+    <form [formGroup]="passwordForm" (ngSubmit)="submitPasswordChange()">
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Current Password</mat-label>
+            <input matInput type="password" formControlName="currentPassword">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>New Password</mat-label>
+            <input matInput type="password" formControlName="newPassword">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Confirm New Password</mat-label>
+            <input matInput type="password" formControlName="confirmPassword">
+        </mat-form-field>
+
+        <div footer>
+            <app-button variant="secondary" (clicked)="showPasswordModal = false">Cancel</app-button>
+            <app-button variant="primary" type="submit" [disabled]="passwordForm.invalid" [loading]="changingPassword">
+                Change Password
+            </app-button>
+        </div>
+    </form>
+</app-modal>

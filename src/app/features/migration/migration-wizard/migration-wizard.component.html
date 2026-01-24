@@ -33,7 +33,7 @@
                             <mat-label>Source Language</mat-label>
                             <mat-select formControlName="sourceLanguage"
                                 (selectionChange)="onSourceLanguageChange($event.value)">
-                                @for (lang of frameworks; track lang.name) {
+                                @for (lang of frameworks(); track lang.name) {
                                 <mat-option [value]="lang.name">
                                     {{ lang.display_name }}
                                 </mat-option>
@@ -42,11 +42,11 @@
                             <mat-icon matPrefix>code</mat-icon>
                         </mat-form-field>
 
-                        @if (sourceFrameworks.length > 0) {
+                        @if (sourceFrameworks().length > 0) {
                         <mat-form-field appearance="outline" class="full-width">
                             <mat-label>Source Framework</mat-label>
                             <mat-select formControlName="sourceFramework">
-                                @for (fw of sourceFrameworks; track fw.name) {
+                                @for (fw of sourceFrameworks(); track fw.name) {
                                 <mat-option [value]="fw.name">
                                     {{ fw.name }} v{{ fw.version }}
                                 </mat-option>
@@ -80,7 +80,7 @@
                             <mat-label>Target Language</mat-label>
                             <mat-select formControlName="targetLanguage"
                                 (selectionChange)="onTargetLanguageChange($event.value)">
-                                @for (lang of frameworks; track lang.name) {
+                                @for (lang of frameworks(); track lang.name) {
                                 <mat-option [value]="lang.name">
                                     {{ lang.display_name }}
                                 </mat-option>
@@ -89,12 +89,12 @@
                             <mat-icon matPrefix>code</mat-icon>
                         </mat-form-field>
 
-                        @if (targetFrameworks.length > 0) {
+                        @if (targetFrameworks().length > 0) {
                         <mat-form-field appearance="outline" class="full-width">
                             <mat-label>Target Framework</mat-label>
                             <mat-select formControlName="targetFramework"
                                 (selectionChange)="onTargetFrameworkChange($event.value)">
-                                @for (fw of targetFrameworks; track fw.name) {
+                                @for (fw of targetFrameworks(); track fw.name) {
                                 <mat-option [value]="fw.name">
                                     {{ fw.name }} v{{ fw.version }}
                                 </mat-option>
@@ -173,7 +173,7 @@
                 <ng-template matStepLabel>Migrate</ng-template>
 
                 <div class="step-content">
-                    @if (!migrating && !migrationResult) {
+                    @if (!migrating() && !migrationResult()) {
                     <div>
                         <h2>Ready to Migrate</h2>
                         <p class="step-description">Review and start migration.</p>
@@ -204,30 +204,30 @@
                     </div>
                     }
 
-                    @if (migrating) {
+                    @if (migrating()) {
                     <div class="migration-progress animate-fadeIn">
                         <mat-icon class="progress-icon">sync</mat-icon>
                         <h2>Migrating Your Project...</h2>
                         <p>This may take several minutes depending on project size.</p>
-                        <mat-progress-bar mode="determinate" [value]="migrationProgress"></mat-progress-bar>
-                        <p class="progress-text">{{ migrationProgress }}% Complete</p>
+                        <mat-progress-bar mode="determinate" [value]="migrationProgress()"></mat-progress-bar>
+                        <p class="progress-text">{{ migrationProgress() }}% Complete</p>
                     </div>
                     }
 
-                    @if (migrationResult) {
+                    @if (migrationResult()) {
                     <div class="migration-results animate-fadeIn">
                         <div class="results-header">
                             <mat-icon class="success-icon">check_circle</mat-icon>
                             <h2>Migration Complete!</h2>
-                            <p>{{ migrationResult.files_migrated || 0 }} files migrated successfully</p>
+                            <p>{{ migrationResult().files_migrated || 0 }} files migrated successfully</p>
                         </div>
 
                         <div class="diff-viewer">
                             <div class="file-list">
                                 <h3>Migrated Files</h3>
                                 <div class="file-list-items">
-                                    @for (file of migrationResult.migrated_files; track file.path) {
-                                    <div class="file-item" [class.selected]="selectedFile === file"
+                                    @for (file of migrationResult().migrated_files; track file.path) {
+                                    <div class="file-item" [class.selected]="selectedFile() === file"
                                         (click)="selectFile(file)">
                                         <mat-icon>description</mat-icon>
                                         <span class="file-path">{{ file.path }}</span>
@@ -237,18 +237,18 @@
                                 </div>
                             </div>
 
-                            @if (selectedFile) {
+                            @if (selectedFile()) {
                             <div class="code-diff">
                                 <mat-tab-group>
                                     <mat-tab label="Original">
                                         <div class="code-container">
-                                            <div appHighlight [code]="selectedFile.originalCode"
+                                            <div appHighlight [code]="selectedFile()!.originalCode"
                                                 [language]="sourceForm.value.sourceLanguage || 'typescript'"></div>
                                         </div>
                                     </mat-tab>
                                     <mat-tab label="Migrated">
                                         <div class="code-container">
-                                            <div appHighlight [code]="selectedFile.migratedCode"
+                                            <div appHighlight [code]="selectedFile()!.migratedCode"
                                                 [language]="targetForm.value.targetLanguage || 'typescript'"></div>
                                         </div>
                                     </mat-tab>
@@ -256,12 +256,14 @@
                                         <div class="code-comparison">
                                             <div class="code-column">
                                                 <h4>Original</h4>
-                                                <div class="code-block" appHighlight [code]="selectedFile.originalCode"
+                                                <div class="code-block" appHighlight
+                                                    [code]="selectedFile()!.originalCode"
                                                     [language]="sourceForm.value.sourceLanguage || 'typescript'"></div>
                                             </div>
                                             <div class="code-column">
                                                 <h4>Migrated (Angular 18+)</h4>
-                                                <div class="code-block" appHighlight [code]="selectedFile.migratedCode"
+                                                <div class="code-block" appHighlight
+                                                    [code]="selectedFile()!.migratedCode"
                                                     [language]="targetForm.value.targetLanguage || 'typescript'"></div>
                                             </div>
                                         </div>
@@ -286,7 +288,7 @@
                 </div>
 
                 <div class="step-actions">
-                    @if (!migrating && !migrationResult) {
+                    @if (!migrating() && !migrationResult()) {
                     <button mat-button matStepperPrevious>
                         <mat-icon>arrow_back</mat-icon>
                         Back
@@ -298,6 +300,6 @@
     </mat-card>
 </div>
 
-@if (loading) {
+@if (loading()) {
 <app-loading-spinner [fullscreen]="true" message="Loading frameworks..."></app-loading-spinner>
 }

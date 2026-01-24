@@ -83,4 +83,14 @@ export class StorageService extends BaseApiService {
   restoreProject(request: RestoreRequest): Observable<RestoreResponse> {
     return this.post<RestoreResponse>('/api/storage/restore', request);
   }
+
+  /**
+   * Download project as ZIP
+   * GET /api/storage/projects/{project_id}/download
+   */
+  downloadProject(projectId: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/api/storage/projects/${projectId}/download`, {
+      responseType: 'blob'
+    });
+  }
 }

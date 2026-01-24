@@ -64,14 +64,14 @@ export class AuthService extends BaseApiService {
    * Refresh access token
    * POST /auth/refresh
    */
-  refreshToken(): Observable<TokenResponse> {
-    const refreshToken = this.getRefreshToken();
-    if (!refreshToken) {
+  refreshToken(request?: RefreshTokenRequest): Observable<TokenResponse> {
+    const token = request?.refresh_token || this.getRefreshToken();
+    if (!token) {
       return of({} as TokenResponse);
     }
 
-    const request: RefreshTokenRequest = { refresh_token: refreshToken };
-    return this.post<TokenResponse>('/auth/refresh', request).pipe(
+    const payload: RefreshTokenRequest = { refresh_token: token };
+    return this.post<TokenResponse>('/auth/refresh', payload).pipe(
       tap(response => this.handleAuthSuccess(response)),
       catchError(error => {
         this.handleLogout();
@@ -163,6 +163,30 @@ export class AuthService extends BaseApiService {
    */
   listApiKeys(): Observable<ApiKey[]> {
     return this.get<ApiKey[]>('/auth/api-keys');
+  }
+
+  /**
+   * List all users (admin only)
+   * GET /auth/users
+   */
+  listUsers(): Observable<UserInfo[]> {
+    return this.get<UserInfo[]>('/auth/users');
+  }
+
+  /**
+   * Update user details
+   * PATCH /auth/users/{user_id}
+   */
+  updateUser(userId: string, data: Partial<UserInfo>): Observable<UserInfo> {
+    return this.patch<UserInfo>(`/auth/users/${userId}`, data);
+  }
+
+  /**
+   * Delete user (admin only)
+   * DELETE /auth/users/{user_id}
+   */
+  deleteUser(userId: string): Observable<{ message: string }> {
+    return this.delete<{ message: string }>(`/auth/users/${userId}`);
   }
 
   /**

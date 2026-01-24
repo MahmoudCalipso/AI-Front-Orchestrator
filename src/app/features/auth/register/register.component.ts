@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -13,6 +13,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 
 @Component({
     selector: 'app-register',
+    standalone: true,
     imports: [
         CommonModule,
         ReactiveFormsModule,
@@ -34,9 +35,9 @@ export class RegisterComponent {
     private toast = inject(ToastService);
 
     registerForm: FormGroup;
-    loading = false;
-    hidePassword = true;
-    hideConfirmPassword = true;
+    loading = signal(false);
+    hidePassword = signal(true);
+    hideConfirmPassword = signal(true);
 
     constructor() {
         this.registerForm = this.fb.group({
@@ -50,90 +51,61 @@ export class RegisterComponent {
     passwordStrengthValidator(control: AbstractControl): ValidationErrors | null {
         const value = control.value;
         if (!value) return null;
-
         const hasUpperCase = /[A-Z]/.test(value);
         const hasLowerCase = /[a-z]/.test(value);
         const hasNumeric = /[0-9]/.test(value);
         const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(value);
-
-        const passwordValid = hasUpperCase && hasLowerCase && hasNumeric && hasSpecial;
-
-        return !passwordValid ? { passwordStrength: true } : null;
+        return !(hasUpperCase && hasLowerCase && hasNumeric && hasSpecial) ? { passwordStrength: true } : null;
     }
 
     passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
         const password = control.get('password');
         const confirmPassword = control.get('confirmPassword');
-
         if (!password || !confirmPassword) return null;
-
         return password.value === confirmPassword.value ? null : { passwordMismatch: true };
     }
 
     onSubmit(): void {
         if (this.registerForm.valid) {
-            this.loading = true;
+            this.loading.set(true);
             const { username, email, password } = this.registerForm.value;
-
-            this.authService.register({ username, email, password }).subscribe({
-                next: (response) => {
+            this.authService.register({
+                username, email, password,
+                full_name: username,
+                tenant_name: `${username}-tenant`
+            }).subscribe({
+                next: () => {
                     this.toast.success('Registration successful! Please log in.');
                     this.router.navigate(['/login']);
+                    this.loading.set(false);
                 },
                 error: (error) => {
-                    this.loading = false;
-                    this.toast.error(error.message || 'Registration failed. Please try again.');
-                },
-                complete: () => {
-                    this.loading = false;
+                    this.loading.set(false);
+                    this.toast.error(error.message || 'Registration failed');
                 }
             });
-        } else {
-            this.markFormGroupTouched(this.registerForm);
         }
-    }
-
-    private markFormGroupTouched(formGroup: FormGroup): void {
-        Object.keys(formGroup.controls).forEach(key => {
-            const control = formGroup.get(key);
-            control?.markAsTouched();
-        });
     }
 
     getErrorMessage(field: string): string {
         const control = this.registerForm.get(field);
-        if (control?.hasError('required')) {
-            return `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
-        }
-        if (control?.hasError('email')) {
-            return 'Please enter a valid email';
-        }
-        if (control?.hasError('minlength')) {
-            const minLength = control.getError('minlength').requiredLength;
-            return `Must be at least ${minLength} characters`;
-        }
-        if (control?.hasError('passwordStrength')) {
-            return 'Password must contain uppercase, lowercase, number, and special character';
-        }
-        if (field === 'confirmPassword' && this.registerForm.hasError('passwordMismatch')) {
-            return 'Passwords do not match';
-        }
+        if (control?.hasError('required')) return 'Required';
+        if (control?.hasError('email')) return 'Invalid email';
+        if (control?.hasError('minlength')) return `Min ${control.getError('minlength').requiredLength} chars`;
+        if (control?.hasError('passwordStrength')) return 'Weak password';
+        if (field === 'confirmPassword' && this.registerForm.hasError('passwordMismatch')) return 'Passwords mismatch';
         return '';
     }
 
     getPasswordStrength(): string {
         const password = this.registerForm.get('password')?.value;
         if (!password) return '';
-
         let strength = 0;
         if (password.length >= 8) strength++;
         if (/[A-Z]/.test(password)) strength++;
         if (/[a-z]/.test(password)) strength++;
         if (/[0-9]/.test(password)) strength++;
         if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength++;
-
-        if (strength <= 2) return 'weak';
-        if (strength <= 4) return 'medium';
-        return 'strong';
+        return strength <= 2 ? 'weak' : strength <= 4 ? 'medium' : 'strong';
     }
 }

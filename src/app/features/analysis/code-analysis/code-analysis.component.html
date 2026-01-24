@@ -23,8 +23,8 @@
     <div class="metrics-grid">
         <mat-card class="metric-card">
             <mat-card-content>
-                <div class="metric-circle" [style.--progress]="qualityMetrics.codeQuality">
-                    <span class="metric-value">{{ qualityMetrics.codeQuality }}%</span>
+                <div class="metric-circle" [style.--progress]="qualityMetrics().codeQuality">
+                    <span class="metric-value">{{ qualityMetrics().codeQuality }}%</span>
                 </div>
                 <h3>Code Quality</h3>
             </mat-card-content>
@@ -32,8 +32,8 @@
 
         <mat-card class="metric-card">
             <mat-card-content>
-                <div class="metric-circle" [style.--progress]="qualityMetrics.maintainability">
-                    <span class="metric-value">{{ qualityMetrics.maintainability }}%</span>
+                <div class="metric-circle" [style.--progress]="qualityMetrics().maintainability">
+                    <span class="metric-value">{{ qualityMetrics().maintainability }}%</span>
                 </div>
                 <h3>Maintainability</h3>
             </mat-card-content>
@@ -41,8 +41,8 @@
 
         <mat-card class="metric-card">
             <mat-card-content>
-                <div class="metric-circle" [style.--progress]="qualityMetrics.testCoverage">
-                    <span class="metric-value">{{ qualityMetrics.testCoverage }}%</span>
+                <div class="metric-circle" [style.--progress]="qualityMetrics().testCoverage">
+                    <span class="metric-value">{{ qualityMetrics().testCoverage }}%</span>
                 </div>
                 <h3>Test Coverage</h3>
             </mat-card-content>
@@ -50,8 +50,8 @@
 
         <mat-card class="metric-card">
             <mat-card-content>
-                <div class="metric-circle" [style.--progress]="qualityMetrics.documentation">
-                    <span class="metric-value">{{ qualityMetrics.documentation }}%</span>
+                <div class="metric-circle" [style.--progress]="qualityMetrics().documentation">
+                    <span class="metric-value">{{ qualityMetrics().documentation }}%</span>
                 </div>
                 <h3>Documentation</h3>
             </mat-card-content>
@@ -64,9 +64,9 @@
             <!-- Issues Tab -->
             <mat-tab label="Issues">
                 <div class="tab-content">
-                    @if (analysisResult) {
+                    @if (analysisResult()) {
                     <div class="issues-list">
-                        @for (issue of analysisResult.issues; track issue.message) {
+                        @for (issue of analysisResult().issues; track issue.message) {
                         <div class="issue-item">
                             <div class="issue-severity" [class]="'severity-' + issue.severity">
                                 <mat-icon>{{ issue.severity === 'high' ? 'error' : issue.severity === 'medium' ?
@@ -89,21 +89,21 @@
             <!-- Complexity Tab -->
             <mat-tab label="Complexity">
                 <div class="tab-content">
-                    @if (analysisResult) {
+                    @if (analysisResult()) {
                     <div class="complexity-section">
                         <div class="complexity-stats">
                             <div class="stat-box">
-                                <h3>{{ analysisResult.complexity.average }}</h3>
+                                <h3>{{ analysisResult().complexity.average }}</h3>
                                 <p>Average Complexity</p>
                             </div>
                             <div class="stat-box">
-                                <h3>{{ analysisResult.complexity.highest }}</h3>
+                                <h3>{{ analysisResult().complexity.highest }}</h3>
                                 <p>Highest Complexity</p>
                             </div>
                         </div>
                         <div class="complexity-files">
                             <h3>Most Complex Files</h3>
-                            @for (file of analysisResult.complexity.files; track file.name) {
+                            @for (file of analysisResult().complexity.files; track file.name) {
                             <div class="complexity-file">
                                 <span class="file-name">{{ file.name }}</span>
                                 <div class="complexity-bar">
@@ -121,18 +121,18 @@
             <!-- Security Tab -->
             <mat-tab label="Security">
                 <div class="tab-content">
-                    @if (securityScan) {
+                    @if (securityScan()) {
                     <div class="security-section">
                         <div class="security-score">
                             <div class="score-circle">
-                                <span class="score-value">{{ securityScan.score }}</span>
+                                <span class="score-value">{{ securityScan().score }}</span>
                                 <span class="score-label">/100</span>
                             </div>
                             <h3>Security Score</h3>
                         </div>
                         <div class="vulnerabilities-list">
                             <h3>Vulnerabilities Found</h3>
-                            @for (vuln of securityScan.vulnerabilities; track vuln.type) {
+                            @for (vuln of securityScan().vulnerabilities; track vuln.type) {
                             <div class="vulnerability-item">
                                 <span class="badge" [class]="'badge-' + (vuln.severity | statusColor)">
                                     {{ vuln.severity }}
@@ -153,6 +153,6 @@
     </mat-card>
 </div>
 
-@if (loading) {
+@if (loading()) {
 <app-loading-spinner [fullscreen]="true" message="Analyzing code..."></app-loading-spinner>
 }

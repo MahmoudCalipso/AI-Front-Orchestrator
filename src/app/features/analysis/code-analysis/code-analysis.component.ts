@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,6 +12,7 @@ import { StatusColorPipe } from '../../../shared/pipes/status-color.pipe';
 
 @Component({
     selector: 'app-code-analysis',
+    standalone: true,
     imports: [
         CommonModule,
         MatCardModule,
@@ -29,24 +30,29 @@ export class CodeAnalysisComponent implements OnInit {
     private securityService = inject(SecurityService);
     private toast = inject(ToastService);
 
-    loading = false;
-    analysisResult: any = null;
-    securityScan: any = null;
+    loading = signal(false);
+    analysisResult = signal<any>(null);
+    securityScan = signal<any>(null);
 
-    qualityMetrics = {
+    qualityMetrics = signal({
         codeQuality: 85,
         maintainability: 78,
         testCoverage: 65,
         documentation: 72
-    };
+    });
+
+    isHealthy = computed(() => {
+        const metrics = this.qualityMetrics();
+        return metrics.codeQuality > 80 && metrics.maintainability > 70;
+    });
 
     ngOnInit(): void {
         this.loadMockData();
     }
 
     loadMockData(): void {
-        // Mock analysis data
-        this.analysisResult = {
+        // Mock analysis data using Signals
+        this.analysisResult.set({
             issues: [
                 { severity: 'high', type: 'Performance', message: 'Inefficient database query in UserService', file: 'user.service.ts', line: 45 },
                 { severity: 'medium', type: 'Code Smell', message: 'Long method detected', file: 'auth.controller.ts', line: 123 },
@@ -61,34 +67,34 @@ export class CodeAnalysisComponent implements OnInit {
                     { name: 'payment.service.ts', complexity: 7 }
                 ]
             }
-        };
+        });
 
-        this.securityScan = {
+        this.securityScan.set({
             vulnerabilities: [
                 { severity: 'critical', type: 'SQL Injection', description: 'Unsanitized user input', location: 'database.ts:56' },
                 { severity: 'high', type: 'XSS', description: 'Unescaped output', location: 'template.html:23' }
             ],
             score: 72
-        };
+        });
     }
 
     runAnalysis(): void {
-        this.loading = true;
+        this.loading.set(true);
         this.toast.info('Analysis started...');
 
         setTimeout(() => {
-            this.loading = false;
+            this.loading.set(false);
             this.toast.success('Analysis completed');
             this.loadMockData();
         }, 2000);
     }
 
     runSecurityScan(): void {
-        this.loading = true;
+        this.loading.set(true);
         this.toast.info('Security scan started...');
 
         setTimeout(() => {
-            this.loading = false;
+            this.loading.set(false);
             this.toast.success('Security scan completed');
         }, 2000);
     }

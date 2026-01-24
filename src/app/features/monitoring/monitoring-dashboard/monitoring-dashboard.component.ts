@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,6 +12,7 @@ declare const Chart: any;
 
 @Component({
   selector: 'app-monitoring-dashboard',
+  standalone: true,
   imports: [
     CommonModule,
     MatCardModule,
@@ -37,12 +38,12 @@ export class MonitoringDashboardComponent implements OnInit, AfterViewInit, OnDe
   requestsChart: any;
   responseTimeChart: any;
 
-  loading = false;
-  currentMetrics: any = null;
-  buildHistory: any[] = [];
+  loading = signal(false);
+  currentMetrics = signal<any>(null);
+  buildHistory = signal<any[]>([]);
   updateInterval: any;
 
-  timeRange = '1h';
+  timeRange = signal('1h');
 
   ngOnInit(): void {
     this.loadChartJS();
@@ -83,33 +84,13 @@ export class MonitoringDashboardComponent implements OnInit, AfterViewInit, OnDe
     const chartOptions = {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: false
-        }
-      },
+      plugins: { legend: { display: false } },
       scales: {
-        y: {
-          beginAtZero: true,
-          grid: {
-            color: 'rgba(255, 255, 255, 0.1)'
-          },
-          ticks: {
-            color: '#9ca3af'
-          }
-        },
-        x: {
-          grid: {
-            color: 'rgba(255, 255, 255, 0.1)'
-          },
-          ticks: {
-            color: '#9ca3af'
-          }
-        }
+        y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#9ca3af' } },
+        x: { grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#9ca3af' } }
       }
     };
 
-    // CPU Chart
     if (this.cpuChartRef) {
       this.cpuChart = new Chart(this.cpuChartRef.nativeElement, {
         type: 'line',
@@ -128,7 +109,6 @@ export class MonitoringDashboardComponent implements OnInit, AfterViewInit, OnDe
       });
     }
 
-    // Memory Chart
     if (this.memoryChartRef) {
       this.memoryChart = new Chart(this.memoryChartRef.nativeElement, {
         type: 'line',
@@ -147,7 +127,6 @@ export class MonitoringDashboardComponent implements OnInit, AfterViewInit, OnDe
       });
     }
 
-    // Requests Chart
     if (this.requestsChartRef) {
       this.requestsChart = new Chart(this.requestsChartRef.nativeElement, {
         type: 'bar',
@@ -163,7 +142,6 @@ export class MonitoringDashboardComponent implements OnInit, AfterViewInit, OnDe
       });
     }
 
-    // Response Time Chart
     if (this.responseTimeChartRef) {
       this.responseTimeChart = new Chart(this.responseTimeChartRef.nativeElement, {
         type: 'line',
@@ -192,25 +170,15 @@ export class MonitoringDashboardComponent implements OnInit, AfterViewInit, OnDe
 
   loadCurrentMetrics(): void {
     this.monitoringService.getCurrentMetrics().subscribe({
-      next: (metrics) => {
-        this.currentMetrics = metrics;
-      },
-      error: (error) => {
-        console.error('Failed to load metrics from API:', error);
-        this.currentMetrics = null;
-      }
+      next: (metrics) => this.currentMetrics.set(metrics),
+      error: () => this.currentMetrics.set(null)
     });
   }
 
   loadBuildHistory(): void {
     this.monitoringService.getBuildHistory(10).subscribe({
-      next: (history: any[]) => {
-        this.buildHistory = history;
-      },
-      error: (error: any) => {
-        console.error('Failed to load build history from API:', error);
-        this.buildHistory = [];
-      }
+      next: (history: any[]) => this.buildHistory.set(history),
+      error: () => this.buildHistory.set([])
     });
   }
 
@@ -224,41 +192,25 @@ export class MonitoringDashboardComponent implements OnInit, AfterViewInit, OnDe
   updateCharts(): void {
     if (!this.cpuChart) return;
 
-    // Update CPU Chart
-    this.cpuChart.data.labels.push(new Date().toLocaleTimeString());
-    this.cpuChart.data.labels.shift();
-    this.cpuChart.data.datasets[0].data.push(Math.random() * 100);
-    this.cpuChart.data.datasets[0].data.shift();
-    this.cpuChart.update();
+    this.updateChart(this.cpuChart, Math.random() * 100);
+    this.updateChart(this.memoryChart, Math.random() * 100);
+    this.updateChart(this.requestsChart, Math.random() * 1000);
+    this.updateChart(this.responseTimeChart, Math.random() * 500);
+  }
 
-    // Update Memory Chart
-    this.memoryChart.data.labels.push(new Date().toLocaleTimeString());
-    this.memoryChart.data.labels.shift();
-    this.memoryChart.data.datasets[0].data.push(Math.random() * 100);
-    this.memoryChart.data.datasets[0].data.shift();
-    this.memoryChart.update();
-
-    // Update Requests Chart
-    this.requestsChart.data.labels.push(new Date().toLocaleTimeString());
-    this.requestsChart.data.labels.shift();
-    this.requestsChart.data.datasets[0].data.push(Math.random() * 1000);
-    this.requestsChart.data.datasets[0].data.shift();
-    this.requestsChart.update();
-
-    // Update Response Time Chart
-    this.responseTimeChart.data.labels.push(new Date().toLocaleTimeString());
-    this.responseTimeChart.data.labels.shift();
-    this.responseTimeChart.data.datasets[0].data.push(Math.random() * 500);
-    this.responseTimeChart.data.datasets[0].data.shift();
-    this.responseTimeChart.update();
+  private updateChart(chart: any, newValue: number): void {
+    chart.data.labels.push(new Date().toLocaleTimeString());
+    chart.data.labels.shift();
+    chart.data.datasets[0].data.push(newValue);
+    chart.data.datasets[0].data.shift();
+    chart.update();
   }
 
   generateTimeLabels(): string[] {
     const labels = [];
     const now = new Date();
     for (let i = 19; i >= 0; i--) {
-      const time = new Date(now.getTime() - i * 60000);
-      labels.push(time.toLocaleTimeString());
+      labels.push(new Date(now.getTime() - i * 60000).toLocaleTimeString());
     }
     return labels;
   }
@@ -268,18 +220,13 @@ export class MonitoringDashboardComponent implements OnInit, AfterViewInit, OnDe
   }
 
   onTimeRangeChange(range: string): void {
-    this.timeRange = range;
-    // Reload data for new time range
+    this.timeRange.set(range);
     this.destroyCharts();
     setTimeout(() => this.initializeCharts(), 100);
   }
 
   getStatusColor(status: string): string {
-    const colors: { [key: string]: string } = {
-      'success': 'success',
-      'failed': 'error',
-      'running': 'warning'
-    };
+    const colors: Record<string, string> = { 'success': 'success', 'failed': 'error', 'running': 'warning' };
     return colors[status] || 'info';
   }
 }

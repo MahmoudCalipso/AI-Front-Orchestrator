@@ -155,8 +155,12 @@ export interface GitHistoryResponse {
  * Git diff response
  */
 export interface GitDiffResponse {
-  files: GitDiffFile[];
-  stats: {
+  path: string;
+  original_content: string;
+  modified_content: string;
+  diff: string;
+  files?: GitDiffFile[];
+  stats?: {
     additions: number;
     deletions: number;
     files_changed: number;
@@ -172,13 +176,4 @@ export interface GitDiffFile {
   additions: number;
   deletions: number;
   diff: string;
-}
-
-/**
- * Standard response
- */
-export interface StandardResponse {
-  status: string;
-  result?: any;
-  message?: string;
 }

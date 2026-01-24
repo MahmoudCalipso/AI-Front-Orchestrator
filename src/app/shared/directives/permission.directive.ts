@@ -53,11 +53,7 @@ export class PermissionDirective implements OnInit, OnDestroy {
             ? this.appPermission
             : [this.appPermission];
 
-        // Assuming user has a 'role' property. Adjust based on exact UserInfo model.
-        // If roles is an array in UserInfo:
-        return requiredRoles.some(role => this.currentUser?.roles.includes(role));
-
-        // If role is a string:
-        // return requiredRoles.includes(this.currentUser.role || '');
+        // Check if user's role matches any of the required roles
+        return requiredRoles.includes(this.currentUser.role || '');
     }
 }

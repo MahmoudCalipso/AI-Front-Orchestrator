@@ -12,15 +12,15 @@
         </div>
     </div>
 
-    @if (loading) {
+    @if (loading()) {
     <app-loading-spinner message="Loading dashboard..."></app-loading-spinner>
     }
 
-    @if (!loading) {
+    @if (!loading()) {
     <div class="dashboard-content animate-fadeIn">
         <!-- Metrics Cards -->
         <div class="metrics-grid">
-            @for (metric of metrics; track metric.title) {
+            @for (metric of metrics(); track metric.title) {
             <mat-card class="metric-card" [class]="'metric-' + metric.color">
                 <mat-card-content>
                     <div class="metric-header">
@@ -56,7 +56,7 @@
                     <button mat-button routerLink="/storage">View All</button>
                 </mat-card-header>
                 <mat-card-content>
-                    @if (recentProjects.length === 0) {
+                    @if (recentProjects().length === 0) {
                     <div class="empty-state">
                         <mat-icon>folder_open</mat-icon>
                         <p>No projects yet</p>
@@ -66,9 +66,9 @@
                     </div>
                     }
 
-                    @if (recentProjects.length > 0) {
+                    @if (recentProjects().length > 0) {
                     <div class="projects-list">
-                        @for (project of recentProjects; track project.id) {
+                        @for (project of recentProjects(); track project.id) {
                         <div class="project-item">
                             <div class="project-icon">
                                 <mat-icon>folder</mat-icon>
@@ -123,7 +123,7 @@
             </mat-card>
 
             <!-- System Health -->
-            @if (systemHealth) {
+            @if (systemHealth()) {
             <mat-card class="system-health-card">
                 <mat-card-header>
                     <mat-card-title>
@@ -136,23 +136,23 @@
                         <div class="health-item">
                             <span class="health-label">CPU Usage</span>
                             <div class="health-bar">
-                                <div class="health-fill" [style.width.%]="systemHealth.cpu_usage || 0"></div>
+                                <div class="health-fill" [style.width.%]="systemHealth().cpu_usage || 0"></div>
                             </div>
-                            <span class="health-value">{{ systemHealth.cpu_usage || 0 }}%</span>
+                            <span class="health-value">{{ systemHealth().cpu_usage || 0 }}%</span>
                         </div>
                         <div class="health-item">
                             <span class="health-label">Memory</span>
                             <div class="health-bar">
-                                <div class="health-fill" [style.width.%]="systemHealth.memory_usage || 0"></div>
+                                <div class="health-fill" [style.width.%]="systemHealth().memory_usage || 0"></div>
                             </div>
-                            <span class="health-value">{{ systemHealth.memory_usage || 0 }}%</span>
+                            <span class="health-value">{{ systemHealth().memory_usage || 0 }}%</span>
                         </div>
                         <div class="health-item">
                             <span class="health-label">Disk</span>
                             <div class="health-bar">
-                                <div class="health-fill" [style.width.%]="systemHealth.disk_usage || 0"></div>
+                                <div class="health-fill" [style.width.%]="systemHealth().disk_usage || 0"></div>
                             </div>
-                            <span class="health-value">{{ systemHealth.disk_usage || 0 }}%</span>
+                            <span class="health-value">{{ systemHealth().disk_usage || 0 }}%</span>
                         </div>
                     </div>
                 </mat-card-content>

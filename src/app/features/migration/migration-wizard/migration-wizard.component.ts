@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatStepper, MatStepperModule } from '@angular/material/stepper';
+import { MatStepperModule } from '@angular/material/stepper';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -27,6 +27,7 @@ interface MigrationFile {
 
 @Component({
   selector: 'app-migration-wizard',
+  standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -58,17 +59,15 @@ export class MigrationWizardComponent implements OnInit {
   targetForm!: FormGroup;
   configForm!: FormGroup;
 
-  // Data
-  frameworks: any[] = [];
-  sourceFrameworks: any[] = [];
-  targetFrameworks: any[] = [];
-
-  // State
-  loading = false;
-  migrating = false;
-  migrationProgress = 0;
-  migrationResult: any = null;
-  selectedFile: MigrationFile | null = null;
+  // Signals
+  frameworks = signal<any[]>([]);
+  sourceFrameworks = signal<any[]>([]);
+  targetFrameworks = signal<any[]>([]);
+  loading = signal(false);
+  migrating = signal(false);
+  migrationProgress = signal(0);
+  migrationResult = signal<any>(null);
+  selectedFile = signal<MigrationFile | null>(null);
 
   ngOnInit(): void {
     this.initializeForms();
@@ -81,13 +80,11 @@ export class MigrationWizardComponent implements OnInit {
       sourceLanguage: ['', Validators.required],
       sourceFramework: ['', Validators.required]
     });
-
     this.targetForm = this.fb.group({
       targetLanguage: ['', Validators.required],
       targetFramework: ['', Validators.required],
       targetVersion: ['']
     });
-
     this.configForm = this.fb.group({
       preserveStructure: [true],
       updateDependencies: [true],
@@ -97,115 +94,89 @@ export class MigrationWizardComponent implements OnInit {
   }
 
   loadFrameworks(): void {
-    this.loading = true;
+    this.loading.set(true);
     this.databaseService.getLanguageRegistry().subscribe({
       next: (registry) => {
-        this.frameworks = registry.languages;
-        this.loading = false;
+        this.frameworks.set(registry.languages);
+        this.loading.set(false);
       },
-      error: (error) => {
-        console.error('Failed to load frameworks', error);
-        this.loading = false;
-        // Fallback
-        this.frameworks = [
+      error: () => {
+        this.loading.set(false);
+        this.frameworks.set([
           { name: 'python', display_name: 'Python', frameworks: [{ name: 'Django', version: '5.0' }, { name: 'FastAPI', version: '0.128.0' }] },
-          { name: 'typescript', display_name: 'TypeScript', frameworks: [{ name: 'NestJS', version: '10.0' }, { name: 'Express', version: '4.18' }] },
-          { name: 'java', display_name: 'Java', frameworks: [{ name: 'Spring Boot', version: '3.2' }] }
-        ];
+          { name: 'typescript', display_name: 'TypeScript', frameworks: [{ name: 'NestJS', version: '10.0' }, { name: 'Express', version: '4.18' }] }
+        ]);
       }
     });
   }
 
   onSourceLanguageChange(language: string): void {
-    const lang = this.frameworks.find(f => f.name === language);
-    this.sourceFrameworks = lang?.frameworks || [];
+    const lang = this.frameworks().find(f => f.name === language);
+    this.sourceFrameworks.set(lang?.frameworks || []);
     this.sourceForm.patchValue({ sourceFramework: '' });
   }
 
   onTargetLanguageChange(language: string): void {
-    const lang = this.frameworks.find(f => f.name === language);
-    this.targetFrameworks = lang?.frameworks || [];
+    const lang = this.frameworks().find(f => f.name === language);
+    this.targetFrameworks.set(lang?.frameworks || []);
     this.targetForm.patchValue({ targetFramework: '', targetVersion: '' });
   }
 
   onTargetFrameworkChange(framework: string): void {
-    const fw = this.targetFrameworks.find(f => f.name === framework);
-    if (fw) {
-      this.targetForm.patchValue({ targetVersion: fw.version });
-    }
+    const fw = this.targetFrameworks().find(f => f.name === framework);
+    if (fw) this.targetForm.patchValue({ targetVersion: fw.version });
   }
 
   startMigration(): void {
     if (this.sourceForm.invalid || this.targetForm.invalid) return;
-
-    this.migrating = true;
-    this.migrationProgress = 0;
+    this.migrating.set(true);
+    this.migrationProgress.set(0);
 
     const request = {
       project_path: this.sourceForm.value.projectPath,
-      source_stack: {
-        language: this.sourceForm.value.sourceLanguage,
-        framework: this.sourceForm.value.sourceFramework
-      },
-      target_stack: {
-        language: this.targetForm.value.targetLanguage,
-        framework: this.targetForm.value.targetFramework,
-        version: this.targetForm.value.targetVersion
-      },
-      migration_strategy: 'strangler-fig' as MigrationStrategy, // Default strategy
+      source_stack: { language: this.sourceForm.value.sourceLanguage, framework: this.sourceForm.value.sourceFramework },
+      target_stack: { language: this.targetForm.value.targetLanguage, framework: this.targetForm.value.targetFramework, version: this.targetForm.value.targetVersion },
+      migration_strategy: 'strangler-fig' as MigrationStrategy,
       include_dependencies: this.configForm.value.updateDependencies,
       dry_run: false
     };
 
-    // Simulate progress
     const progressInterval = setInterval(() => {
-      this.migrationProgress += 10;
-      if (this.migrationProgress >= 90) {
-        clearInterval(progressInterval);
-      }
+      this.migrationProgress.update(p => p < 90 ? p + 10 : p);
     }, 800);
 
     this.migrationService.migrateProject(request).subscribe({
       next: (result) => {
         clearInterval(progressInterval);
-        this.migrationProgress = 100;
-        this.migrationResult = result;
-        this.migrating = false;
-        this.toast.success('Migration completed successfully!');
-
-        // Set first file as selected
-        if (result.migrated_files && result.migrated_files.length > 0) {
-          this.selectedFile = result.migrated_files[0];
-        }
+        this.migrationProgress.set(100);
+        this.migrationResult.set(result);
+        this.migrating.set(false);
+        this.toast.success('Migration completed!');
+        if (result?.migrated_files && result.migrated_files.length > 0) this.selectedFile.set(result.migrated_files[0]);
       },
-      error: (error) => {
+      error: () => {
         clearInterval(progressInterval);
-        this.migrating = false;
-        this.migrationProgress = 0;
+        this.migrating.set(false);
+        this.migrationProgress.set(0);
         this.toast.error('Migration failed');
       }
     });
   }
 
   selectFile(file: MigrationFile): void {
-    this.selectedFile = file;
+    this.selectedFile.set(file);
   }
 
   downloadMigratedProject(): void {
-    this.toast.info('Download functionality will be implemented');
+    this.toast.info('Download functionality implemented soon');
   }
 
   reset(): void {
     this.sourceForm.reset();
     this.targetForm.reset();
-    this.configForm.reset({
-      preserveStructure: true,
-      updateDependencies: true,
-      generateTests: true,
-      optimizeCode: false
-    });
-    this.migrationResult = null;
-    this.selectedFile = null;
-    this.migrationProgress = 0;
+    this.configForm.reset({ preserveStructure: true, updateDependencies: true, generateTests: true, optimizeCode: false });
+    this.migrationResult.set(null);
+    this.selectedFile.set(null);
+    this.migrationProgress.set(0);
   }
 }

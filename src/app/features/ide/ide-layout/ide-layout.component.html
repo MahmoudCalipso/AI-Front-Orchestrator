@@ -29,6 +29,9 @@
             matTooltip="Toggle Kubernetes Explorer">
             <mat-icon>cloud</mat-icon>
         </button>
+        <button mat-icon-button (click)="toggleSearch()" [class.accent-color]="isSearchOpen" matTooltip="Toggle Search">
+            <mat-icon>search</mat-icon>
+        </button>
         <button mat-icon-button (click)="toggleChat()" [class.accent-color]="isChatOpen" matTooltip="Toggle AI Chat">
             <mat-icon>chat</mat-icon>
         </button>
@@ -75,6 +78,12 @@
             <app-k8s-window></app-k8s-window>
         </mat-sidenav>
 
+        <!-- Search Sidebar -->
+        <mat-sidenav position="start" mode="side" [opened]="isSearchOpen" class="search-sidebar"
+            [style.width.px]="searchWidth">
+            <app-search-window [workspaceId]="workspaceId" (openFile)="openFile($event)"></app-search-window>
+        </mat-sidenav>
+
         <!-- Right Chat Sidebar -->
         <mat-sidenav position="end" mode="side" [opened]="isChatOpen" class="chat-sidebar" [style.width.px]="chatWidth">
             <app-ide-chat [contextFile]="getActiveGroup()?.activeFile?.name || null" (closeChat)="toggleChat()">
@@ -82,8 +91,9 @@
         </mat-sidenav>
 
         <!-- Resize Gutter (Right) -->
-        @if (isChatOpen || isGitOpen) {
-        <div class="resize-gutter vertical right" (mousedown)="startResizing($event, isChatOpen ? 'chat' : 'git')">
+        @if (isChatOpen || isGitOpen || isSearchOpen) {
+        <div class="resize-gutter vertical right"
+            (mousedown)="startResizing($event, isChatOpen ? 'chat' : (isGitOpen ? 'git' : 'search'))">
         </div>
         }
 
@@ -118,7 +128,13 @@
                             </div>
                         </div>
 
+                        @defer (on viewport) {
                         <div class="monaco-container" #editorContainer></div>
+                        } @placeholder {
+                        <div class="editor-skeleton">
+                            <div class="shine"></div>
+                        </div>
+                        }
                     </div>
                     }
                 </div>
@@ -131,7 +147,11 @@
             <div class="bottom-panel" [style.height.px]="bottomPanelHeight">
                 <mat-tab-group>
                     <mat-tab label="Terminal">
+                        @defer (on timer(500ms)) {
                         <div #terminalContainer class="terminal-container"></div>
+                        } @placeholder {
+                        <div class="terminal-loading">Initializing Terminal...</div>
+                        }
                     </mat-tab>
                     <mat-tab label="Problems">
                         <div class="problems-panel">

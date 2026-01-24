@@ -5,6 +5,7 @@ export interface RegisterRequest {
   email: string;
   password: string;
   full_name: string;
+  username: string; // Added username
   tenant_name: string;
 }
 
@@ -39,9 +40,16 @@ export interface UserInfo {
   id: string;
   tenant_id: string;
   email: string;
+  username?: string; // Added username
   full_name?: string;
   role: UserRole;
   is_active: boolean;
+  avatar_url?: string; // Added for profile
+  bio?: string; // Added for profile
+  organization?: string; // Added for profile
+  preferences?: UserPreferences; // Added for profile
+  password_changed_at?: string; // Added for security section
+  two_factor_enabled?: boolean; // Added for security section
   created_at: string;
   last_login?: string;
   credentials_accepted?: boolean;
@@ -53,13 +61,30 @@ export interface UserInfo {
 export type UserRole = 'admin' | 'enterprise' | 'developer';
 
 /**
- * Me response - matches backend MeResponse
+ * Me response - matches backend MeResponse with extended user properties
  */
 export interface MeResponse {
   user: UserInfo;
   tenant: TenantInfo;
   permissions: string[];
   external_accounts: ExternalAccount[];
+  // Extended properties for user profile
+  username?: string;
+  email: string;
+  bio?: string;
+  organization?: string;
+  preferences?: UserPreferences;
+  avatar_url?: string;
+}
+
+/**
+ * User preferences
+ */
+export interface UserPreferences {
+  theme: 'dark' | 'light' | 'auto';
+  language: string;
+  notifications_enabled: boolean;
+  email_notifications: boolean;
 }
 
 /**

@@ -1,181 +1,211 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatChipsModule } from '@angular/material/chips';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatDividerModule } from '@angular/material/divider';
 import { StorageService } from '../../../core/services/api/storage.service';
-import { ToastService } from '../../../shared/services/toast.service';
-import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
-
-interface Project {
-    project_id: string;
-    project_name: string;
-    language: string;
-    framework: string;
-    created_at: string;
-    size_mb: number;
-    status: string;
-}
+import { Project } from '../../../core/models';
+import { CardComponent } from '../../../shared/components/card/card.component';
+import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { SignalStoreService } from '../../../core/services/signal-store.service';
 
 @Component({
     selector: 'app-project-list',
+    standalone: true,
     imports: [
         CommonModule,
-        RouterLink,
         FormsModule,
         MatCardModule,
-        MatButtonModule,
-        MatIconModule,
         MatFormFieldModule,
         MatInputModule,
         MatSelectModule,
-        MatChipsModule,
+        MatIconModule,
+        MatButtonModule,
         MatMenuModule,
-        LoadingSpinnerComponent
+        MatButtonToggleModule,
+        MatProgressSpinnerModule,
+        MatPaginatorModule,
+        MatDividerModule,
+        CardComponent,
+        ButtonComponent
     ],
     templateUrl: './project-list.component.html',
-    styleUrl: './project-list.component.css'
+    styleUrl: './project-list.component.scss'
 })
 export class ProjectListComponent implements OnInit {
     private storageService = inject(StorageService);
-    private router = inject(Router);
-    private toast = inject(ToastService);
+    private store = inject(SignalStoreService);
 
-    projects: Project[] = [];
-    filteredProjects: Project[] = [];
-    loading = false;
+    // Signals
+    projects = signal<Project[]>([]);
+    totalProjectCount = signal(0);
+    searchFilter = signal('');
+    selectedLanguage = signal('');
+    selectedFramework = signal('');
+    selectedStatus = signal('');
+    viewMode = signal<'grid' | 'list'>('grid');
+    loading = signal(false);
+    page = signal(1);
+    pageSize = signal(12);
 
-    searchQuery = '';
-    filterLanguage = 'all';
-    filterStatus = 'all';
+    // Computed
+    filteredProjects = computed(() => {
+        const query = this.searchFilter().toLowerCase();
+        const lang = this.selectedLanguage();
+        const framework = this.selectedFramework();
+        const status = this.selectedStatus();
 
-    languages: string[] = [];
-    storageStats: any = null;
+        return this.projects().filter(project => {
+            const matchesSearch = !query || project.project_name.toLowerCase().includes(query);
+            const matchesLanguage = !lang || project.language === lang;
+            const matchesFramework = !framework || (project.framework === framework);
+            const matchesStatus = !status || project.status === status;
+            return matchesSearch && matchesLanguage && matchesFramework && matchesStatus;
+        });
+    });
 
     ngOnInit(): void {
         this.loadProjects();
-        this.loadStorageStats();
     }
 
     loadProjects(): void {
-        this.loading = true;
-        this.storageService.listProjects({ page: 1, pageSize: 100 }).subscribe({
+        this.loading.set(true);
+        this.storageService.listProjects({
+            page: this.page(),
+            pageSize: this.pageSize()
+        }).subscribe({
             next: (response) => {
-                // Map ProjectMetadata to Project interface
-                this.projects = (response.projects || []).map(p => ({
-                    project_id: p.project_id,
-                    project_name: p.name || p.project_id,
-                    language: p.languages?.[0] || 'Unknown',
-                    framework: p.frameworks?.[0] || 'Unknown',
+                const mapped = (response.projects || []).map((p: any) => ({
+                    id: p.project_id || p.id,
+                    project_name: p.name || p.project_name,
+                    user_id: p.user_id || p.owner,
+                    language: p.language || (p.languages && p.languages[0]) || 'unknown',
+                    framework: p.framework || (p.frameworks && p.frameworks[0]),
+                    database: p.database,
+                    description: p.description,
+                    status: p.status,
+                    size_bytes: p.size_bytes || p.size,
+                    file_count: p.file_count,
                     created_at: p.created_at,
-                    size_mb: p.size / (1024 * 1024), // Convert bytes to MB
-                    status: p.status
-                }));
-                this.filteredProjects = this.projects;
-                this.extractLanguages();
-                this.loading = false;
+                    updated_at: p.updated_at,
+                    protected: p.protected
+                } as Project));
+
+                this.projects.set(mapped);
+                this.totalProjectCount.set(response.total || 0);
+                this.loading.set(false);
             },
-            error: (error) => {
-                console.error('Failed to load projects from API:', error);
-                this.loading = false;
-                this.toast.error('Failed to load projects. Please check your connection to the backend.');
-                this.projects = [];
-                this.filteredProjects = [];
+            error: (error: any) => {
+                console.error('Failed to load projects', error);
+                this.loading.set(false);
+                this.projects.set([]);
             }
         });
     }
 
-    loadStorageStats(): void {
-        this.storageService.getStorageStats().subscribe({
-            next: (stats) => {
-                this.storageStats = {
-                    total_projects: stats.total_projects,
-                    total_size_gb: stats.total_size / (1024 * 1024 * 1024), // Convert bytes to GB
-                    used_percentage: (stats.used_space / stats.total_size) * 100
-                };
-            },
-            error: (error) => {
-                console.error('Failed to load storage stats from API:', error);
-                this.storageStats = null;
-            }
-        });
+    onSearchChange(): void {
+        // Computed signal handles the filter automatically
     }
 
-    extractLanguages(): void {
-        const langSet = new Set(this.projects.map(p => p.language));
-        this.languages = Array.from(langSet);
-    }
-
-    applyFilters(): void {
-        this.filteredProjects = this.projects.filter(project => {
-            const matchesSearch = project.project_name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                project.language.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                project.framework.toLowerCase().includes(this.searchQuery.toLowerCase());
-
-            const matchesLanguage = this.filterLanguage === 'all' || project.language === this.filterLanguage;
-            const matchesStatus = this.filterStatus === 'all' || project.status === this.filterStatus;
-
-            return matchesSearch && matchesLanguage && matchesStatus;
-        });
+    createProject(): void {
+        window.location.href = '/generation';
     }
 
     openProject(project: Project): void {
-        this.router.navigate(['/ide'], { queryParams: { project: project.project_id } });
+        this.store.setActiveProject(project);
+        window.location.href = `/ide?project=${project.id}`;
+    }
+
+    openInIDE(project: Project): void {
+        this.openProject(project);
     }
 
     downloadProject(project: Project): void {
-        // Download functionality - would call backend endpoint
-        this.toast.info('Download functionality will be implemented');
+        this.storageService.downloadProject(project.id).subscribe({
+            next: (blob: Blob) => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${project.project_name}.zip`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+            },
+            error: (error: any) => console.error('Failed to download project', error)
+        });
+    }
+
+    duplicateProject(project: Project): void {
+        console.log('Duplicate project', project);
+        // Implement duplication logic via StorageService
+    }
+
+    archiveProject(project: Project): void {
+        console.log('Archive project', project);
+        // Implement archive logic via StorageService
     }
 
     deleteProject(project: Project): void {
-        if (confirm(`Are you sure you want to delete ${project.project_name}?`)) {
-            this.storageService.deleteProject(project.project_id).subscribe({
-                next: () => {
-                    this.toast.success('Project deleted successfully');
-                    this.loadProjects();
-                    this.loadStorageStats();
-                },
-                error: (error) => {
-                    this.toast.error('Failed to delete project');
-                }
+        if (confirm(`Are you sure you want to delete "${project.project_name}"?`)) {
+            this.storageService.deleteProject(project.id).subscribe({
+                next: () => this.loadProjects(),
+                error: (error) => console.error('Failed to delete project', error)
             });
         }
     }
 
-    archiveProject(project: Project): void {
-        this.storageService.archiveProject(project.project_id).subscribe({
-            next: () => {
-                this.toast.success('Project archived successfully');
-                this.loadProjects();
-            },
-            error: (error) => {
-                this.toast.error('Failed to archive project');
-            }
-        });
+    getProjectColor(language: string): string {
+        const colors: Record<string, string> = {
+            javascript: 'linear-gradient(135deg, #f7df1e 0%, #f0db4f 100%)',
+            typescript: 'linear-gradient(135deg, #3178c6 0%, #235a97 100%)',
+            python: 'linear-gradient(135deg, #3776ab 0%, #ffd43b 100%)'
+        };
+        return colors[language.toLowerCase()] || 'linear-gradient(135deg, #6366f1 0%, #818cf8 100%)';
     }
 
-    getStatusColor(status: string): string {
-        const colors: { [key: string]: string } = {
-            'active': 'success',
-            'archived': 'warning',
-            'deleted': 'error'
+    getProjectIcon(language: string): string {
+        const icons: Record<string, string> = {
+            javascript: 'code',
+            typescript: 'code',
+            python: 'code'
         };
-        return colors[status] || 'info';
+        return icons[language.toLowerCase()] || 'folder';
     }
 
     formatDate(date: string): string {
-        return new Date(date).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric'
-        });
+        return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    formatSize(bytes?: number): string {
+        if (!bytes) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    formatRelativeTime(date?: string): string {
+        if (!date) return 'Never';
+        const now = new Date();
+        const then = new Date(date);
+        const diff = now.getTime() - then.getTime();
+        const days = Math.floor(diff / 86400000);
+        if (days < 1) return 'Today';
+        if (days < 30) return `${days}d ago`;
+        return this.formatDate(date);
+    }
+
+    onPageChange(event: PageEvent): void {
+        this.page.set(event.pageIndex + 1);
+        this.pageSize.set(event.pageSize);
+        this.loadProjects();
     }
 }

@@ -11,7 +11,7 @@ export const roleGuard: (requiredRoles: string[]) => CanActivateFn = (requiredRo
   return (route, state) => {
     const authService = inject(AuthService);
     const router = inject(Router);
-    
+
     return authService.currentUser$.pipe(
       map(user => {
         if (!user) {
@@ -20,14 +20,14 @@ export const roleGuard: (requiredRoles: string[]) => CanActivateFn = (requiredRo
           });
           return false;
         }
-        
-        const hasRole = requiredRoles.some(role => user.roles.includes(role));
-        
+
+        const hasRole = requiredRoles.includes(user.role);
+
         if (!hasRole) {
           router.navigate(['/forbidden']);
           return false;
         }
-        
+
         return true;
       })
     );

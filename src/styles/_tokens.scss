@@ -1,0 +1,341 @@
+/**
+ * Design Tokens - AI Orchestrator
+ * Modern dark theme with glassmorphism and premium aesthetics
+ */
+
+// ==================== Color Palette ====================
+
+// Primary Colors (Vibrant Blue/Purple Gradient)
+$primary-50: #f0f4ff;
+$primary-100: #e0e7ff;
+$primary-200: #c7d2fe;
+$primary-300: #a5b4fc;
+$primary-400: #818cf8;
+$primary-500: #6366f1; // Main primary
+$primary-600: #4f46e5;
+$primary-700: #4338ca;
+$primary-800: #3730a3;
+$primary-900: #312e81;
+
+// Accent Colors (Cyan/Teal for highlights)
+$accent-50: #ecfeff;
+$accent-100: #cffafe;
+$accent-200: #a5f3fc;
+$accent-300: #67e8f9;
+$accent-400: #22d3ee;
+$accent-500: #06b6d4; // Main accent
+$accent-600: #0891b2;
+$accent-700: #0e7490;
+$accent-800: #155e75;
+$accent-900: #164e63;
+
+// Dark Theme Base
+$dark-bg-primary: #0a0e1a; // Deepest background
+$dark-bg-secondary: #111827; // Card backgrounds
+$dark-bg-tertiary: #1f2937; // Elevated surfaces
+$dark-bg-elevated: #374151; // Hover states
+
+// Glass Effect
+$glass-bg: rgba(31, 41, 55, 0.7);
+$glass-border: rgba(255, 255, 255, 0.1);
+$glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+// Text Colors
+$text-primary: #f9fafb;
+$text-secondary: #d1d5db;
+$text-tertiary: #9ca3af;
+$text-disabled: #6b7280;
+
+// Semantic Colors
+$success: #10b981;
+$success-light: #34d399;
+$success-dark: #059669;
+
+$warning: #f59e0b;
+$warning-light: #fbbf24;
+$warning-dark: #d97706;
+
+$error: #ef4444;
+$error-light: #f87171;
+$error-dark: #dc2626;
+
+$info: #3b82f6;
+$info-light: #60a5fa;
+$info-dark: #2563eb;
+
+// ==================== Typography ====================
+
+// Font Families
+$font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+$font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+$font-display: 'Plus Jakarta Sans', 'Inter', sans-serif;
+
+// Font Sizes
+$text-xs: 0.75rem; // 12px
+$text-sm: 0.875rem; // 14px
+$text-base: 1rem; // 16px
+$text-lg: 1.125rem; // 18px
+$text-xl: 1.25rem; // 20px
+$text-2xl: 1.5rem; // 24px
+$text-3xl: 1.875rem; // 30px
+$text-4xl: 2.25rem; // 36px
+$text-5xl: 3rem; // 48px
+
+// Font Weights
+$font-light: 300;
+$font-normal: 400;
+$font-medium: 500;
+$font-semibold: 600;
+$font-bold: 700;
+$font-extrabold: 800;
+
+// Line Heights
+$leading-tight: 1.25;
+$leading-normal: 1.5;
+$leading-relaxed: 1.75;
+$leading-loose: 2;
+
+// ==================== Spacing ====================
+
+$space-0: 0;
+$space-1: 0.25rem; // 4px
+$space-2: 0.5rem; // 8px
+$space-3: 0.75rem; // 12px
+$space-4: 1rem; // 16px
+$space-5: 1.25rem; // 20px
+$space-6: 1.5rem; // 24px
+$space-8: 2rem; // 32px
+$space-10: 2.5rem; // 40px
+$space-12: 3rem; // 48px
+$space-16: 4rem; // 64px
+$space-20: 5rem; // 80px
+$space-24: 6rem; // 96px
+
+// ==================== Border Radius ====================
+
+$radius-none: 0;
+$radius-sm: 0.25rem; // 4px
+$radius-base: 0.5rem; // 8px
+$radius-md: 0.75rem; // 12px
+$radius-lg: 1rem; // 16px
+$radius-xl: 1.5rem; // 24px
+$radius-2xl: 2rem; // 32px
+$radius-full: 9999px;
+
+// ==================== Shadows ====================
+
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+$shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+$shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+$shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+
+// Glow Effects
+$glow-primary: 0 0 20px rgba(99, 102, 241, 0.5);
+$glow-accent: 0 0 20px rgba(6, 182, 212, 0.5);
+$glow-success: 0 0 20px rgba(16, 185, 129, 0.5);
+$glow-error: 0 0 20px rgba(239, 68, 68, 0.5);
+
+// ==================== Transitions ====================
+
+$transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-slower: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+
+// Easing Functions
+$ease-in: cubic-bezier(0.4, 0, 1, 1);
+$ease-out: cubic-bezier(0, 0, 0.2, 1);
+$ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+$ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+// ==================== Z-Index ====================
+
+$z-dropdown: 1000;
+$z-sticky: 1020;
+$z-fixed: 1030;
+$z-modal-backdrop: 1040;
+$z-modal: 1050;
+$z-popover: 1060;
+$z-tooltip: 1070;
+$z-notification: 1080;
+
+// ==================== Breakpoints ====================
+
+$breakpoint-sm: 640px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+$breakpoint-2xl: 1536px;
+
+// ==================== Grid ====================
+
+$grid-columns: 12;
+$grid-gutter: $space-6;
+$container-max-width: 1280px;
+
+// ==================== Borders ====================
+
+$border-width-thin: 1px;
+$border-width-base: 2px;
+$border-width-thick: 4px;
+
+$border-color-light: rgba(255, 255, 255, 0.1);
+$border-color-base: rgba(255, 255, 255, 0.15);
+$border-color-strong: rgba(255, 255, 255, 0.25);
+
+// ==================== Backdrop Blur ====================
+
+$blur-sm: blur(4px);
+$blur-base: blur(8px);
+$blur-md: blur(12px);
+$blur-lg: blur(16px);
+$blur-xl: blur(24px);
+
+// ==================== Gradients ====================
+
+$gradient-primary: linear-gradient(135deg, $primary-600 0%, $primary-400 100%);
+$gradient-accent: linear-gradient(135deg, $accent-600 0%, $accent-400 100%);
+$gradient-success: linear-gradient(135deg, $success-dark 0%, $success-light 100%);
+$gradient-dark: linear-gradient(180deg, $dark-bg-secondary 0%, $dark-bg-primary 100%);
+$gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+
+// ==================== Component Specific ====================
+
+// Buttons
+$btn-height-sm: 2rem;
+$btn-height-base: 2.5rem;
+$btn-height-lg: 3rem;
+$btn-padding-x-sm: $space-3;
+$btn-padding-x-base: $space-4;
+$btn-padding-x-lg: $space-6;
+
+// Inputs
+$input-height-sm: 2rem;
+$input-height-base: 2.5rem;
+$input-height-lg: 3rem;
+$input-padding-x: $space-3;
+$input-border-width: 1px;
+$input-border-color: $border-color-base;
+$input-border-color-focus: $primary-500;
+
+// Cards
+$card-padding: $space-6;
+$card-radius: $radius-lg;
+$card-bg: $glass-bg;
+$card-border: $glass-border;
+
+// Sidebar
+$sidebar-width: 16rem;
+$sidebar-width-collapsed: 4rem;
+
+// Header
+$header-height: 4rem;
+
+// ==================== Animations ====================
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+// ==================== Mixins ====================
+
+@mixin glass-effect {
+    background: $glass-bg;
+    backdrop-filter: $blur-md;
+    border: 1px solid $glass-border;
+    box-shadow: $glass-shadow;
+}
+
+@mixin hover-lift {
+    transition: transform $transition-base, box-shadow $transition-base;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: $shadow-lg;
+    }
+}
+
+@mixin text-gradient($gradient) {
+    background: $gradient;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+@mixin truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@mixin line-clamp($lines) {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}

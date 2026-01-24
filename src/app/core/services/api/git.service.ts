@@ -13,9 +13,9 @@ import {
   GitStatus,
   GitBranchesResponse,
   GitHistoryResponse,
-  GitDiffResponse,
-  StandardResponse
+  GitDiffResponse
 } from '../../models/git/git.model';
+import { StandardResponse } from '../../models/common/api-response.model';
 
 /**
  * Git Service

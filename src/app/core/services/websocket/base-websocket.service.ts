@@ -1,14 +1,13 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { Observable, Subject, BehaviorSubject, timer, Subscription } from 'rxjs';
+import { Observable, Subject, BehaviorSubject, Subscription, throwError } from 'rxjs';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
-import { retry, tap, catchError, delayWhen, retryWhen, take } from 'rxjs/operators';
+import { tap, catchError } from 'rxjs/operators';
 import { environment } from '@environments/environment';
+import { WebSocketMessage, WebSocketConfig } from '../../models/websocket/websocket.model';
 
-export interface WebSocketMessage<T = any> {
-  type: string;
-  payload: T;
-  timestamp?: number;
-}
+/**
+ * Base configuration and message types for WebSocket services
+ */
 
 export type ConnectionState = 'connecting' | 'connected' | 'disconnected' | 'reconnecting' | 'error';
 
@@ -21,7 +20,7 @@ export type ConnectionState = 'connecting' | 'connected' | 'disconnected' | 'rec
 })
 export class BaseWebSocketService implements OnDestroy {
   protected socket$: WebSocketSubject<any> | null = null;
-  protected messagesSubject = new Subject<WebSocketMessage>();
+  protected messagesSubject = new Subject<any>();
   protected connectionStateSubject = new BehaviorSubject<ConnectionState>('disconnected');
 
   protected reconnectAttempts = 0;
@@ -39,19 +38,29 @@ export class BaseWebSocketService implements OnDestroy {
   /**
    * Connect to WebSocket endpoint
    */
-  connect(endpoint: string, params?: Record<string, string>): void {
+  connect(config: WebSocketConfig | string, params?: Record<string, string>): Observable<any> {
     if (this.socket$) {
       this.disconnect();
     }
 
-    let url = `${this.wsUrl}${endpoint}`;
+    let url: string;
 
-    // Add query parameters
-    if (params) {
-      const queryString = Object.entries(params)
-        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
-        .join('&');
-      url += `?${queryString}`;
+    if (typeof config === 'string') {
+      url = `${this.wsUrl}${config}`;
+      if (params) {
+        const queryString = Object.entries(params)
+          .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+          .join('&');
+        url += `?${queryString}`;
+      }
+    } else {
+      url = config.url || `${this.wsUrl}${config.endpoint || ''}`;
+      if (config.params) {
+        const queryString = Object.entries(config.params)
+          .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+          .join('&');
+        url += `?${queryString}`;
+      }
     }
 
     this.connectionStateSubject.next('connecting');
@@ -63,7 +72,7 @@ export class BaseWebSocketService implements OnDestroy {
           this.connectionStateSubject.next('connected');
           this.reconnectAttempts = 0;
           if (environment.enableLogging) {
-            console.log(`WebSocket connected: ${endpoint}`);
+            console.log(`WebSocket connected to ${url}`);
           }
         }
       },
@@ -71,9 +80,13 @@ export class BaseWebSocketService implements OnDestroy {
         next: (event) => {
           this.connectionStateSubject.next('disconnected');
           if (environment.enableLogging) {
-            console.log(`WebSocket disconnected: ${endpoint}`, event);
+            console.log(`WebSocket disconnected from ${url}`, event);
           }
-          this.handleReconnect(endpoint, params);
+          if (typeof config !== 'string' && config.reconnect) {
+            this.handleReconnect(config);
+          } else if (typeof config === 'string') {
+            this.handleReconnect(config, params);
+          }
         }
       }
     });
@@ -87,17 +100,18 @@ export class BaseWebSocketService implements OnDestroy {
         if (environment.enableLogging) {
           console.error('WebSocket error:', error);
         }
-        throw error;
+        return throwError(() => error);
       })
     ).subscribe();
 
     this.subscriptions.push(subscription);
+    return this.messages$;
   }
 
   /**
    * Handle reconnection logic
    */
-  protected handleReconnect(endpoint: string, params?: Record<string, string>): void {
+  protected handleReconnect(config: WebSocketConfig | string, params?: Record<string, string>): void {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
       this.connectionStateSubject.next('reconnecting');
@@ -107,7 +121,7 @@ export class BaseWebSocketService implements OnDestroy {
       }
 
       setTimeout(() => {
-        this.connect(endpoint, params);
+        this.connect(config, params);
       }, this.reconnectInterval * this.reconnectAttempts);
     } else {
       this.connectionStateSubject.next('error');

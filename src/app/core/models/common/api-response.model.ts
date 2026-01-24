@@ -104,3 +104,12 @@ export interface TaskStatus {
   startTime: string;
   endTime?: string;
 }
+
+/**
+ * Standard response
+ */
+export interface StandardResponse {
+  status: string;
+  result?: any;
+  message?: string;
+}

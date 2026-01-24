@@ -10,13 +10,15 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
-import { IdeService } from '../../../core/services/api/ide.service';
+import { IDEService } from '../../../core/services/api/ide.service';
 import { GitService } from '../../../core/services/api/git.service';
 import { ToastService } from '../../../shared/services/toast.service';
 import { IdeChatComponent } from '../ide-chat/ide-chat.component';
 import { GitWindowComponent } from '../git-window/git-window';
 import { K8sWindowComponent } from '../k8s-window/k8s-window';
+import { SearchWindowComponent } from '../search-window/search-window.component';
 import { CommandPaletteComponent } from '../command-palette/command-palette';
+import { SignalStoreService } from '../../../core/services/signal-store.service';
 import { CommandService } from '../../../core/services/command.service';
 import { environment } from '../../../../environments/environment';
 import { HostListener } from '@angular/core';
@@ -41,6 +43,7 @@ interface EditorGroup {
 
 @Component({
   selector: 'app-ide-layout',
+  standalone: true,
   imports: [
     CommonModule,
     MatSidenavModule,
@@ -52,6 +55,7 @@ interface EditorGroup {
     IdeChatComponent,
     GitWindowComponent,
     K8sWindowComponent,
+    SearchWindowComponent,
     CommandPaletteComponent
   ],
   templateUrl: './ide-layout.component.html',
@@ -61,11 +65,12 @@ export class IdeLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChildren('editorContainer') editorContainers!: QueryList<ElementRef>;
   @ViewChild('terminalContainer', { static: false }) terminalContainer!: ElementRef;
 
-  private ideService = inject(IdeService);
+  private ideService = inject(IDEService);
   private gitService = inject(GitService);
   private toast = inject(ToastService);
   private route = inject(ActivatedRoute);
   private commandService = inject(CommandService);
+  private store = inject(SignalStoreService);
 
   workspaceId = 'demo-workspace';
   fileTree: FileNode[] = [];
@@ -75,6 +80,7 @@ export class IdeLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   chatWidth = 350;
   gitWidth = 300;
   k8sWidth = 300;
+  searchWidth = 300;
   bottomPanelHeight = 300;
   isResizing = false;
 
@@ -97,32 +103,41 @@ export class IdeLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   isChatOpen = false;
   isGitOpen = false;
   isK8sOpen = false;
+  isSearchOpen = false;
 
   toggleChat(): void {
     this.isChatOpen = !this.isChatOpen;
     this.isGitOpen = false;
     this.isK8sOpen = false;
-    // Resize editors when layout changes
-    setTimeout(() => {
-      this.editorGroups.forEach(g => g.editorInstance?.layout() || g.diffEditorInstance?.layout());
-      this.fitAddon?.fit();
-    }, 300);
+    this.isSearchOpen = false;
+    this.resizeAll();
   }
 
   toggleGit(): void {
     this.isGitOpen = !this.isGitOpen;
     this.isChatOpen = false;
     this.isK8sOpen = false;
-    setTimeout(() => {
-      this.editorGroups.forEach(g => g.editorInstance?.layout() || g.diffEditorInstance?.layout());
-      this.fitAddon?.fit();
-    }, 300);
+    this.isSearchOpen = false;
+    this.resizeAll();
   }
 
   toggleK8s(): void {
     this.isK8sOpen = !this.isK8sOpen;
     this.isChatOpen = false;
     this.isGitOpen = false;
+    this.isSearchOpen = false;
+    this.resizeAll();
+  }
+
+  toggleSearch(): void {
+    this.isSearchOpen = !this.isSearchOpen;
+    this.isChatOpen = false;
+    this.isGitOpen = false;
+    this.isK8sOpen = false;
+    this.resizeAll();
+  }
+
+  private resizeAll(): void {
     setTimeout(() => {
       this.editorGroups.forEach(g => g.editorInstance?.layout() || g.diffEditorInstance?.layout());
       this.fitAddon?.fit();
@@ -233,7 +248,7 @@ export class IdeLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
         this.fileTree = structure.files || [];
         this.dataSource.data = this.fileTree;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Failed to load project structure', error);
         this.toast.error('Failed to load project files');
         this.fileTree = [
@@ -339,11 +354,11 @@ export class IdeLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Connect to Backend Session
     this.ideService.createTerminal({ workspace_id: this.workspaceId }).subscribe({
-      next: (session) => {
+      next: (session: any) => {
         this.term.write('\x1b[32m[OK]\x1b[0m Terminal Session Established: \x1b[33m' + session.session_id + '\x1b[0m\r\n');
         this.connectTerminalSocket(session.session_id);
       },
-      error: (err) => {
+      error: (err: any) => {
         this.term.write('\x1b[31m[ERROR]\x1b[0m Critical failure in backend handshake.\r\n');
         console.error(err);
       }
@@ -547,7 +562,7 @@ export class IdeLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadFileContent(file: FileNode, group: EditorGroup): void {
     this.ideService.getFileContent(this.workspaceId, file.path).subscribe({
-      next: (content) => {
+      next: (content: any) => {
         if (group.editorInstance) {
           group.editorInstance.setValue(content.content);
           const model = group.editorInstance.getModel();
@@ -608,6 +623,7 @@ export class IdeLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
       if (edge === 'chat') this.chatWidth = window.innerWidth - moveEvent.clientX;
       if (edge === 'git') this.gitWidth = window.innerWidth - moveEvent.clientX;
       if (edge === 'k8s') this.k8sWidth = window.innerWidth - moveEvent.clientX;
+      if (edge === 'search') this.searchWidth = window.innerWidth - moveEvent.clientX;
       if (edge === 'bottom') this.bottomPanelHeight = window.innerHeight - moveEvent.clientY;
 
       this.editorGroups.forEach(g => g.editorInstance?.layout() || g.diffEditorInstance?.layout());

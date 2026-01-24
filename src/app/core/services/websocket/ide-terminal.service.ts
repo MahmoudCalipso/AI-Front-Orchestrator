@@ -20,7 +20,7 @@ export class IdeTerminalService extends BaseWebSocketService {
    */
   connectToTerminal(sessionId: string): Observable<TerminalMessage> {
     const url = `${environment.wsUrl}/api/ide/terminal/${sessionId}`;
-    
+
     return this.connect({
       url,
       reconnect: true,
@@ -36,8 +36,8 @@ export class IdeTerminalService extends BaseWebSocketService {
   sendData(data: string): void {
     this.send({
       type: 'data',
-      data,
-      timestamp: new Date().toISOString()
+      payload: { data },
+      timestamp: Date.now()
     });
   }
 
@@ -47,8 +47,8 @@ export class IdeTerminalService extends BaseWebSocketService {
   resizeTerminal(resize: TerminalResize): void {
     this.send({
       type: 'resize',
-      data: resize,
-      timestamp: new Date().toISOString()
+      payload: { data: resize },
+      timestamp: Date.now()
     });
   }
 
@@ -58,7 +58,8 @@ export class IdeTerminalService extends BaseWebSocketService {
   closeTerminal(): void {
     this.send({
       type: 'exit',
-      timestamp: new Date().toISOString()
+      payload: {},
+      timestamp: Date.now()
     });
     this.disconnect();
   }

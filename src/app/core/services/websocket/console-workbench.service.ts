@@ -20,7 +20,7 @@ export class ConsoleWorkbenchService extends BaseWebSocketService {
    */
   connectToWorkbench(workbenchId: string): Observable<ConsoleMessage> {
     const url = `${environment.wsUrl}/console/${workbenchId}`;
-    
+
     return this.connect({
       url,
       reconnect: true,
@@ -36,8 +36,8 @@ export class ConsoleWorkbenchService extends BaseWebSocketService {
   sendCommand(command: string): void {
     this.send({
       type: 'input',
-      data: command,
-      timestamp: new Date().toISOString()
+      payload: { data: command },
+      timestamp: Date.now()
     });
   }
 
@@ -47,7 +47,8 @@ export class ConsoleWorkbenchService extends BaseWebSocketService {
   clearConsole(): void {
     this.send({
       type: 'clear',
-      timestamp: new Date().toISOString()
+      payload: {},
+      timestamp: Date.now()
     });
   }
 
@@ -57,8 +58,8 @@ export class ConsoleWorkbenchService extends BaseWebSocketService {
   resizeTerminal(cols: number, rows: number): void {
     this.send({
       type: 'resize',
-      data: { cols, rows },
-      timestamp: new Date().toISOString()
+      payload: { data: { cols, rows } },
+      timestamp: Date.now()
     });
   }
 

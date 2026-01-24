@@ -1,28 +1,4 @@
 /**
- * WebSocket message type
- */
-export type WebSocketMessageType =
-  | 'connect'
-  | 'disconnect'
-  | 'error'
-  | 'ping'
-  | 'pong'
-  | 'data'
-  | 'command'
-  | 'response'
-  | 'event';
-
-/**
- * Base WebSocket message
- */
-export interface WebSocketMessage<T = any> {
-  type: WebSocketMessageType;
-  id?: string;
-  timestamp: string;
-  payload: T;
-}
-
-/**
  * WebSocket connection state
  */
 export enum WebSocketState {
@@ -34,11 +10,23 @@ export enum WebSocketState {
 }
 
 /**
+ * Common message properties
+ */
+export interface WebSocketMessage<T = any> {
+  type: string;
+  id?: string;
+  timestamp: number;
+  payload: T;
+}
+
+/**
  * WebSocket configuration
  */
 export interface WebSocketConfig {
-  url: string;
+  url?: string;
+  endpoint?: string;
   protocols?: string | string[];
+  params?: Record<string, string>;
   reconnect?: boolean;
   reconnectInterval?: number;
   reconnectMaxAttempts?: number;
@@ -57,7 +45,7 @@ export type ConsoleMessageType = 'output' | 'input' | 'error' | 'clear' | 'resiz
 export interface ConsoleMessage {
   type: ConsoleMessageType;
   data: string;
-  timestamp: string;
+  timestamp: number;
 }
 
 /**
@@ -71,7 +59,7 @@ export type TerminalMessageType = 'data' | 'resize' | 'exit';
 export interface TerminalMessage {
   type: TerminalMessageType;
   data: string | { cols: number; rows: number };
-  timestamp: string;
+  timestamp: number;
 }
 
 /**
@@ -98,7 +86,7 @@ export type MonitoringMessageType =
 export interface MonitoringStreamMessage {
   type: MonitoringMessageType;
   data: any;
-  timestamp: string;
+  timestamp: number;
 }
 
 /**
@@ -114,7 +102,7 @@ export interface MetricsEvent {
   };
   active_connections: number;
   requests_per_second: number;
-  timestamp: string;
+  timestamp: number;
 }
 
 /**
@@ -127,7 +115,7 @@ export interface AlertEvent {
   metric: string;
   current_value: number;
   threshold: number;
-  timestamp: string;
+  timestamp: number;
 }
 
 /**
@@ -137,7 +125,7 @@ export interface LogEvent {
   level: 'debug' | 'info' | 'warning' | 'error' | 'fatal';
   message: string;
   service: string;
-  timestamp: string;
+  timestamp: number;
   metadata?: any;
 }
 
@@ -157,11 +145,11 @@ export type CollaborationMessageType =
  * Collaboration message
  */
 export interface CollaborationMessage {
-  type: CollaborationMessageType;
+  type: string;
   user_id: string;
   username: string;
   data: any;
-  timestamp: string;
+  timestamp: number;
 }
 
 /**
@@ -202,7 +190,7 @@ export interface CollaborationChatMessage {
   user_id: string;
   username: string;
   content: string;
-  timestamp: string;
+  timestamp: number;
   reply_to?: string;
 }
 
@@ -231,5 +219,5 @@ export interface WebSocketError {
   code: number;
   reason: string;
   wasClean: boolean;
-  timestamp: string;
+  timestamp: number;
 }

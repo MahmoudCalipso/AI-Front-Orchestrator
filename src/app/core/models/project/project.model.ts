@@ -9,10 +9,13 @@ export interface Project {
   git_repo_url?: string;
   git_branch?: string;
   local_path?: string;
-  language?: string;
+  language: string;
   framework?: string;
+  database?: string;
   status: ProjectStatus;
   protected?: boolean;
+  size_bytes?: number;
+  file_count?: number;
   created_at: string;
   updated_at?: string;
   last_opened?: string;

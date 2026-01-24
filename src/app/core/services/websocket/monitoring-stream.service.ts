@@ -30,15 +30,15 @@ export class MonitoringStreamService extends BaseWebSocketService {
     health?: boolean;
   }): Observable<MonitoringStreamMessage> {
     const url = `${environment.wsUrl}/api/monitoring/stream`;
-    
+
     return this.connect({
       url,
       reconnect: true,
       heartbeatInterval: 15000 // 15 seconds for monitoring
     }).pipe(
-      map(message => {
+      map((message: any) => {
         const streamMessage = message.payload as MonitoringStreamMessage;
-        
+
         // Filter based on preferences
         if (filters) {
           if (!filters.metrics && streamMessage.type === 'metrics') return null;
@@ -46,7 +46,7 @@ export class MonitoringStreamService extends BaseWebSocketService {
           if (!filters.logs && streamMessage.type === 'log') return null;
           if (!filters.health && streamMessage.type === 'health') return null;
         }
-        
+
         return streamMessage;
       }),
       map(message => message as MonitoringStreamMessage)
@@ -63,7 +63,7 @@ export class MonitoringStreamService extends BaseWebSocketService {
         action: 'subscribe',
         metrics: metricNames
       },
-      timestamp: new Date().toISOString()
+      timestamp: Date.now()
     });
   }
 
@@ -77,7 +77,7 @@ export class MonitoringStreamService extends BaseWebSocketService {
         action: 'unsubscribe',
         metrics: metricNames
       },
-      timestamp: new Date().toISOString()
+      timestamp: Date.now()
     });
   }
 
@@ -92,7 +92,7 @@ export class MonitoringStreamService extends BaseWebSocketService {
         metric,
         threshold
       },
-      timestamp: new Date().toISOString()
+      timestamp: Date.now()
     });
   }
 

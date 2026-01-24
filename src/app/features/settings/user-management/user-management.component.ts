@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -15,19 +15,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../../core/services/api/auth.service';
 import { ToastService } from '../../../shared/services/toast.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
-
-interface User {
-    id: string;
-    username: string;
-    email: string;
-    role: string;
-    permissions: string[];
-    created_at: string;
-    is_active: boolean;
-}
+import { User } from '../../../core/models';
 
 @Component({
     selector: 'app-user-management',
+    standalone: true,
     imports: [
         CommonModule,
         ReactiveFormsModule,
@@ -50,28 +42,20 @@ interface User {
 export class UserManagementComponent implements OnInit {
     private authService = inject(AuthService);
     private toast = inject(ToastService);
-    private dialog = inject(MatDialog);
     private fb = inject(FormBuilder);
 
-    users: User[] = [];
-    loading = false;
+    users = signal<User[]>([]);
+    loading = signal(false);
     displayedColumns = ['username', 'email', 'role', 'permissions', 'status', 'actions'];
 
     userForm!: FormGroup;
-    editingUser: User | null = null;
+    editingUser = signal<User | null>(null);
 
     roles = ['admin', 'developer', 'viewer'];
     availablePermissions = [
-        'project.create',
-        'project.read',
-        'project.update',
-        'project.delete',
-        'deployment.create',
-        'deployment.read',
-        'deployment.update',
-        'deployment.delete',
-        'user.manage',
-        'settings.manage'
+        'project.create', 'project.read', 'project.update', 'project.delete',
+        'deployment.create', 'deployment.read', 'deployment.update', 'deployment.delete',
+        'user.manage', 'settings.manage'
     ];
 
     ngOnInit(): void {
@@ -91,10 +75,10 @@ export class UserManagementComponent implements OnInit {
     }
 
     loadUsers(): void {
-        this.loading = true;
+        this.loading.set(true);
         this.authService.listUsers().subscribe({
             next: (users: any[]) => {
-                this.users = users.map(u => ({
+                this.users.set(users.map(u => ({
                     id: u.user_id || u.id,
                     username: u.username,
                     email: u.email,
@@ -102,60 +86,45 @@ export class UserManagementComponent implements OnInit {
                     permissions: u.permissions || [],
                     created_at: u.created_at,
                     is_active: u.is_active !== undefined ? u.is_active : true
-                }));
-                this.loading = false;
+                }) as any as User));
+                this.loading.set(false);
             },
             error: (error) => {
-                console.error('Failed to load users from API:', error);
-                this.loading = false;
-                this.toast.error('Failed to load users. Please check your connection to the backend.');
-                this.users = [];
+                this.loading.set(false);
+                this.toast.error('Failed to load users');
+                this.users.set([]);
             }
         });
     }
 
     createUser(): void {
         if (this.userForm.invalid) return;
-
-        const userData = this.userForm.value;
-        this.authService.register(userData).subscribe({
-            next: (user) => {
+        this.authService.register(this.userForm.value).subscribe({
+            next: () => {
                 this.toast.success('User created successfully');
                 this.loadUsers();
                 this.resetForm();
             },
-            error: (error) => {
-                this.toast.error('Failed to create user');
-            }
+            error: () => this.toast.error('Failed to create user')
         });
     }
 
     editUser(user: User): void {
-        this.editingUser = user;
-        this.userForm.patchValue({
-            username: user.username,
-            email: user.email,
-            role: user.role,
-            permissions: user.permissions,
-            is_active: user.is_active
-        });
+        this.editingUser.set(user);
+        this.userForm.patchValue(user);
         this.userForm.get('password')?.clearValidators();
         this.userForm.get('password')?.updateValueAndValidity();
     }
 
     updateUser(): void {
-        if (this.userForm.invalid || !this.editingUser) return;
-
-        const userData = this.userForm.value;
-        this.authService.updateUser(this.editingUser.id, userData).subscribe({
+        if (this.userForm.invalid || !this.editingUser()) return;
+        this.authService.updateUser(this.editingUser()!.id, this.userForm.value).subscribe({
             next: () => {
                 this.toast.success('User updated successfully');
                 this.loadUsers();
                 this.resetForm();
             },
-            error: (error) => {
-                this.toast.error('Failed to update user');
-            }
+            error: () => this.toast.error('Failed to update user')
         });
     }
 
@@ -166,9 +135,7 @@ export class UserManagementComponent implements OnInit {
                     this.toast.success('User deleted successfully');
                     this.loadUsers();
                 },
-                error: (error) => {
-                    this.toast.error('Failed to delete user');
-                }
+                error: () => this.toast.error('Failed to delete user')
             });
         }
     }
@@ -180,29 +147,19 @@ export class UserManagementComponent implements OnInit {
                 this.toast.success(`User ${newStatus ? 'activated' : 'deactivated'}`);
                 this.loadUsers();
             },
-            error: (error) => {
-                this.toast.error('Failed to update user status');
-            }
+            error: () => this.toast.error('Failed to update user status')
         });
     }
 
     resetForm(): void {
-        this.editingUser = null;
-        this.userForm.reset({
-            role: 'developer',
-            permissions: [],
-            is_active: true
-        });
+        this.editingUser.set(null);
+        this.userForm.reset({ role: 'developer', permissions: [], is_active: true });
         this.userForm.get('password')?.setValidators([Validators.required, Validators.minLength(8)]);
         this.userForm.get('password')?.updateValueAndValidity();
     }
 
     getRoleBadgeClass(role: string): string {
-        const classes: { [key: string]: string } = {
-            'admin': 'badge-error',
-            'developer': 'badge-primary',
-            'viewer': 'badge-info'
-        };
+        const classes: Record<string, string> = { 'admin': 'badge-error', 'developer': 'badge-primary', 'viewer': 'badge-info' };
         return classes[role] || 'badge-info';
     }
 }

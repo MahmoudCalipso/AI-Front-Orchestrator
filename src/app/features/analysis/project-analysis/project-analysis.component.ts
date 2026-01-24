@@ -1,5 +1,4 @@
-
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -12,6 +11,7 @@ import { GenerationService } from '../../../core/services/api/generation.service
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { StatusColorPipe } from '../../../shared/pipes/status-color.pipe';
 import { ToastService } from '../../../shared/services/toast.service';
+import { SignalStoreService } from '../../../core/services/signal-store.service';
 
 @Component({
   selector: 'app-project-analysis',
@@ -37,17 +37,17 @@ import { ToastService } from '../../../shared/services/toast.service';
         <p class="subtitle">Deep insight into your project structure and health</p>
       </div>
 
-      @if (loading) {
+      @if (loading()) {
         <app-loading-spinner message="Analyzing project structure..."></app-loading-spinner>
       }
 
-      @if (!loading && analysisData) {
+      @if (!loading() && analysisData()) {
         <div class="dashboard-grid animate-fadeIn">
           <!-- Overview Cards -->
           <div class="stats-row">
             <mat-card class="stat-card">
               <mat-card-content>
-                <div class="stat-value">{{ analysisData.total_files }}</div>
+                <div class="stat-value">{{ analysisData().total_files }}</div>
                 <div class="stat-label">Total Files</div>
                 <mat-icon class="bg-primary">description</mat-icon>
               </mat-card-content>
@@ -55,7 +55,7 @@ import { ToastService } from '../../../shared/services/toast.service';
 
             <mat-card class="stat-card">
               <mat-card-content>
-                <div class="stat-value">{{ analysisData.total_lines }}</div>
+                <div class="stat-value">{{ analysisData().total_lines }}</div>
                 <div class="stat-label">Lines of Code</div>
                 <mat-icon class="bg-accent">code</mat-icon>
               </mat-card-content>
@@ -63,7 +63,7 @@ import { ToastService } from '../../../shared/services/toast.service';
 
             <mat-card class="stat-card">
               <mat-card-content>
-                <div class="stat-value">{{ analysisData.languages?.length || 0 }}</div>
+                <div class="stat-value">{{ analysisData().languages?.length || 0 }}</div>
                 <div class="stat-label">Languages</div>
                 <mat-icon class="bg-warning">language</mat-icon>
               </mat-card-content>
@@ -77,7 +77,7 @@ import { ToastService } from '../../../shared/services/toast.service';
                 <mat-card-title>Language Distribution</mat-card-title>
               </mat-card-header>
               <mat-card-content>
-                @for (lang of analysisData.languages; track lang.name) {
+                @for (lang of analysisData().languages; track lang.name) {
                   <div class="lang-item">
                     <div class="lang-info">
                       <span class="lang-name">{{ lang.name }}</span>
@@ -112,7 +112,7 @@ import { ToastService } from '../../../shared/services/toast.service';
         </div>
       }
       
-      @if (!loading && !analysisData) {
+      @if (!loading() && !analysisData()) {
         <div class="empty-state">
             <mat-icon>search_off</mat-icon>
             <h3>No Analysis Data</h3>
@@ -218,19 +218,19 @@ import { ToastService } from '../../../shared/services/toast.service';
 export class ProjectAnalysisComponent implements OnInit {
   private generationService = inject(GenerationService);
   private toast = inject(ToastService);
+  private store = inject(SignalStoreService);
 
-  loading = false;
-  analysisData: any = null;
+  loading = signal(false);
+  analysisData = signal<any>(null);
 
   ngOnInit() {
-    // In a real scenario, we might derive project ID from route params
     this.loadSampleData();
   }
 
   loadSampleData() {
-    this.loading = true;
+    this.loading.set(true);
     setTimeout(() => {
-      this.analysisData = {
+      this.analysisData.set({
         total_files: 142,
         total_lines: 12540,
         languages: [
@@ -238,8 +238,8 @@ export class ProjectAnalysisComponent implements OnInit {
           { name: 'HTML', percentage: 25 },
           { name: 'SCSS', percentage: 10 }
         ]
-      };
-      this.loading = false;
+      });
+      this.loading.set(false);
       this.toast.success('Analysis data loaded');
     }, 1500);
   }
