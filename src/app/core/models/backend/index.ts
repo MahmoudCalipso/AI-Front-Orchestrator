@@ -16,6 +16,7 @@ export * from './dtos/requests/auth.requests';
 
 // DTOs - Responses
 export * from './dtos/responses/auth.responses';
+export * from './dtos/responses/admin.responses';
 
 // Common DTOs
 export * from './dtos/common/base-response.model';

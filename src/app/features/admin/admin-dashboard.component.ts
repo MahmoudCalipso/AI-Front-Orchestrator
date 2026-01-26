@@ -21,7 +21,6 @@ import { Subject } from 'rxjs';
 import { AdminService } from '../../core/services/api/admin.service';
 import { ToastService } from '../../shared/services/toast.service';
 import {
-  UserResponseDTO,
   UserFilter,
   ProjectFilter,
   SortDirection,
@@ -30,6 +29,11 @@ import {
   BuildStatus,
   RunStatus
 } from '../../core/models/backend';
+import {
+  AdminUserDTO,
+  AdminProjectDTO,
+  SystemMetricsResponse
+} from '../../core/models/backend/dtos/responses/admin.responses';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -66,9 +70,9 @@ export class AdminDashboardComponent implements OnInit {
   @ViewChild('projectSort') projectSort!: MatSort;
 
   // Data
-  users: UserResponseDTO[] = [];
-  projects: any[] = []; // TODO: Create proper Project DTO
-  filteredUsers: UserResponseDTO[] = [];
+  users: AdminUserDTO[] = [];
+  projects: AdminProjectDTO[] = [];
+  filteredUsers: AdminUserDTO[] = [];
   filteredProjects: any[] = [];
 
   // Loading states
@@ -209,92 +213,55 @@ export class AdminDashboardComponent implements OnInit {
 
   loadUsers() {
     this.usersLoading = true;
-    // TODO: Replace with actual API call
-    // this.adminService.getUsers(this.userFilters).subscribe({
-    //   next: (response) => {
-    //     this.users = response.data;
-    //     this.filteredUsers = [...this.users];
-    //     this.usersLoading = false;
-    //   },
-    //   error: (error) => {
-    //     this.toast.error('Failed to load users');
-    //     this.usersLoading = false;
-    //   }
-    // });
-
-    // Mock data for now
-    setTimeout(() => {
-      this.users = [
-        {
-          id: '1',
-          email: 'john@example.com',
-          full_name: 'John Doe',
-          role: UserRole.DEVELOPER,
-          tenant_id: 'tenant-1',
-          is_active: true,
-          is_verified: true,
-          created_at: '2024-01-01T00:00:00Z'
-        },
-        {
-          id: '2',
-          email: 'jane@example.com',
-          full_name: 'Jane Smith',
-          role: UserRole.ADMIN,
-          tenant_id: 'tenant-1',
-          is_active: true,
-          is_verified: true,
-          created_at: '2024-01-02T00:00:00Z'
-        }
-      ];
-      this.filteredUsers = [...this.users];
-      this.usersLoading = false;
-    }, 500);
+    this.adminService.getUsers({
+      page: this.userFilters.page,
+      page_size: this.userFilters.page_size,
+      role: this.userFilters.role
+    }).subscribe({
+      next: (response) => {
+        this.users = response.users;
+        this.filteredUsers = [...this.users];
+        this.usersLoading = false;
+      },
+      error: (error) => {
+        this.toast.error('Failed to load users');
+        this.usersLoading = false;
+      }
+    });
   }
 
   loadProjects() {
     this.projectsLoading = true;
-    // TODO: Replace with actual API call
-
-    // Mock data for now
-    setTimeout(() => {
-      this.projects = [
-        {
-          id: '1',
-          project_name: 'E-commerce Platform',
-          user_id: '1',
-          status: ProjectStatus.RUNNING,
-          language: 'typescript',
-          framework: 'nestjs',
-          created_at: '2024-01-10T00:00:00Z',
-          updated_at: '2024-01-15T00:00:00Z',
-          build_status: BuildStatus.SUCCESS,
-          run_status: RunStatus.RUNNING
-        },
-        {
-          id: '2',
-          project_name: 'Data Analytics API',
-          user_id: '2',
-          status: ProjectStatus.BUILDING,
-          language: 'python',
-          framework: 'fastapi',
-          created_at: '2024-01-12T00:00:00Z',
-          updated_at: '2024-01-14T00:00:00Z',
-          build_status: BuildStatus.BUILDING,
-          run_status: RunStatus.STOPPED
-        }
-      ];
-      this.filteredProjects = [...this.projects];
-      this.projectsLoading = false;
-    }, 500);
+    this.adminService.getProjects({
+      page: this.projectFilters.page,
+      page_size: this.projectFilters.page_size
+    }).subscribe({
+      next: (response) => {
+        this.projects = response.projects;
+        this.filteredProjects = [...this.projects];
+        this.projectsLoading = false;
+      },
+      error: (error) => {
+        this.toast.error('Failed to load projects');
+        this.projectsLoading = false;
+      }
+    });
   }
 
   loadSystemMetrics() {
-    this.systemMetrics = {
-      totalUsers: this.users.length,
-      activeProjects: this.projects.filter(p => p.status === 'running').length,
-      systemLoad: 45,
-      memoryUsage: 67
-    };
+    this.adminService.getSystemMetrics().subscribe({
+      next: (response) => {
+        this.systemMetrics = {
+          totalUsers: response.total_users,
+          activeProjects: response.active_projects,
+          systemLoad: response.cpu_usage,
+          memoryUsage: response.memory_usage
+        };
+      },
+      error: (error) => {
+        this.toast.error('Failed to load system metrics');
+      }
+    });
   }
 
   // Methods removed - duplicates exist below
@@ -305,47 +272,100 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   runSystemCleanup() {
-    // TODO: Implement system cleanup
-    this.toast.info('System cleanup functionality coming soon');
+    if (confirm('Are you sure you want to run system cleanup? This may take some time.')) {
+      this.adminService.runSystemCleanup().subscribe({
+        next: (response) => {
+          this.toast.success('System cleanup completed successfully');
+        },
+        error: (error) => {
+          this.toast.error('System cleanup failed');
+        }
+      });
+    }
   }
 
   backupSystem() {
-    // TODO: Implement system backup
-    this.toast.info('System backup functionality coming soon');
+    if (confirm('Are you sure you want to create a system backup?')) {
+      this.adminService.createSystemBackup().subscribe({
+        next: (response) => {
+          this.toast.success(`System backup created successfully. Backup ID: ${response.backup_id}`);
+        },
+        error: (error) => {
+          this.toast.error('System backup failed');
+        }
+      });
+    }
   }
 
   getTotalPages(totalItems: number, pageSize: number): number {
     return Math.ceil(totalItems / pageSize) || 1;
   }
 
-  updateUserRole(user: UserResponseDTO) {
-    // TODO: Implement role update dialog
-    this.toast.info('Role update functionality coming soon');
-  }
-
-  toggleUserStatus(user: UserResponseDTO) {
-    user.is_active = !user.is_active;
-    this.toast.success(`User ${user.is_active ? 'activated' : 'suspended'}`);
-  }
-
-  deleteUser(user: UserResponseDTO) {
-    if (confirm(`Are you sure you want to delete user ${user.full_name || user.email}?`)) {
-      this.users = this.users.filter(u => u.id !== user.id);
-      this.filteredUsers = this.filteredUsers.filter(u => u.id !== user.id);
-      this.toast.success('User deleted successfully');
+  updateUserRole(user: AdminUserDTO) {
+    const newRole = prompt(`Update role for ${user.username || user.email}:`, user.role);
+    if (newRole && newRole !== user.role) {
+      this.adminService.updateUserRole(user.id, newRole as 'user' | 'admin' | 'superuser').subscribe({
+        next: (response) => {
+          user.role = newRole;
+          this.toast.success('User role updated successfully');
+        },
+        error: (error) => {
+          this.toast.error('Failed to update user role');
+        }
+      });
     }
   }
 
-  viewProject(project: any) {
-    // TODO: Implement project details dialog
-    this.toast.info('Project details view coming soon');
+  toggleUserStatus(user: AdminUserDTO) {
+    const action = user.is_active ? 'suspend' : 'activate';
+    const serviceCall = user.is_active ?
+      this.adminService.suspendUser(user.id) :
+      this.adminService.activateUser(user.id);
+
+    serviceCall.subscribe({
+      next: (response) => {
+        user.is_active = !user.is_active;
+        this.toast.success(`User ${user.is_active ? 'activated' : 'suspended'} successfully`);
+      },
+      error: (error) => {
+        this.toast.error(`Failed to ${action} user`);
+      }
+    });
   }
 
-  deleteProject(project: any) {
-    if (confirm(`Are you sure you want to delete project ${project.project_name}?`)) {
-      this.projects = this.projects.filter(p => p.id !== project.id);
-      this.filteredProjects = this.filteredProjects.filter(p => p.id !== project.id);
-      this.toast.success('Project deleted successfully');
+  deleteUser(user: AdminUserDTO) {
+    if (confirm(`Are you sure you want to delete user ${user.username || user.email}? This action cannot be undone.`)) {
+      this.adminService.deleteUser(user.id).subscribe({
+        next: (response) => {
+          this.users = this.users.filter(u => u.id !== user.id);
+          this.filteredUsers = this.filteredUsers.filter(u => u.id !== user.id);
+          this.toast.success('User deleted successfully');
+        },
+        error: (error) => {
+          this.toast.error('Failed to delete user');
+        }
+      });
+    }
+  }
+
+  viewProject(project: AdminProjectDTO) {
+    // For now, show a simple alert with project details
+    // In a real app, this would open a detailed dialog/modal
+    alert(`Project Details:\n\nName: ${project.project_name}\nLanguage: ${project.language}\nFramework: ${project.framework}\nStatus: ${project.status}\nCreated: ${project.created_at}\nBuild Status: ${project.build_status}\nRun Status: ${project.run_status}`);
+  }
+
+  deleteProject(project: AdminProjectDTO) {
+    if (confirm(`Are you sure you want to delete project "${project.project_name}"? This action cannot be undone.`)) {
+      this.adminService.deleteProject(project.id).subscribe({
+        next: (response) => {
+          this.projects = this.projects.filter(p => p.id !== project.id);
+          this.filteredProjects = this.filteredProjects.filter(p => p.id !== project.id);
+          this.toast.success('Project deleted successfully');
+        },
+        error: (error) => {
+          this.toast.error('Failed to delete project');
+        }
+      });
     }
   }
 }

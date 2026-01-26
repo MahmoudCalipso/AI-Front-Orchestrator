@@ -121,4 +121,18 @@ export class KubernetesService extends BaseApiService {
             replicas
         });
     }
+    /**
+     * Get all namespaces
+     * GET /api/kubernetes/namespaces
+     */
+    getNamespaces(): Observable<string[]> {
+        return this.get<string[]>('/api/kubernetes/namespaces');
+    }
+
+    /**
+     * Get unified resources for a namespace
+     */
+    getResources(namespace: string): Observable<any[]> {
+        return this.get<any[]>(`/api/kubernetes/resources/${namespace}`);
+    }
 }

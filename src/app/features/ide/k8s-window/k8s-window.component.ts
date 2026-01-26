@@ -6,7 +6,8 @@ import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { K8sService, K8sResource } from '../../../core/services/api/k8s.service';
+import { KubernetesService } from '../../../core/services/api/kubernetes.service';
+import { K8sResource } from '../../../core/services/api/k8s.service'; // Keeping K8sResource for now as it's defined there
 import { StatusColorPipe } from '../../../shared/pipes/status-color.pipe';
 import { FormsModule } from '@angular/forms';
 
@@ -18,7 +19,7 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './k8s-window.scss'
 })
 export class K8sWindowComponent implements OnInit {
-  private k8sService = inject(K8sService);
+  private k8sService = inject(KubernetesService);
 
   namespaces: string[] = [];
   selectedNamespace: string = 'default';

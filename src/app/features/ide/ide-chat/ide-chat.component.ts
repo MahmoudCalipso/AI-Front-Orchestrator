@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
+import { AIService } from '../../../core/services/api/ai.service';
 import { ToastService } from '../../../shared/services/toast.service';
 import { SafeHtmlPipe } from '../../../shared/pipes/safe-html.pipe';
 import { HighlightDirective } from '../../../shared/directives/highlight.directive';
@@ -21,7 +22,7 @@ export interface ChatMessage {
 
 @Component({
     selector: 'app-ide-chat',
-    standalone: true, // Ensuring standalone is explicit
+    standalone: true,
     imports: [
         CommonModule,
         FormsModule,
@@ -37,8 +38,13 @@ export interface ChatMessage {
     styleUrl: './ide-chat.component.css'
 })
 export class IdeChatComponent {
+    @Input() workspaceId: string = '';
     @Input() contextFile: string | null = null;
     @Output() closeChat = new EventEmitter<void>();
+    @Output() applyChange = new EventEmitter<string>();
+
+    private aiService = inject(AIService);
+    private toast = inject(ToastService);
 
     messages: ChatMessage[] = [
         {
@@ -52,7 +58,7 @@ export class IdeChatComponent {
     isThinking: boolean = false;
 
     sendMessage(): void {
-        if (!this.userInput.trim()) return;
+        if (!this.userInput.trim() || !this.workspaceId) return;
 
         const userMsg: ChatMessage = {
             role: 'user',
@@ -65,31 +71,40 @@ export class IdeChatComponent {
         const prompt = this.userInput;
         this.userInput = '';
 
-        setTimeout(() => {
-            this.isThinking = false;
-
-            // Logic to simulate Agentic response
-            const isRefactorRequest = prompt.toLowerCase().includes('fix') || prompt.toLowerCase().includes('refactor');
-
-            const aiMsg: ChatMessage = {
-                role: 'ai',
-                content: isRefactorRequest
-                    ? `I've analyzed the code in ${this.contextFile}. Here is a suggested improvement:`
-                    : `I received your request: "${prompt}". How else can I assist with your ${this.contextFile} file?`,
-                timestamp: new Date(),
-                isAgentic: isRefactorRequest,
-                codeSnippet: isRefactorRequest ? `// Optimized version of ${this.contextFile}\nexport class RefactoredCode {\n  // AI suggested optimization\n}` : undefined
-            };
-            this.messages.push(aiMsg);
-        }, 1500);
+        this.aiService.chat({
+            project_id: this.workspaceId,
+            message: prompt,
+            context: {
+                active_file: this.contextFile || undefined
+            }
+        }).subscribe({
+            next: (response: any) => {
+                this.isThinking = false;
+                const aiMsg: ChatMessage = {
+                    role: 'ai',
+                    content: response.data?.answer || response.answer || 'I am sorry, I could not generate a response.',
+                    timestamp: new Date(),
+                    isAgentic: !!response.data?.code,
+                    codeSnippet: response.data?.code
+                };
+                this.messages.push(aiMsg);
+            },
+            error: (err: any) => {
+                this.isThinking = false;
+                this.toast.error('AI Service failed');
+                this.messages.push({
+                    role: 'ai',
+                    content: 'Error communicating with AI service.',
+                    timestamp: new Date()
+                });
+            }
+        });
     }
 
     applySuggestion(code: string): void {
+        this.applyChange.emit(code);
         this.toast.success('AI suggestion applied to editor!');
-        // In real impl, this would emit to IdeLayout to update Monaco
     }
-
-    private toast = inject(ToastService);
 
     clearChat(): void {
         this.messages = [];

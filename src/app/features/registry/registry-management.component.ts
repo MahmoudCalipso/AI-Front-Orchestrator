@@ -211,76 +211,32 @@ export class RegistryManagementComponent implements OnInit {
   }
 
   loadRegistryInfo() {
-    // TODO: Implement registry info API call
-    this.registryInfo = {
-      last_updated: new Date().toISOString(),
-      total_languages: 15,
-      total_frameworks: 120,
-      version: '1.0.0'
-    };
+    this.registryService.getRegistryInfo().subscribe({
+      next: (info) => {
+        this.registryInfo = info;
+      },
+      error: (err) => {
+        console.error('Failed to load registry info:', err);
+      }
+    });
   }
 
   loadLanguages() {
     this.languagesLoading = true;
-
-    // TODO: Replace with actual API call
-    // this.registryService.getLanguages().subscribe({
-    //   next: (response) => {
-    //     this.languages = response.data.map(lang => ({ ...lang, framework_count: lang.frameworks.length }));
-    //     this.filteredLanguages = [...this.languages];
-    //     this.languagesLoading = false;
-    //   },
-    //   error: (error) => {
-    //     this.toast.error('Failed to load languages');
-    //     this.languagesLoading = false;
-    //   }
-    // });
-
-    // Mock data
-    setTimeout(() => {
-      this.languages = [
-        {
-          name: 'TypeScript',
-          version: '5.3.0',
-          frameworks: ['Angular', 'NestJS', 'Express', 'Fastify'],
-          package_manager: 'npm',
-          build_tool: 'tsc',
-          framework_count: 4
-        },
-        {
-          name: 'Python',
-          version: '3.11.0',
-          frameworks: ['Django', 'FastAPI', 'Flask', 'Pyramid'],
-          package_manager: 'pip',
-          framework_count: 4
-        },
-        {
-          name: 'JavaScript',
-          version: 'ES2023',
-          frameworks: ['Express', 'Koa', 'Hapi', 'Sails'],
-          package_manager: 'npm',
-          framework_count: 4
-        },
-        {
-          name: 'Java',
-          version: '21',
-          frameworks: ['Spring Boot', 'Quarkus', 'Micronaut', 'Vert.x'],
-          package_manager: 'maven',
-          build_tool: 'gradle',
-          framework_count: 4
-        },
-        {
-          name: 'C#',
-          version: '12.0',
-          frameworks: ['ASP.NET Core', 'Blazor', 'Entity Framework'],
-          package_manager: 'nuget',
-          build_tool: 'dotnet',
-          framework_count: 3
-        }
-      ];
-      this.filteredLanguages = [...this.languages];
-      this.languagesLoading = false;
-    }, 500);
+    this.registryService.getLanguages().subscribe({
+      next: (response) => {
+        this.languages = (response.languages || []).map(lang => ({
+          ...lang,
+          framework_count: lang.frameworks?.length || 0
+        }));
+        this.filteredLanguages = [...this.languages];
+        this.languagesLoading = false;
+      },
+      error: (error) => {
+        this.toast.error('Failed to load languages');
+        this.languagesLoading = false;
+      }
+    });
   }
 
   loadFrameworks() {
@@ -292,10 +248,12 @@ export class RegistryManagementComponent implements OnInit {
         this.frameworks = [];
 
         // Transform backend data structure to component format
-        Object.keys(response.data).forEach(language => {
+        const data = response.data || {};
+        Object.keys(data).forEach(language => {
           this.frameworksByLanguage[language] = [];
-          Object.keys(response.data[language]).forEach(framework => {
-            const fwData = response.data[language][framework];
+          const frameworksForLang = data[language] || {};
+          Object.keys(frameworksForLang).forEach(framework => {
+            const fwData = frameworksForLang[framework];
             const frameworkObj: Framework = {
               name: framework,
               language: language,
@@ -303,7 +261,7 @@ export class RegistryManagementComponent implements OnInit {
               latest_version: fwData.latest_version || fwData.version || 'Unknown',
               description: fwData.description || 'No description available',
               architectures: fwData.architectures,
-              dependencies: fwData.required_packages,
+              dependencies: fwData.required_packages || fwData.dependencies,
               templates: fwData.templates,
               best_practices: fwData.best_practices
             };
@@ -324,39 +282,26 @@ export class RegistryManagementComponent implements OnInit {
 
   syncRegistry() {
     this.syncLoading = true;
-
-    // TODO: Replace with actual API call
-    // this.registryService.updateRegistry().subscribe({
-    //   next: (response) => {
-    //     this.toast.success(`Registry updated: ${response.data.updated_count} items`);
-    //     this.loadRegistryInfo();
-    //     this.loadLanguages();
-    //     this.loadFrameworks();
-    //     this.syncLoading = false;
-    //   },
-    //   error: (error) => {
-    //     this.toast.error('Failed to sync registry');
-    //     this.syncLoading = false;
-    //   }
-    // });
-
-    // Mock sync
-    setTimeout(() => {
-      this.toast.success('Registry synchronized successfully');
-      this.loadRegistryInfo();
-      this.loadLanguages();
-      this.loadFrameworks();
-      this.syncLoading = false;
-    }, 2000);
+    this.registryService.updateRegistry().subscribe({
+      next: (response) => {
+        this.toast.success(`Registry updated: ${response.updated_count} items`);
+        this.loadRegistryInfo();
+        this.loadLanguages();
+        this.loadFrameworks();
+        this.syncLoading = false;
+      },
+      error: (error) => {
+        this.toast.error('Failed to sync registry');
+        this.syncLoading = false;
+      }
+    });
   }
 
   viewLanguageDetails(language: Language) {
-    // TODO: Implement language details dialog
     this.toast.info(`Language details: ${language.name} v${language.version}`);
   }
 
   viewFrameworkDetails(framework: Framework) {
-    // TODO: Implement framework details dialog
     this.toast.info(`Framework details: ${framework.name} (${framework.language})`);
   }
 

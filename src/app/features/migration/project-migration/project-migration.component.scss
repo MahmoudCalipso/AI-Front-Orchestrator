@@ -1,0 +1,270 @@
+.migration-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: 30px;
+
+  h1 {
+    color: #333;
+    margin-bottom: 10px;
+  }
+
+  p {
+    color: #666;
+  }
+}
+
+.migration-form {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+
+  h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+  }
+}
+
+.migration-view {
+  min-height: 100vh;
+  background: radial-gradient(circle at top left, rgba(0, 122, 204, 0.1), transparent),
+    radial-gradient(circle at bottom right, rgba(138, 43, 226, 0.1), transparent);
+  padding: 40px;
+  color: #e0e0e0;
+}
+
+.glass-header {
+  margin-bottom: 40px;
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+
+    .header-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      color: #007acc;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin: 0;
+      font-weight: 700;
+    }
+
+    p {
+      color: #969696;
+      margin: 5px 0 0;
+    }
+  }
+}
+
+.migration-grid {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.card-glass {
+  flex: 1;
+  background: rgba(30, 30, 30, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 30px;
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 25px;
+
+    mat-icon {
+      color: #007acc;
+    }
+
+    h3 {
+      margin: 0;
+      text-transform: uppercase;
+      font-size: 1rem;
+      letter-spacing: 1px;
+    }
+  }
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.stack-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.migration-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    color: #4d4d4d;
+    animation: pulse 2s infinite;
+  }
+}
+
+.migrate-btn {
+  margin-top: 20px;
+  height: 50px;
+  font-weight: 600;
+}
+
+.migration-feedback {
+  margin-top: 50px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+
+  .feedback-card {
+    padding: 20px;
+    text-align: center;
+
+    .step-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      font-weight: 500;
+    }
+
+    .progress-percent {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #969696;
+    }
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: translateX(-5px);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: translateX(5px);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(-5px);
+    opacity: 0.5;
+  }
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.form-group {
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #555;
+  }
+
+  input,
+  select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+
+    &:focus {
+      outline: none;
+      border-color: #007acc;
+    }
+  }
+}
+
+.btn-migrate {
+  background: #007acc;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.2s;
+
+  &:hover:not(:disabled) {
+    background: #0056b3;
+  }
+
+  &:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+  }
+}
+
+.migration-status {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 20px;
+
+  h3 {
+    margin-top: 0;
+    color: #333;
+  }
+
+  .status-item {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 4px;
+    background: white;
+
+    &.completed {
+      background: #d4edda;
+      border-left: 4px solid #28a745;
+    }
+
+    &.running {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+    }
+
+    &.pending {
+      background: #e2e3e5;
+      border-left: 4px solid #6c757d;
+    }
+
+    &.failed {
+      background: #f8d7da;
+      border-left: 4px solid #dc3545;
+    }
+  }
+}

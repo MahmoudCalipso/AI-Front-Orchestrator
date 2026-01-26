@@ -28,25 +28,25 @@ export class DatabaseService extends BaseApiService {
 
     /**
      * Get language and framework registry
-     * GET /api/registry/languages
+     * GET /registry/languages
      */
     getLanguageRegistry(): Observable<LanguageRegistry> {
-        return this.get<LanguageRegistry>('/api/registry/languages');
+        return this.get<LanguageRegistry>('/registry/languages');
     }
 
     /**
      * Get specific language information
-     * GET /api/registry/languages/{language}
+     * GET /registry/languages/{language}
      */
     getLanguageInfo(language: string): Observable<any> {
-        return this.get<any>(`/api/registry/languages/${language}`);
+        return this.get<any>(`/registry/languages/${language}`);
     }
 
     /**
      * Get framework information
-     * GET /api/registry/languages/{language}/frameworks/{framework}
+     * GET /registry/languages/{language}/frameworks/{framework}
      */
     getFrameworkInfo(language: string, framework: string): Observable<any> {
-        return this.get<any>(`/api/registry/languages/${language}/frameworks/${framework}`);
+        return this.get<any>(`/registry/languages/${language}/frameworks/${framework}`);
     }
 }
