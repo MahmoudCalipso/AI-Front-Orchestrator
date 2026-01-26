@@ -1,0 +1,358 @@
+<div class="admin-dashboard">
+  <div class="header">
+    <h1>Admin Dashboard</h1>
+    <p>Manage users, projects, and system settings</p>
+  </div>
+
+  <mat-tab-group>
+    <!-- Users Tab -->
+    <mat-tab label="Users">
+      <div class="tab-content">
+        <!-- Filters Section -->
+        <mat-card class="filters-card">
+          <mat-card-content>
+            <div class="filters-row">
+              <mat-form-field appearance="outline" class="search-field">
+                <mat-label>Search Users</mat-label>
+                <input matInput
+                       placeholder="Search by name or email..."
+                       (input)="onUserSearch($event.target.value)"
+                       #userSearchInput>
+                <mat-icon matSuffix>search</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Role</mat-label>
+                <mat-select [(ngModel)]="userFilters.role" (selectionChange)="onUserFilterChange()">
+                  <mat-option value="">All Roles</mat-option>
+                  <mat-option *ngFor="let role of userRoleOptions" [value]="role.value">
+                    {{ role.label }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Status</mat-label>
+                <mat-select [(ngModel)]="userFilters.is_active" (selectionChange)="onUserFilterChange()">
+                  <mat-option value="">All Status</mat-option>
+                  <mat-option [value]="true">Active</mat-option>
+                  <mat-option [value]="false">Inactive</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Sort By</mat-label>
+                <mat-select [(ngModel)]="userFilters.sort_by" (selectionChange)="onUserFilterChange()">
+                  <mat-option *ngFor="let option of sortOptions" [value]="option.value">
+                    {{ option.label }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Order</mat-label>
+                <mat-select [(ngModel)]="userFilters.sort_direction" (selectionChange)="onUserFilterChange()">
+                  <mat-option value="asc">Ascending</mat-option>
+                  <mat-option value="desc">Descending</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <button mat-raised-button color="primary" (click)="loadUsers()">
+                <mat-icon>refresh</mat-icon>
+                Refresh
+              </button>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Users Table -->
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>User Management</mat-card-title>
+            <mat-card-subtitle>{{ filteredUsers.length }} users (showing page {{ userFilters.page || 1 }} of {{ getTotalPages(filteredUsers.length, userFilters.page_size || 10) }})</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="table-container" *ngIf="!usersLoading; else loadingSpinner">
+              <table mat-table [dataSource]="filteredUsers" matSort #userSort="matSort" class="user-table">
+                <ng-container matColumnDef="full_name">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+                  <td mat-cell *matCellDef="let user">{{ user.full_name || 'N/A' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="email">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+                  <td mat-cell *matCellDef="let user">{{ user.email }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="role">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Role</th>
+                  <td mat-cell *matCellDef="let user">
+                    <span class="role-badge" [class]="user.role">
+                      {{ user.role | titlecase }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="is_active">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+                  <td mat-cell *matCellDef="let user">
+                    <span class="status-badge" [class.active]="user.is_active"
+                          [class.inactive]="!user.is_active">
+                      {{ user.is_active ? 'Active' : 'Inactive' }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="created_at">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Created</th>
+                  <td mat-cell *matCellDef="let user">{{ user.created_at | date:'short' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef>Actions</th>
+                  <td mat-cell *matCellDef="let user">
+                    <button mat-icon-button (click)="updateUserRole(user)" matTooltip="Change Role">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button [class.suspended]="!user.is_active"
+                            (click)="toggleUserStatus(user)" matTooltip="Toggle Status">
+                      <mat-icon>{{ user.is_active ? 'block' : 'check_circle' }}</mat-icon>
+                    </button>
+                    <button mat-icon-button color="warn" (click)="deleteUser(user)" matTooltip="Delete User">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="userColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: userColumns;"></tr>
+              </table>
+
+              <mat-paginator #userPaginator="matPaginator"
+                            [pageSizeOptions]="[5, 10, 20, 50]"
+                            [pageSize]="userFilters.page_size"
+                            [pageIndex]="(userFilters.page || 1) - 1"
+                            [length]="filteredUsers.length"
+                            showFirstLastButtons>
+              </mat-paginator>
+            </div>
+
+            <ng-template #loadingSpinner>
+              <div class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+                <p>Loading users...</p>
+              </div>
+            </ng-template>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <!-- Projects Tab -->
+    <mat-tab label="Projects">
+      <div class="tab-content">
+        <!-- Filters Section -->
+        <mat-card class="filters-card">
+          <mat-card-content>
+            <div class="filters-row">
+              <mat-form-field appearance="outline" class="search-field">
+                <mat-label>Search Projects</mat-label>
+                <input matInput
+                       placeholder="Search by name, language, or framework..."
+                       (input)="onProjectSearch($event.target.value)"
+                       #projectSearchInput>
+                <mat-icon matSuffix>search</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Status</mat-label>
+                <mat-select [(ngModel)]="projectFilters.status" (selectionChange)="onProjectFilterChange()">
+                  <mat-option value="">All Status</mat-option>
+                  <mat-option *ngFor="let status of projectStatusOptions" [value]="status.value">
+                    {{ status.label }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Language</mat-label>
+                <mat-select [(ngModel)]="projectFilters.language" (selectionChange)="onProjectFilterChange()">
+                  <mat-option value="">All Languages</mat-option>
+                  <mat-option value="typescript">TypeScript</mat-option>
+                  <mat-option value="python">Python</mat-option>
+                  <mat-option value="javascript">JavaScript</mat-option>
+                  <mat-option value="java">Java</mat-option>
+                  <mat-option value="csharp">C#</mat-option>
+                  <mat-option value="go">Go</mat-option>
+                  <mat-option value="rust">Rust</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Framework</mat-label>
+                <mat-select [(ngModel)]="projectFilters.framework" (selectionChange)="onProjectFilterChange()">
+                  <mat-option value="">All Frameworks</mat-option>
+                  <mat-option value="nestjs">NestJS</mat-option>
+                  <mat-option value="fastapi">FastAPI</mat-option>
+                  <mat-option value="react">React</mat-option>
+                  <mat-option value="angular">Angular</mat-option>
+                  <mat-option value="spring">Spring Boot</mat-option>
+                  <mat-option value="dotnet">.NET</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Sort By</mat-label>
+                <mat-select [(ngModel)]="projectFilters.sort_by" (selectionChange)="onProjectFilterChange()">
+                  <mat-option *ngFor="let option of sortOptions" [value]="option.value">
+                    {{ option.label }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Order</mat-label>
+                <mat-select [(ngModel)]="projectFilters.sort_direction" (selectionChange)="onProjectFilterChange()">
+                  <mat-option value="asc">Ascending</mat-option>
+                  <mat-option value="desc">Descending</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <button mat-raised-button color="primary" (click)="loadProjects()">
+                <mat-icon>refresh</mat-icon>
+                Refresh
+              </button>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Projects Table -->
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Project Management</mat-card-title>
+            <mat-card-subtitle>{{ filteredProjects.length }} projects (showing page {{ projectFilters.page || 1 }} of {{ getTotalPages(filteredProjects.length, projectFilters.page_size || 10) }})</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="table-container" *ngIf="!projectsLoading; else loadingSpinner">
+              <table mat-table [dataSource]="filteredProjects" matSort #projectSort="matSort" class="project-table">
+                <ng-container matColumnDef="project_name">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+                  <td mat-cell *matCellDef="let project">{{ project.project_name }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="language">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Language</th>
+                  <td mat-cell *matCellDef="let project">
+                    <span class="language-badge">{{ project.language | titlecase }}</span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="framework">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Framework</th>
+                  <td mat-cell *matCellDef="let project">
+                    <span class="framework-badge">{{ project.framework | titlecase }}</span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+                  <td mat-cell *matCellDef="let project">
+                    <span class="status-badge" [class]="project.status">
+                      {{ project.status | titlecase }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="created_at">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Created</th>
+                  <td mat-cell *matCellDef="let project">{{ project.created_at | date:'short' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef>Actions</th>
+                  <td mat-cell *matCellDef="let project">
+                    <button mat-icon-button (click)="viewProject(project)" matTooltip="View Details">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                    <button mat-icon-button color="warn" (click)="deleteProject(project)" matTooltip="Delete Project">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="projectColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: projectColumns;"></tr>
+              </table>
+
+              <mat-paginator #projectPaginator="matPaginator"
+                            [pageSizeOptions]="[5, 10, 20, 50]"
+                            [pageSize]="projectFilters.page_size"
+                            [pageIndex]="(projectFilters.page || 1) - 1"
+                            [length]="filteredProjects.length"
+                            showFirstLastButtons>
+              </mat-paginator>
+            </div>
+
+            <ng-template #loadingSpinner>
+              <div class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+                <p>Loading projects...</p>
+              </div>
+            </ng-template>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <!-- System Tab -->
+    <mat-tab label="System">
+      <div class="tab-content">
+        <div class="metrics-grid">
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>System Metrics</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="metric-item">
+                <span class="metric-label">Total Users:</span>
+                <span class="metric-value">{{ systemMetrics.totalUsers }}</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-label">Active Projects:</span>
+                <span class="metric-value">{{ systemMetrics.activeProjects }}</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-label">System Load:</span>
+                <span class="metric-value">{{ systemMetrics.systemLoad }}%</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-label">Memory Usage:</span>
+                <span class="metric-value">{{ systemMetrics.memoryUsage }}%</span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Quick Actions</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <button mat-raised-button color="primary" (click)="refreshMetrics()">
+                <mat-icon>refresh</mat-icon>
+                Refresh Metrics
+              </button>
+              <button mat-raised-button (click)="runSystemCleanup()">
+                <mat-icon>cleaning_services</mat-icon>
+                System Cleanup
+              </button>
+              <button mat-raised-button (click)="backupSystem()">
+                <mat-icon>backup</mat-icon>
+                Create Backup
+              </button>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
