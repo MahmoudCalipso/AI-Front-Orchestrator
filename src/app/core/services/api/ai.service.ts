@@ -78,8 +78,14 @@ export class AIService extends BaseApiService {
    */
   runInference(request: InferenceRequest): Observable<InferenceResponse> {
     return this.post<InferenceResponse>('/inference', request, {
-      timeout: 120000 // 2 minutes for inference
     });
+  }
+
+  /**
+   * High-level chat interface for IDE
+   */
+  chat(payload: { project_id: string; message: string; context?: any }): Observable<any> {
+    return this.post<any>('/ai/chat', payload);
   }
 
   /**

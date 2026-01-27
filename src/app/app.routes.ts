@@ -46,5 +46,13 @@ export const routes: Routes = [
     path: 'testing',
     loadChildren: () => import('./features/testing/testing.routes').then(m => m.TESTING_ROUTES)
   },
+  {
+    path: 'admin',
+    loadChildren: () => import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES)
+  },
+  {
+    path: 'registry',
+    loadChildren: () => import('./features/registry/registry.routes').then(m => m.registryRoutes)
+  },
   { path: '**', redirectTo: 'dashboard' }
 ];

@@ -37,6 +37,17 @@
             <div class="res-status" [class]="'status-' + (res.status | statusColor)">
                 <mat-icon>fiber_manual_record</mat-icon>
                 <span>{{ res.status }}</span>
+                @if (res.type === 'Pod') {
+                <button mat-icon-button [matMenuTriggerFor]="k8sMenu" (click)="$event.stopPropagation()">
+                    <mat-icon class="more-icon">more_vert</mat-icon>
+                </button>
+                <mat-menu #k8sMenu="matMenu" class="glass-menu">
+                    <button mat-menu-item (click)="viewLogs(res.name)">
+                        <mat-icon>text_snippet</mat-icon>
+                        <span>View Logs</span>
+                    </button>
+                </mat-menu>
+                }
             </div>
         </div>
         } @empty {

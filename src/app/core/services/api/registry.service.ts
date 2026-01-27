@@ -28,21 +28,30 @@ export class RegistryService extends BaseApiService {
     }
 
     /**
-     * Get frameworks for a specific language
+     * Get all frameworks grouped by language
      * GET /api/registry/frameworks
      */
-    getFrameworks(language?: string): Observable<{
-        frameworks: Array<{
-            name: string;
-            language: string;
-            version: string;
-            latest_version: string;
-            description: string;
-            architectures?: string[];
-            dependencies?: string[];
-        }>;
+    getAllFrameworks(search?: string): Observable<{
+        status: string;
+        code: string;
+        message: string;
+        data: { [language: string]: { [framework: string]: any } };
+        meta?: { search?: string };
     }> {
-        return this.get('/api/registry/frameworks', language ? { language } : undefined);
+        return this.get('/api/registry/frameworks', search ? { search } : undefined);
+    }
+
+    /**
+     * Get frameworks for a specific language
+     * GET /api/registry/frameworks/{language}
+     */
+    getFrameworksByLanguage(language: string): Observable<{
+        status: string;
+        code: string;
+        message: string;
+        data: { [framework: string]: any };
+    }> {
+        return this.get(`/api/registry/frameworks/${language}`);
     }
 
     /**

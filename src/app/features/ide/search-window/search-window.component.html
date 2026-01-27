@@ -1,0 +1,99 @@
+<div class="search-window">
+    <div class="window-header">
+        <span>SEARCH</span>
+        <div class="header-actions">
+            <button mat-icon-button title="Clear Search" (click)="clearSearch()">
+                <mat-icon>clear_all</mat-icon>
+            </button>
+            <button mat-icon-button title="Refresh" (click)="performSearch()">
+                <mat-icon>refresh</mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <div class="search-controls">
+        <mat-form-field appearance="outline" class="search-input">
+            <input matInput [(ngModel)]="query" (keyup.enter)="performSearch()" placeholder="Search" #searchInput>
+            <div class="search-actions" matSuffix>
+                <button mat-icon-button [class.active]="matchCase()" (click)="toggleMatchCase()"
+                    matTooltip="Match Case">
+                    <span class="icon-label">Aa</span>
+                </button>
+                <button mat-icon-button [class.active]="wholeWord()" (click)="toggleWholeWord()"
+                    matTooltip="Match Whole Word">
+                    <span class="icon-label"><span style="text-decoration: underline;">ab</span></span>
+                </button>
+                <button mat-icon-button [class.active]="useRegex()" (click)="toggleRegex()"
+                    matTooltip="Use Regular Expression">
+                    <span class="icon-label">.*</span>
+                </button>
+            </div>
+        </mat-form-field>
+
+        <div class="advanced-filters">
+            <mat-expansion-panel class="filters-panel" [expanded]="showFilters">
+                <mat-expansion-panel-header>
+                    <mat-panel-title>
+                        <mat-icon>filter_list</mat-icon> files to include/exclude
+                    </mat-panel-title>
+                </mat-expansion-panel-header>
+
+                <div class="filter-inputs">
+                    <mat-form-field appearance="outline" class="small-field">
+                        <mat-label>files to include</mat-label>
+                        <input matInput [(ngModel)]="includePattern" placeholder="e.g. *.ts, src/**">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="small-field">
+                        <mat-label>files to exclude</mat-label>
+                        <input matInput [(ngModel)]="excludePattern" placeholder="e.g. *.spec.ts, node_modules">
+                    </mat-form-field>
+                </div>
+            </mat-expansion-panel>
+        </div>
+    </div>
+
+    @if (searching()) {
+    <mat-progress-bar mode="indeterminate" class="search-progress"></mat-progress-bar>
+    }
+
+    <div class="search-results">
+        @if (results().length > 0) {
+        <div class="results-header">
+            <span>{{ filteredResultsCount() }} results in {{ resultsByFile().length }} files</span>
+            <button mat-button class="collapse-btn" (click)="collapseAll()">Collapse All</button>
+        </div>
+
+        @for (fileGroup of resultsByFile(); track fileGroup.path) {
+        <div class="file-group">
+            <div class="file-header" (click)="toggleFile(fileGroup.path)">
+                <mat-icon class="toggle-icon">{{ isExpanded(fileGroup.path) ? 'expand_more' : 'chevron_right'
+                    }}</mat-icon>
+                <mat-icon class="file-type-icon">description</mat-icon>
+                <span class="file-name" [title]="fileGroup.path">{{ fileGroup.path }}</span>
+                <span class="count-badge">{{ fileGroup.matches.length }}</span>
+            </div>
+
+            @if (isExpanded(fileGroup.path)) {
+            <div class="matches-list">
+                @for (match of fileGroup.matches; track match.id) {
+                <div class="match-item" (click)="selectMatch(match)">
+                    <span class="line-num">{{ match.line }}</span>
+                    <span class="line-content" [innerHTML]="highlightMatch(match.content)"></span>
+                </div>
+                }
+            </div>
+            }
+        </div>
+        }
+        } @else if (query() && !searching()) {
+        <div class="no-results">
+            <mat-icon>search_off</mat-icon>
+            <p>No results found for "{{ query() }}"</p>
+            @if (includePattern || excludePattern) {
+            <span class="filter-hint">Check your inclusion/exclusion filters</span>
+            }
+        </div>
+        }
+    </div>
+</div>

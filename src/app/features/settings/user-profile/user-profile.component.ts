@@ -13,6 +13,7 @@ import { AuthService } from '../../../core/services/api/auth.service';
 import { CardComponent } from '../../../shared/components/card/card.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
     selector: 'app-user-profile',
@@ -38,6 +39,7 @@ import { ModalComponent } from '../../../shared/components/modal/modal.component
 export class UserProfileComponent implements OnInit {
     private fb = inject(FormBuilder);
     private authService = inject(AuthService);
+    private toast = inject(ToastService);
 
     user: any = null;
     profileForm!: FormGroup;
@@ -123,23 +125,37 @@ export class UserProfileComponent implements OnInit {
     }
 
     saveProfile(): void {
-        if (this.profileForm.invalid) return;
+        if (this.profileForm.invalid || !this.user) return;
 
         this.saving = true;
-        // API call to save profile
-        setTimeout(() => {
-            this.saving = false;
-            console.log('Profile saved', this.profileForm.value);
-        }, 1000);
+        this.authService.updateUser(this.user.id, this.profileForm.value).subscribe({
+            next: (updatedUser) => {
+                this.user = { ...this.user, ...updatedUser };
+                this.saving = false;
+                this.toast.success('Profile updated successfully');
+            },
+            error: (err) => {
+                this.saving = false;
+                this.toast.error('Failed to update profile');
+            }
+        });
     }
 
     savePreferences(): void {
+        if (!this.user) return;
         this.savingPreferences = true;
-        // API call to save preferences
-        setTimeout(() => {
-            this.savingPreferences = false;
-            console.log('Preferences saved', this.preferencesForm.value);
-        }, 1000);
+        // Assuming user preferences are part of the user object and updateable via updateUser
+        this.authService.updateUser(this.user.id, { preferences: this.preferencesForm.value }).subscribe({
+            next: (updatedUser) => {
+                this.user = { ...this.user, ...updatedUser };
+                this.savingPreferences = false;
+                this.toast.success('Preferences saved');
+            },
+            error: () => {
+                this.savingPreferences = false;
+                this.toast.error('Failed to save preferences');
+            }
+        });
     }
 
     resetForm(): void {

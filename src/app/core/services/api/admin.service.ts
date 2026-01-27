@@ -1,6 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BaseApiService } from './base-api.service';
+import {
+  AdminUserDTO,
+  AdminProjectDTO,
+  AdminUsersResponse,
+  AdminProjectsResponse,
+  SystemMetricsResponse,
+  UpdateUserRoleResponse
+} from '../../models/backend/dtos/responses/admin.responses';
 
 /**
  * Admin Service
@@ -15,19 +23,7 @@ export class AdminService extends BaseApiService {
      * Get all users (admin only)
      * GET /api/admin/users
      */
-    getUsers(params?: { page?: number; page_size?: number; role?: string }): Observable<{
-        users: Array<{
-            id: string;
-            username: string;
-            email: string;
-            role: string;
-            created_at: string;
-            is_active: boolean;
-        }>;
-        total: number;
-        page: number;
-        page_size: number;
-    }> {
+    getUsers(params?: { page?: number; page_size?: number; role?: string }): Observable<AdminUsersResponse> {
         return this.get('/api/admin/users', params);
     }
 
@@ -35,20 +31,7 @@ export class AdminService extends BaseApiService {
      * Get all projects (admin only)
      * GET /api/admin/projects
      */
-    getProjects(params?: { page?: number; page_size?: number; user_id?: string }): Observable<{
-        projects: Array<{
-            id: string;
-            name: string;
-            owner_id: string;
-            owner_username: string;
-            created_at: string;
-            status: string;
-            language: string;
-        }>;
-        total: number;
-        page: number;
-        page_size: number;
-    }> {
+    getProjects(params?: { page?: number; page_size?: number; user_id?: string }): Observable<AdminProjectsResponse> {
         return this.get('/api/admin/projects', params);
     }
 
@@ -71,16 +54,7 @@ export class AdminService extends BaseApiService {
      * Get system metrics
      * GET /api/admin/system/metrics
      */
-    getSystemMetrics(): Observable<{
-        total_users: number;
-        active_users: number;
-        total_projects: number;
-        active_projects: number;
-        total_storage_gb: number;
-        cpu_usage: number;
-        memory_usage: number;
-        disk_usage: number;
-    }> {
+    getSystemMetrics(): Observable<SystemMetricsResponse> {
         return this.get('/api/admin/system/metrics');
     }
 
@@ -103,5 +77,26 @@ export class AdminService extends BaseApiService {
      */
     activateUser(userId: string): Observable<{ message: string }> {
         return this.post(`/api/admin/users/${userId}/activate`, {});
+    }
+
+    /**
+     * Run system cleanup
+     */
+    runSystemCleanup(): Observable<{ message: string }> {
+        return this.post('/api/admin/system/cleanup', {});
+    }
+
+    /**
+     * Create system backup
+     */
+    createSystemBackup(): Observable<{ message: string; backup_id: string }> {
+        return this.post('/api/admin/system/backup', {});
+    }
+
+    /**
+     * Delete project (admin only)
+     */
+    deleteProject(projectId: string): Observable<{ message: string }> {
+        return this.delete(`/api/admin/projects/${projectId}`);
     }
 }

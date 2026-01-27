@@ -70,7 +70,8 @@
 
         <!-- Git Sidebar -->
         <mat-sidenav position="start" mode="side" [opened]="isGitOpen" class="git-sidebar" [style.width.px]="gitWidth">
-            <app-git-window [workspaceId]="workspaceId" (openDiff)="handleGitDiff($event)"></app-git-window>
+            <app-git-window [workspaceId]="workspaceId" [localPath]="'/workspaces/' + workspaceId"
+                (openDiff)="handleGitDiff($event)" (statusChanged)="handleGitStatusChange()"></app-git-window>
         </mat-sidenav>
 
         <!-- K8s Sidebar -->
@@ -86,7 +87,8 @@
 
         <!-- Right Chat Sidebar -->
         <mat-sidenav position="end" mode="side" [opened]="isChatOpen" class="chat-sidebar" [style.width.px]="chatWidth">
-            <app-ide-chat [contextFile]="getActiveGroup()?.activeFile?.name || null" (closeChat)="toggleChat()">
+            <app-ide-chat [workspaceId]="workspaceId" [contextFile]="getActiveGroup()?.activeFile?.name || null"
+                (closeChat)="toggleChat()" (applyChange)="handleAiApply($event)">
             </app-ide-chat>
         </mat-sidenav>
 
