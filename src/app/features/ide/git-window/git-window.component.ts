@@ -10,10 +10,13 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { GitService } from '../../../core/services/api/git.service';
-import { GitStatus, GitChange } from '../../../core/models/git/git.model';
+import { GitStatus, GitChange, GitBranch, GitCommit } from '../../../core/models/git/git.model';
 import { ToastService } from '../../../shared/services/toast.service';
 import { StatusColorPipe } from '../../../shared/pipes/status-color.pipe';
 import { Subscription } from 'rxjs';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatMenuModule } from '@angular/material/menu';
+import { DatePipe } from '@angular/common';
 
 
 @Component({
@@ -29,7 +32,10 @@ import { Subscription } from 'rxjs';
     MatInputModule,
     MatListModule,
     MatDividerModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatTabsModule,
+    MatMenuModule,
+    DatePipe
   ],
   templateUrl: './git-window.html',
   styleUrl: './git-window.scss',
@@ -48,11 +54,22 @@ export class GitWindowComponent {
   currentStatus: GitStatus | null = null;
   changes: GitChange[] = [];
 
+  // Branching
+  localBranches: GitBranch[] = [];
+  remoteBranches: GitBranch[] = [];
+  currentBranch: string = '';
+  newBranchName: string = '';
+
+  // History
+  commits: GitCommit[] = [];
+
   get stagedChanges() { return this.changes.filter(c => c.staged); }
   get unstagedChanges() { return this.changes.filter(c => !c.staged); }
 
   ngOnInit() {
     this.refreshStatus();
+    this.loadBranches();
+    this.loadHistory();
   }
 
   refreshStatus(): void {
@@ -117,6 +134,69 @@ export class GitWindowComponent {
       },
       error: (err) => {
         this.toast.error('Sync failed: ' + err.message);
+        this.isWorking = false;
+      }
+    });
+  }
+
+  loadBranches(): void {
+    if (!this.workspaceId) return;
+    this.gitService.listBranches(this.workspaceId, this.localPath).subscribe({
+      next: (res) => {
+        this.currentBranch = res.current_branch;
+        this.localBranches = res.branches.filter(b => !b.remote);
+        this.remoteBranches = res.branches.filter(b => b.remote);
+      }
+    });
+  }
+
+  loadHistory(): void {
+    if (!this.workspaceId) return;
+    this.gitService.getHistory(this.workspaceId, this.localPath).subscribe({
+      next: (res) => {
+        this.commits = res.commits;
+      }
+    });
+  }
+
+  checkoutBranch(branch: string): void {
+    this.isWorking = true;
+    this.gitService.checkoutBranch(this.workspaceId, {
+      local_path: this.localPath,
+      branch_name: branch
+    }).subscribe({
+      next: () => {
+        this.toast.success(`Switched to branch ${branch}`);
+        this.refreshStatus();
+        this.loadBranches();
+        this.loadHistory();
+        this.statusChanged.emit();
+        this.isWorking = false;
+      },
+      error: (err) => {
+        this.toast.error('Checkout failed: ' + err.message);
+        this.isWorking = false;
+      }
+    });
+  }
+
+  createNewBranch(): void {
+    if (!this.newBranchName.trim()) return;
+
+    this.isWorking = true;
+    this.gitService.checkoutBranch(this.workspaceId, {
+      local_path: this.localPath,
+      branch_name: this.newBranchName
+    }).subscribe({
+      next: () => {
+        this.toast.success(`Created and switched to ${this.newBranchName}`);
+        this.newBranchName = '';
+        this.loadBranches();
+        this.refreshStatus();
+        this.isWorking = false;
+      },
+      error: (err) => {
+        this.toast.error('Branch creation failed');
         this.isWorking = false;
       }
     });
