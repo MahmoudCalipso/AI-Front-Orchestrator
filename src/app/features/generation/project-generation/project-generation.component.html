@@ -1,0 +1,108 @@
+<div class="antigravity-view generation-view">
+  <div class="glass-header">
+    <div class="header-content">
+      <mat-icon class="header-icon">rocket_launch</mat-icon>
+      <div class="header-text">
+        <h1>Project Architect</h1>
+        <p>Orchestrate enterprise-grade codebases with AI precision.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="layout-grid">
+    <div class="card-glass config-card">
+      <div class="card-header">
+        <mat-icon>settings</mat-icon>
+        <h3>Core Specifications</h3>
+      </div>
+
+      <div class="form-container">
+        <mat-form-field appearance="outline">
+          <mat-label>Project Identity</mat-label>
+          <input matInput [(ngModel)]="projectName" placeholder="e.g. Nexus Core">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Architectural description</mat-label>
+          <textarea matInput [(ngModel)]="description" rows="4"
+            placeholder="Describe the service architecture, business logic requirements, and data models..."></textarea>
+        </mat-form-field>
+
+        <button mat-flat-button color="accent" class="analyze-btn" (click)="analyzeDescription()"
+          [disabled]="!description || loading">
+          <mat-spinner diameter="18" *ngIf="loading"></mat-spinner>
+          <mat-icon *ngIf="!loading">analytics</mat-icon>
+          Analyze Requirement
+        </button>
+
+        <div class="stack-selector">
+          <mat-form-field appearance="outline">
+            <mat-label>Target Language</mat-label>
+            <mat-select [(ngModel)]="selectedLanguage" (selectionChange)="onLanguageChange()">
+              <mat-option *ngFor="let lang of languages" [value]="lang.name">{{lang.display_name}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Primary Framework</mat-label>
+            <mat-select [(ngModel)]="selectedFramework">
+              <mat-option *ngFor="let fw of frameworks" [value]="fw.name">{{fw.name}} ({{fw.version}})</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-glass options-card">
+      <div class="card-header">
+        <mat-icon>storage</mat-icon>
+        <h3>Infrastructure & Features</h3>
+      </div>
+
+      <div class="db-grid">
+        <div class="db-item" [class.active]="selectedDatabase === 'postgresql'"
+          (click)="selectedDatabase = 'postgresql'">
+          <mat-icon>data_object</mat-icon>
+          <span>PostgreSQL</span>
+        </div>
+        <div class="db-item" [class.active]="selectedDatabase === 'mongodb'" (click)="selectedDatabase = 'mongodb'">
+          <mat-icon>account_tree</mat-icon>
+          <span>MongoDB</span>
+        </div>
+        <div class="db-item" [class.active]="selectedDatabase === 'redis'" (click)="selectedDatabase = 'redis'">
+          <mat-icon>memory</mat-icon>
+          <span>Redis</span>
+        </div>
+      </div>
+
+      <div class="feature-toggles">
+        <mat-slide-toggle [(ngModel)]="includeAuth">Security Layer (JWT)</mat-slide-toggle>
+        <mat-slide-toggle [(ngModel)]="includeRBAC">Access Control (RBAC)</mat-slide-toggle>
+        <mat-slide-toggle [(ngModel)]="includeKubernetes">Cloud Native (K8s)</mat-slide-toggle>
+      </div>
+
+      <div class="action-footer">
+        <button mat-fab extended color="primary" class="generate-btn"
+          [disabled]="!projectName || !selectedLanguage || !selectedFramework || generating"
+          (click)="generateProject()">
+          <mat-icon>auto_awesome</mat-icon>
+          Generate Foundation
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="analysis-overlay" *ngIf="analysis">
+    <div class="glass-chip">Project Type: {{analysis.project_type}}</div>
+    <div class="glass-chip">Complexity: {{analysis.estimated_complexity}}</div>
+    <div class="glass-chip">Timeline: {{analysis.estimated_time}}</div>
+  </div>
+
+  <div class="progress-overlay" *ngIf="generating">
+    <div class="progress-content">
+      <mat-spinner diameter="60"></mat-spinner>
+      <h2>Orchestrating Source...</h2>
+      <p>Building scaffolds, configuring DI, and wiring cloud manifests.</p>
+    </div>
+  </div>
+</div>

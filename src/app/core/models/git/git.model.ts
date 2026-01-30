@@ -105,6 +105,13 @@ export interface GitFileChange {
 }
 
 /**
+ * Git change (with staged status)
+ */
+export interface GitChange extends GitFileChange {
+  staged: boolean;
+}
+
+/**
  * Git branch info
  */
 export interface GitBranch {

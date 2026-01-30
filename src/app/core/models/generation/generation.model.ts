@@ -28,7 +28,7 @@ export interface FrontendConfig {
   version?: string;
   typescript?: boolean;
   ssr?: boolean;
-  styling?: 'css' | 'scss' | 'tailwind' | 'styled-components';
+  styling?: 'css' | 'scss' | 'tailwind' | 'styled-project-generation';
   ui_library?: string;
 }
 

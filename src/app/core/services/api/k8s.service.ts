@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { BaseApiService } from './base-api.service';
+import { StandardResponse } from '../../models/common/api-response.model';
 
 export interface K8sResource {
     name: string;
@@ -16,22 +17,18 @@ export interface K8sResource {
 export class K8sService extends BaseApiService {
 
     getNamespaces(): Observable<string[]> {
-        // return this.get<string[]>('/k8s/namespaces');
-        return of(['default', 'kube-system', 'monitoring', 'active-projects']);
+        return this.get<string[]>('/kubernetes/namespaces');
     }
 
     getResources(namespace: string): Observable<K8sResource[]> {
-        // return this.get<K8sResource[]>(`/k8s/resources/${namespace}`);
-        // Mock data for Phase 6 entry
-        return of([
-            { name: 'api-server-v1', status: 'Running', type: 'Pod', namespace, age: '2d' },
-            { name: 'worker-node-1', status: 'Running', type: 'Pod', namespace, age: '5h' },
-            { name: 'db-stack-primary', status: 'Pending', type: 'Deployment', namespace, age: '10m' },
-            { name: 'load-balancer', status: 'Ready', type: 'Service', namespace, age: '14d' }
-        ]);
+        return this.get<K8sResource[]>(`/kubernetes/resources/${namespace}`);
     }
 
-    getPodLogs(podName: string): Observable<string> {
-        return of(`[LOG] Initializing ${podName}...\n[LOG] Connection established.\n[LOG] Heartbeat OK.`);
+    getPodLogs(podName: string, namespace: string = 'default'): Observable<string> {
+        return this.get<string>(`/kubernetes/pods/${podName}/logs`, { namespace });
+    }
+
+    generateConfig(request: any): Observable<StandardResponse> {
+        return this.post<StandardResponse>('/kubernetes/generate', request);
     }
 }

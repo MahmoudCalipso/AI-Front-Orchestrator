@@ -5,80 +5,150 @@
             <button mat-icon-button (click)="sync()" [disabled]="isWorking" title="Sync Changes">
                 <mat-icon [class.rotate]="isWorking">sync</mat-icon>
             </button>
+            <button mat-icon-button title="More Actions" [matMenuTriggerFor]="gitMenu">
+                <mat-icon>more_horiz</mat-icon>
+            </button>
+            <mat-menu #gitMenu="matMenu" class="glass-menu">
+                <button mat-menu-item (click)="refreshStatus()">Refresh Status</button>
+            </mat-menu>
         </div>
     </div>
 
-    <mat-divider></mat-divider>
+    <mat-tab-group animationDuration="0ms" class="git-tabs" mat-stretch-tabs="false">
+        <!-- Changes Tab -->
+        <mat-tab label="Changes">
+            <div class="git-content tab-content" [class.loading]="isWorking">
+                <div class="commit-section">
+                    <mat-form-field appearance="outline" class="full-width dark-field">
+                        <mat-label>Commit message</mat-label>
+                        <textarea matInput [(ngModel)]="commitMessage" placeholder="What did you change?"
+                            rows="3"></textarea>
+                    </mat-form-field>
 
-    <div class="git-content" [class.loading]="isWorking">
-        <div class="commit-section">
-            <mat-form-field appearance="outline" class="full-width dark-field">
-                <mat-label>Commit message</mat-label>
-                <textarea matInput [(ngModel)]="commitMessage" placeholder="What did you change?" rows="3"></textarea>
-            </mat-form-field>
+                    <button mat-flat-button color="primary" class="full-width commit-btn" (click)="commitAndPush()"
+                        [disabled]="isWorking || !commitMessage">
+                        @if (!isWorking) {
+                        <mat-icon>publish</mat-icon>
+                        } @else {
+                        <mat-spinner diameter="20"></mat-spinner>
+                        }
+                        <span>Commit & Push</span>
+                    </button>
+                </div>
 
-            <button mat-flat-button color="primary" class="full-width commit-btn" (click)="commitAndPush()"
-                [disabled]="isWorking || !commitMessage">
-                @if (!isWorking) {
-                <mat-icon>publish</mat-icon>
-                } @else {
-                <mat-spinner diameter="20"></mat-spinner>
-                }
-                <span>Commit & Push</span>
-            </button>
-        </div>
+                <div class="changes-list">
+                    @if (stagedChanges.length > 0) {
+                    <div class="section-label">Staged Changes</div>
+                    <mat-list dense>
+                        @for (change of stagedChanges; track change.path) {
+                        <mat-list-item class="change-item staged">
+                            <mat-icon matListItemIcon [class]="(change.status | statusColor)">
+                                {{ change.status === 'added' ? 'add_circle' : change.status === 'deleted' ?
+                                'remove_circle' :
+                                'edit' }}
+                            </mat-icon>
+                            <div matListItemTitle class="file-path">{{ change.path }}</div>
+                            <div matListItemMeta class="item-actions">
+                                <button mat-icon-button (click)="openFileDiff(change.path)" title="View Diff">
+                                    <mat-icon>difference</mat-icon>
+                                </button>
+                                <button mat-icon-button (click)="toggleStage(change)" [title]="'Unstage'">
+                                    <mat-icon>remove</mat-icon>
+                                </button>
+                            </div>
+                        </mat-list-item>
+                        }
+                    </mat-list>
+                    }
 
-        <mat-divider></mat-divider>
+                    <div class="section-label">Changes</div>
+                    <mat-list dense>
+                        @for (change of unstagedChanges; track change.path) {
+                        <mat-list-item class="change-item">
+                            <mat-icon matListItemIcon [class]="(change.status | statusColor)">
+                                {{ change.status === 'added' ? 'add_circle' : change.status === 'deleted' ?
+                                'remove_circle' :
+                                'edit' }}
+                            </mat-icon>
+                            <div matListItemTitle class="file-path">{{ change.path }}</div>
+                            <div matListItemMeta class="item-actions">
+                                <button mat-icon-button (click)="openFileDiff(change.path)" title="View Diff">
+                                    <mat-icon>difference</mat-icon>
+                                </button>
+                                <button mat-icon-button (click)="toggleStage(change)" title="Stage">
+                                    <mat-icon>add</mat-icon>
+                                </button>
+                            </div>
+                        </mat-list-item>
+                        } @empty {
+                        @if (stagedChanges.length === 0) {
+                        <div class="empty-state">No changes detected</div>
+                        }
+                        }
+                    </mat-list>
+                </div>
+            </div>
+        </mat-tab>
 
-        <div class="changes-list">
-            @if (stagedChanges.length > 0) {
-            <div class="section-label">Staged Changes</div>
-            <mat-list dense>
-                @for (change of stagedChanges; track change.path) {
-                <mat-list-item class="change-item staged">
-                    <mat-icon matListItemIcon [class]="(change.status | statusColor)">
-                        {{ change.status === 'added' ? 'add_circle' : change.status === 'deleted' ? 'remove_circle' :
-                        'edit' }}
-                    </mat-icon>
-                    <div matListItemTitle class="file-path">{{ change.path }}</div>
-                    <div matListItemMeta class="item-actions">
-                        <button mat-icon-button (click)="openFileDiff(change.path)" title="View Diff">
-                            <mat-icon>difference</mat-icon>
-                        </button>
-                        <button mat-icon-button (click)="toggleStage(change)"
-                            [title]="change.staged ? 'Unstage' : 'Stage'">
-                            <mat-icon>{{ change.staged ? 'remove' : 'add' }}</mat-icon>
-                        </button>
-                    </div>
-                </mat-list-item>
-                }
-            </mat-list>
-            }
-
-            <div class="section-label">Changes</div>
-            <mat-list dense>
-                @for (change of unstagedChanges; track change.path) {
-                <mat-list-item class="change-item">
-                    <mat-icon matListItemIcon [class]="(change.status | statusColor)">
-                        {{ change.status === 'added' ? 'add_circle' : change.status === 'deleted' ? 'remove_circle' :
-                        'edit' }}
-                    </mat-icon>
-                    <div matListItemTitle class="file-path">{{ change.path }}</div>
-                    <div matListItemMeta class="item-actions">
-                        <button mat-icon-button (click)="openFileDiff(change.path)" title="View Diff">
-                            <mat-icon>difference</mat-icon>
-                        </button>
-                        <button mat-icon-button (click)="toggleStage(change)" title="Stage">
+        <!-- Branches Tab -->
+        <mat-tab label="Branches">
+            <div class="git-content tab-content" [class.loading]="isWorking">
+                <div class="new-branch-section">
+                    <mat-form-field appearance="outline" class="full-width dark-field small-field">
+                        <mat-label>New Branch Name</mat-label>
+                        <input matInput [(ngModel)]="newBranchName" (keyup.enter)="createNewBranch()">
+                        <button mat-icon-button matSuffix (click)="createNewBranch()" [disabled]="!newBranchName">
                             <mat-icon>add</mat-icon>
                         </button>
+                    </mat-form-field>
+                </div>
+
+                <div class="section-label">Local Branches</div>
+                <mat-list dense>
+                    @for (branch of localBranches; track branch.name) {
+                    <mat-list-item class="branch-item" [class.active]="branch.current"
+                        (click)="!branch.current && checkoutBranch(branch.name)">
+                        <mat-icon matListItemIcon>{{ branch.current ? 'radio_button_checked' : 'radio_button_unchecked'
+                            }}</mat-icon>
+                        <div matListItemTitle>{{ branch.name }}</div>
+                        @if(branch.current) {
+                        <div matListItemMeta class="current-badge">Current</div>
+                        }
+                    </mat-list-item>
+                    }
+                </mat-list>
+
+                <div class="section-label">Remote Branches</div>
+                <mat-list dense>
+                    @for (branch of remoteBranches; track branch.name) {
+                    <mat-list-item class="branch-item remote">
+                        <mat-icon matListItemIcon>cloud</mat-icon>
+                        <div matListItemTitle>{{ branch.name }}</div>
+                    </mat-list-item>
+                    }
+                </mat-list>
+            </div>
+        </mat-tab>
+
+        <!-- History Tab -->
+        <mat-tab label="History">
+            <div class="git-content tab-content history-view" [class.loading]="isWorking">
+                @for (commit of commits; track commit.hash) {
+                <div class="commit-item">
+                    <div class="commit-graph-node"></div>
+                    <div class="commit-info">
+                        <div class="commit-msg">{{ commit.message }}</div>
+                        <div class="commit-meta">
+                            <span class="author">{{ commit.author }}</span> •
+                            <span class="date">{{ commit.date | date:'short' }}</span>
+                        </div>
                     </div>
-                </mat-list-item>
+                    <div class="commit-hash">{{ commit.short_hash }}</div>
+                </div>
                 } @empty {
-                @if (stagedChanges.length === 0) {
-                <div class="empty-state">No changes detected</div>
+                <div class="empty-state">No history available</div>
                 }
-                }
-            </mat-list>
-        </div>
-    </div>
+            </div>
+        </mat-tab>
+    </mat-tab-group>
 </div>

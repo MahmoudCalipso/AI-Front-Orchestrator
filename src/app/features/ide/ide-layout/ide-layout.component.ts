@@ -14,10 +14,10 @@ import { IDEService } from '../../../core/services/api/ide.service';
 import { GitService } from '../../../core/services/api/git.service';
 import { ToastService } from '../../../shared/services/toast.service';
 import { IdeChatComponent } from '../ide-chat/ide-chat.component';
-import { GitWindowComponent } from '../git-window/git-window';
-import { K8sWindowComponent } from '../k8s-window/k8s-window';
+import { GitWindowComponent } from '../git-window/git-window.component';
+import { K8sWindowComponent } from '../k8s-window/k8s-window.component';
 import { SearchWindowComponent } from '../search-window/search-window.component';
-import { CommandPaletteComponent } from '../command-palette/command-palette';
+import { CommandPaletteComponent } from '../command-palette/command-palette.component';
 import { SignalStoreService } from '../../../core/services/signal-store.service';
 import { CommandService } from '../../../core/services/command.service';
 import { environment } from '../../../../environments/environment';
@@ -141,7 +141,20 @@ export class IdeLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     setTimeout(() => {
       this.editorGroups.forEach(g => g.editorInstance?.layout() || g.diffEditorInstance?.layout());
       this.fitAddon?.fit();
+      if (this.term) this.fitAddon?.fit();
     }, 300);
+  }
+
+  handleAiApply(code: string): void {
+    const group = this.getActiveGroup();
+    if (group && group.editorInstance) {
+      group.editorInstance.setValue(code);
+      this.toast.success('Code updated from AI suggestion');
+    }
+  }
+
+  handleGitStatusChange(): void {
+    this.loadProjectFiles(); // Refresh file tree on git changes
   }
 
   ngOnInit(): void {

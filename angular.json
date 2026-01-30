@@ -24,20 +24,26 @@
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
+            "allowedCommonJsDependencies": [
+              "monaco-editor"
+            ],
             "assets": [
               {
                 "glob": "**/*",
                 "input": "public"
               },
               {
-                "glob": "**/*",
-                "input": "node_modules/monaco-editor/min/vs",
-                "output": "/assets/monaco/vs"
+                "glob": "**/*.ttf",
+                "input": "node_modules/monaco-editor",
+                "output": "/assets/monaco"
               }
             ],
             "styles": [
               "src/styles.scss"
-            ]
+            ],
+            "loader": {
+              ".ttf": "file"
+            }
           },
           "configurations": {
             "production": {

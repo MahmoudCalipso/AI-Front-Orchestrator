@@ -1,0 +1,273 @@
+.admin-dashboard {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.header h1 {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.header p {
+  color: #666;
+}
+
+.tab-content {
+  padding: 20px 0;
+}
+
+.user-table, .project-table {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+
+  &.active {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  &.suspended {
+    background: #f8d7da;
+    color: #721c24;
+  }
+
+  &.running {
+    background: #d1ecf1;
+    color: #0c5460;
+  }
+
+  &.stopped {
+    background: #fff3cd;
+    color: #856404;
+  }
+
+  &.error {
+    background: #f8d7da;
+    color: #721c24;
+  }
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.metric-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.metric-item:last-child {
+  border-bottom: none;
+}
+
+.metric-label {
+  font-weight: 500;
+  color: #555;
+}
+
+.metric-value {
+  font-weight: 600;
+  color: #333;
+}
+
+mat-card-content button {
+  margin: 5px;
+}
+
+// Filters Section
+.filters-card {
+  margin-bottom: 20px;
+
+  mat-card-content {
+    padding: 16px !important;
+  }
+}
+
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+
+  mat-form-field {
+    min-width: 150px;
+    flex: 1;
+  }
+
+  .search-field {
+    min-width: 250px;
+    flex: 2;
+  }
+
+  button {
+    height: 40px;
+    margin-left: auto;
+  }
+}
+
+// Table Container
+.table-container {
+  overflow-x: auto;
+}
+
+// Loading States
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+
+  p {
+    margin-top: 16px;
+    color: #666;
+  }
+}
+
+// Enhanced Badges
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+
+  &.active {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  &.inactive {
+    background: #f8d7da;
+    color: #721c24;
+  }
+
+  &.running {
+    background: #d1ecf1;
+    color: #0c5460;
+  }
+
+  &.building {
+    background: #fff3cd;
+    color: #856404;
+  }
+
+  &.stopped {
+    background: #e2e3e5;
+    color: #383d41;
+  }
+
+  &.error {
+    background: #f8d7da;
+    color: #721c24;
+  }
+}
+
+.role-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+
+  &.admin {
+    background: #dc3545;
+    color: white;
+  }
+
+  &.enterprise {
+    background: #fd7e14;
+    color: white;
+  }
+
+  &.pro_developer {
+    background: #6f42c1;
+    color: white;
+  }
+
+  &.developer {
+    background: #007bff;
+    color: white;
+  }
+}
+
+.language-badge {
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 500;
+  background: #e9ecef;
+  color: #495057;
+}
+
+.framework-badge {
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 500;
+  background: #f8f9fa;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
+}
+
+// Table Enhancements
+.user-table, .project-table {
+  width: 100%;
+  margin-top: 20px;
+
+  th {
+    font-weight: 600;
+    color: #495057;
+  }
+
+  td {
+    padding: 12px 8px;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .filters-row {
+    flex-direction: column;
+    align-items: stretch;
+
+    .search-field {
+      min-width: auto;
+      flex: none;
+    }
+
+    mat-form-field {
+      min-width: auto;
+      flex: none;
+    }
+
+    button {
+      margin-left: 0;
+      margin-top: 8px;
+      align-self: flex-start;
+    }
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
