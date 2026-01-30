@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { BaseApiService } from './base-api.service';
+import { BaseResponse } from '../../models/index';
 
 /**
  * Registry Service
@@ -13,7 +14,7 @@ export class RegistryService extends BaseApiService {
 
     /**
      * Get all supported languages
-     * GET /api/registry/languages
+     * GET /api/v1/registry/languages
      */
     getLanguages(): Observable<{
         languages: Array<{
@@ -24,12 +25,14 @@ export class RegistryService extends BaseApiService {
             build_tool?: string;
         }>;
     }> {
-        return this.get('/api/registry/languages');
+        return this.get<BaseResponse<any>>('registry/languages').pipe(
+            map(res => res.data)
+        );
     }
 
     /**
      * Get frameworks for a specific language
-     * GET /api/registry/frameworks
+     * GET /api/v1/registry/frameworks
      */
     getFrameworks(language?: string): Observable<{
         frameworks: Array<{
@@ -42,12 +45,14 @@ export class RegistryService extends BaseApiService {
             dependencies?: string[];
         }>;
     }> {
-        return this.get('/api/registry/frameworks', language ? { language } : undefined);
+        return this.get<BaseResponse<any>>('registry/frameworks', language ? { language } : undefined).pipe(
+            map(res => res.data)
+        );
     }
 
     /**
      * Get specific framework details
-     * GET /api/registry/frameworks/{framework_name}
+     * GET /api/v1/registry/frameworks/{framework_name}
      */
     getFrameworkDetails(frameworkName: string): Observable<{
         name: string;
@@ -60,12 +65,14 @@ export class RegistryService extends BaseApiService {
         templates: string[];
         best_practices: string[];
     }> {
-        return this.get(`/api/registry/frameworks/${frameworkName}`);
+        return this.get<BaseResponse<any>>(`registry/frameworks/${frameworkName}`).pipe(
+            map(res => res.data)
+        );
     }
 
     /**
      * Update registry (fetch latest versions)
-     * POST /api/registry/update
+     * POST /api/v1/registry/update
      */
     updateRegistry(): Observable<{
         message: string;
@@ -73,11 +80,14 @@ export class RegistryService extends BaseApiService {
         languages_updated: string[];
         frameworks_updated: string[];
     }> {
-        return this.post('/api/registry/update', {});
+        return this.post<BaseResponse<any>>('registry/update', {}).pipe(
+            map(res => res.data)
+        );
     }
 
     /**
      * Get registry last update time
+     * GET /api/v1/registry/info
      */
     getRegistryInfo(): Observable<{
         last_updated: string;
@@ -85,11 +95,14 @@ export class RegistryService extends BaseApiService {
         total_frameworks: number;
         version: string;
     }> {
-        return this.get('/api/registry/info');
+        return this.get<BaseResponse<any>>('registry/info').pipe(
+            map(res => res.data)
+        );
     }
 
     /**
      * Search frameworks
+     * GET /api/v1/registry/search
      */
     searchFrameworks(query: string): Observable<{
         results: Array<{
@@ -100,6 +113,8 @@ export class RegistryService extends BaseApiService {
             relevance_score: number;
         }>;
     }> {
-        return this.get('/api/registry/search', { q: query });
+        return this.get<BaseResponse<any>>('registry/search', { q: query }).pipe(
+            map(res => res.data)
+        );
     }
 }

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { BaseApiService } from './base-api.service';
+import { BaseResponse } from '../../models/index';
 import {
   StorageStats,
   ProjectsListResponse,
@@ -22,74 +23,97 @@ export class StorageService extends BaseApiService {
 
   /**
    * Get storage statistics
-   * GET /api/storage/stats
+   * GET /api/v1/storage/stats
    */
   getStorageStats(): Observable<StorageStats> {
-    return this.get<StorageStats>('/api/storage/stats');
+    return this.get<BaseResponse<StorageStats>>('storage/stats').pipe(
+      map(res => res.data)
+    );
   }
 
   /**
    * List stored projects
-   * GET /api/storage/projects
+   * GET /api/v1/storage/projects
    */
   listProjects(params?: { page?: number; pageSize?: number; status?: string }): Observable<ProjectsListResponse> {
-    return this.get<ProjectsListResponse>('/api/storage/projects', params);
+    // Mapping params if needed, BaseApiService handles query params object
+    return this.get<BaseResponse<ProjectsListResponse>>('storage/projects', params).pipe(
+      map(res => res.data)
+    );
   }
 
   /**
    * Get project details
-   * GET /api/storage/projects/{project_id}
+   * GET /api/v1/storage/projects/{project_id}
    */
   getProjectDetails(projectId: string): Observable<ProjectDetails> {
-    return this.get<ProjectDetails>(`/api/storage/projects/${projectId}`);
+    return this.get<BaseResponse<ProjectDetails>>(`storage/projects/${projectId}`).pipe(
+      map(res => res.data)
+    );
   }
 
   /**
    * Delete project
-   * DELETE /api/storage/projects/{project_id}
+   * DELETE /api/v1/storage/projects/{project_id}
    */
   deleteProject(projectId: string): Observable<void> {
-    return this.delete<void>(`/api/storage/projects/${projectId}`);
+    return this.delete<BaseResponse<void>>(`storage/projects/${projectId}`).pipe(
+      map(res => res.data)
+    );
   }
 
   /**
    * Archive project
-   * POST /api/storage/archive/{project_id}
+   * POST /api/v1/storage/archive/{project_id}
    */
   archiveProject(projectId: string, request?: ArchiveProjectRequest): Observable<ArchiveProjectResponse> {
-    return this.post<ArchiveProjectResponse>(`/api/storage/archive/${projectId}`, request || {});
+    return this.post<BaseResponse<ArchiveProjectResponse>>(`storage/archive/${projectId}`, request || {}).pipe(
+      map(res => res.data)
+    );
   }
 
   /**
    * Cleanup old projects
-   * POST /api/storage/cleanup
+   * POST /api/v1/storage/cleanup
    */
   cleanupProjects(request: CleanupRequest): Observable<CleanupResponse> {
-    return this.post<CleanupResponse>('/api/storage/cleanup', request);
+    return this.post<BaseResponse<CleanupResponse>>('storage/cleanup', request).pipe(
+      map(res => res.data)
+    );
   }
 
   /**
    * Backup project
-   * POST /api/storage/backup/{project_id}
+   * POST /api/v1/storage/backup/{project_id}
    */
   backupProject(projectId: string, request?: BackupRequest): Observable<BackupResponse> {
-    return this.post<BackupResponse>(`/api/storage/backup/${projectId}`, request || {});
+    return this.post<BaseResponse<BackupResponse>>(`storage/backup/${projectId}`, request || {}).pipe(
+      map(res => res.data)
+    );
   }
 
   /**
    * Restore project from backup
-   * POST /api/storage/restore
+   * POST /api/v1/storage/restore
    */
   restoreProject(request: RestoreRequest): Observable<RestoreResponse> {
-    return this.post<RestoreResponse>('/api/storage/restore', request);
+    return this.post<BaseResponse<RestoreResponse>>('storage/restore', request).pipe(
+      map(res => res.data)
+    );
   }
 
   /**
    * Download project as ZIP
-   * GET /api/storage/projects/{project_id}/download
+   * GET /api/v1/storage/projects/{project_id}/download
+   * Returns Blob
    */
   downloadProject(projectId: string): Observable<Blob> {
-    return this.http.get(`${this.baseUrl}/api/storage/projects/${projectId}/download`, {
+    // For blob, we usually go direct or handle in BaseApi if supported.
+    // BaseApiService doesn't seem to have specific blob wrapper helper shown, so sticking to HttpClient but using baseUrl
+    // And constructing full path manually to be safe or use buildUrl logic if exposed
+    // But buildUrl is protected.
+    // I will assume simple concatenation for now, matching the previous logic but with /api/v1
+    return this.http.get(`${this.baseUrl}/api/v1/storage/projects/${projectId}/download`, {
       responseType: 'blob'
     });
   }

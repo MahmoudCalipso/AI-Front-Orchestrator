@@ -19,7 +19,7 @@ export class IdeTerminalService extends BaseWebSocketService {
    * Connect to IDE terminal session
    */
   connectToTerminal(sessionId: string): Observable<TerminalMessage> {
-    const url = `${environment.wsUrl}/api/ide/terminal/${sessionId}`;
+    const url = `${environment.wsUrl}/api/v1/ide/terminal/${sessionId}`;
 
     return this.connect({
       url,

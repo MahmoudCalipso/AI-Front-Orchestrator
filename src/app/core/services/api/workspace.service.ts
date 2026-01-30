@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { BaseApiService } from './base-api.service';
+import { BaseResponse } from '../../models/index';
 import {
     Workspace,
-    CreateWorkspaceRequest,
+    WorkspaceCreateRequest,
     UpdateWorkspaceRequest,
-    AddMemberRequest,
+    WorkspaceInviteRequest, // Updated from AddMemberRequest
     WorkspaceListResponse,
     WorkspaceMember
 } from '../../models/workspace/workspace.model';
-import { ApiResponse } from '../../models/common/api-response.model';
 
 /**
  * Workspace Service
@@ -22,81 +22,101 @@ export class WorkspaceService extends BaseApiService {
 
     /**
      * Create a new workspace
-     * POST /api/workspace
+     * POST /api/v1/workspace
      */
-    createWorkspace(request: CreateWorkspaceRequest): Observable<Workspace> {
-        return this.post<Workspace>('/api/workspace', request);
+    createWorkspace(request: WorkspaceCreateRequest): Observable<Workspace> {
+        return this.post<BaseResponse<Workspace>>('workspace', request).pipe(
+            map(res => res.data)
+        );
     }
 
     /**
      * Get workspace by ID
-     * GET /api/workspace/{workspace_id}
+     * GET /api/v1/workspace/{workspace_id}
      */
     getWorkspace(workspaceId: string): Observable<Workspace> {
-        return this.get<Workspace>(`/api/workspace/${workspaceId}`);
+        return this.get<BaseResponse<Workspace>>(`workspace/${workspaceId}`).pipe(
+            map(res => res.data)
+        );
     }
 
     /**
      * Update workspace
-     * PUT /api/workspace/{workspace_id}
+     * PUT /api/v1/workspace/{workspace_id}
      */
     updateWorkspace(workspaceId: string, request: UpdateWorkspaceRequest): Observable<Workspace> {
-        return this.put<Workspace>(`/api/workspace/${workspaceId}`, request);
+        return this.put<BaseResponse<Workspace>>(`workspace/${workspaceId}`, request).pipe(
+            map(res => res.data)
+        );
     }
 
     /**
      * Delete workspace
-     * DELETE /api/workspace/{workspace_id}
+     * DELETE /api/v1/workspace/{workspace_id}
      */
-    deleteWorkspace(workspaceId: string): Observable<ApiResponse> {
-        return this.delete<ApiResponse>(`/api/workspace/${workspaceId}`);
+    deleteWorkspace(workspaceId: string): Observable<any> {
+        return this.delete<BaseResponse<any>>(`workspace/${workspaceId}`).pipe(
+            map(res => res.data)
+        );
     }
 
     /**
      * List all workspaces for current user
-     * GET /api/workspace
+     * GET /api/v1/workspace
      */
     listWorkspaces(page: number = 1, pageSize: number = 20): Observable<WorkspaceListResponse> {
-        return this.get<WorkspaceListResponse>('/api/workspace', { page, page_size: pageSize });
+        return this.get<BaseResponse<WorkspaceListResponse>>('workspace', { page, page_size: pageSize }).pipe(
+            map(res => res.data)
+        );
     }
 
     /**
      * Get workspaces for a specific user
-     * GET /api/workspace/user/{user_id}
+     * GET /api/v1/workspace/user/{user_id}
      */
     getUserWorkspaces(userId: string): Observable<Workspace[]> {
-        return this.get<Workspace[]>(`/api/workspace/user/${userId}`);
+        return this.get<BaseResponse<Workspace[]>>(`workspace/user/${userId}`).pipe(
+            map(res => res.data)
+        );
     }
 
     /**
      * Get workspace members
-     * GET /api/workspace/{workspace_id}/members
+     * GET /api/v1/workspace/{workspace_id}/members
      */
     getWorkspaceMembers(workspaceId: string): Observable<WorkspaceMember[]> {
-        return this.get<WorkspaceMember[]>(`/api/workspace/${workspaceId}/members`);
+        return this.get<BaseResponse<WorkspaceMember[]>>(`workspace/${workspaceId}/members`).pipe(
+            map(res => res.data)
+        );
     }
 
     /**
      * Add member to workspace
-     * POST /api/workspace/{workspace_id}/members
+     * POST /api/v1/workspace/{workspace_id}/members
      */
-    addMember(workspaceId: string, request: AddMemberRequest): Observable<ApiResponse> {
-        return this.post<ApiResponse>(`/api/workspace/${workspaceId}/members`, request);
+    addMember(workspaceId: string, request: WorkspaceInviteRequest): Observable<any> {
+        return this.post<BaseResponse<any>>(`workspace/${workspaceId}/members`, request).pipe(
+            map(res => res.data)
+        );
     }
 
     /**
      * Remove member from workspace
-     * DELETE /api/workspace/{workspace_id}/members/{user_id}
+     * DELETE /api/v1/workspace/{workspace_id}/members/{user_id}
      */
-    removeMember(workspaceId: string, userId: string): Observable<ApiResponse> {
-        return this.delete<ApiResponse>(`/api/workspace/${workspaceId}/members/${userId}`);
+    removeMember(workspaceId: string, userId: string): Observable<any> {
+        return this.delete<BaseResponse<any>>(`workspace/${workspaceId}/members/${userId}`).pipe(
+            map(res => res.data)
+        );
     }
 
     /**
      * Update member role
-     * PATCH /api/workspace/{workspace_id}/members/{user_id}
+     * PATCH /api/v1/workspace/{workspace_id}/members/{user_id}
      */
-    updateMemberRole(workspaceId: string, userId: string, role: string): Observable<ApiResponse> {
-        return this.patch<ApiResponse>(`/api/workspace/${workspaceId}/members/${userId}`, { role });
+    updateMemberRole(workspaceId: string, userId: string, role: string): Observable<any> {
+        return this.patch<BaseResponse<any>>(`workspace/${workspaceId}/members/${userId}`, { role }).pipe(
+            map(res => res.data)
+        );
     }
 }

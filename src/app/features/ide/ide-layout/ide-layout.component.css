@@ -1,28 +1,38 @@
+/* IDE Container */
 .ide-container {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    background: var(--bg-primary);
+    background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
     overflow: hidden;
+    color: var(--text-primary);
 }
 
+/* Toolbar */
 .ide-toolbar {
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border-primary);
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--glass-border);
     height: 56px;
-    padding: 0 var(--spacing-md);
+    padding: 0 var(--space-4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 10;
+    box-shadow: var(--shadow-sm);
 }
 
 .toolbar-title {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    font-weight: 500;
+    gap: var(--space-2);
+    font-weight: 600;
     color: var(--text-primary);
+    font-size: 0.9375rem;
 }
 
 .toolbar-title mat-icon {
-    color: var(--accent-400);
+    color: var(--primary-400);
 }
 
 .spacer {
@@ -31,31 +41,35 @@
 
 .ide-sidenav-container {
     flex: 1;
-    background: var(--bg-primary);
+    background: transparent;
 }
 
-/* File Explorer */
+/* Sidebars */
+.file-explorer,
+.chat-sidebar,
+.git-sidebar,
+.k8s-sidebar {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
 .file-explorer {
-    background: var(--bg-secondary);
-    border-right: none;
+    border-right: 1px solid var(--glass-border);
 }
 
 .chat-sidebar {
-    background: var(--bg-secondary);
-    border-left: none;
-    overflow: hidden;
+    border-left: 1px solid var(--glass-border);
 }
 
 .git-sidebar {
-    background: var(--bg-secondary);
-    border-right: none;
-    overflow: hidden;
+    border-right: 1px solid var(--glass-border);
 }
 
 .k8s-sidebar {
-    background: var(--bg-secondary);
-    border-right: none;
-    overflow: hidden;
+    border-right: 1px solid var(--glass-border);
 }
 
 /* Resize Gutters */
@@ -75,7 +89,7 @@
 
 .resize-gutter.vertical:hover,
 .resize-gutter.vertical:active {
-    background: var(--accent-500);
+    background: var(--primary-500);
 }
 
 .resize-gutter.horizontal {
@@ -87,7 +101,7 @@
 
 .resize-gutter.horizontal:hover,
 .resize-gutter.horizontal:active {
-    background: var(--accent-500);
+    background: var(--primary-500);
 }
 
 .resize-gutter.right {
@@ -95,121 +109,92 @@
     right: 0;
 }
 
-/* IDE Content */
-.ide-content {
-    background: #1e1e1e;
-    display: flex;
-    flex-direction: column;
-}
-
-.spacer-sm {
-    width: 8px;
-}
-
-.accent-color {
-    color: var(--accent-secondary);
-    /* Neon Blue */
-}
-
+/* Explorer Styles */
 .explorer-header {
-    padding: 10px 16px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    color: var(--text-secondary);
-    background: rgba(255, 255, 255, 0.02);
+    padding: var(--space-3) var(--space-4);
+    background: rgba(255, 255, 255, 0.03);
     border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .explorer-header h3 {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
+    gap: var(--space-2);
     margin: 0;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     font-weight: 600;
-    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
 }
 
 .explorer-header mat-icon {
-    color: var(--accent-400);
+    color: var(--primary-400);
     font-size: 18px;
     width: 18px;
     height: 18px;
 }
 
 .file-tree {
-    padding: var(--spacing-sm) 0;
+    padding: var(--space-2) 0;
+    overflow-y: auto;
+    flex: 1;
 }
 
 .file-node {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-sm) var(--spacing-md);
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-4);
     cursor: pointer;
-    transition: background var(--transition-fast);
+    transition: all 150ms;
     font-size: 0.875rem;
-    color: var(--text-primary);
+    color: var(--text-secondary);
+    border-left: 2px solid transparent;
 }
 
 .file-node:hover {
-    background: var(--bg-hover);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    border-left-color: var(--primary-500);
+}
+
+.file-node.active {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--primary-300);
+    border-left-color: var(--primary-500);
 }
 
 .file-node mat-icon {
     font-size: 18px;
     width: 18px;
     height: 18px;
-    color: var(--accent-400);
+    color: var(--text-tertiary);
+}
+
+.file-node:hover mat-icon {
+    color: var(--primary-400);
 }
 
 .file-children {
-    padding-left: var(--spacing-lg);
+    padding-left: var(--space-3);
 }
 
-.file-node.child {
-    padding-left: var(--spacing-xl);
-}
-
-/* IDE Content */
+/* IDE Content Area */
 .ide-content {
     display: flex;
     flex-direction: column;
-    background: var(--bg-primary);
+    background: #1e1e1e;
+    height: 100%;
 }
 
-/* Open Files Tabs */
-.open-files-tabs {
-    display: flex;
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border-primary);
-    overflow-x: auto;
-}
-
-.file-tab {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-right: 1px solid var(--border-primary);
-    cursor: pointer;
-    transition: background var(--transition-fast);
-    white-space: nowrap;
-}
-
-.editor-area {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    background-color: #1e1e1e;
-}
-
+/* Editor Groups */
 .editor-groups-container {
     flex: 1;
     display: flex;
-    flex-direction: row;
     overflow: hidden;
 }
 
@@ -219,7 +204,6 @@
     flex-direction: column;
     border-right: 1px solid #333;
     min-width: 0;
-    /* Prevent flex overflow */
 }
 
 .editor-group:last-child {
@@ -227,7 +211,7 @@
 }
 
 .group-header {
-    height: 35px;
+    height: 36px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -241,75 +225,60 @@
     flex: 1;
 }
 
-.group-actions {
-    display: flex;
-    align-items: center;
-}
-
-.group-actions button {
-    width: 28px;
-    height: 28px;
-    line-height: 28px;
-    color: #ccc;
-}
-
-.group-actions mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-}
-
 .editor-tab {
-    padding: 0 10px;
-    height: 35px;
+    padding: 0 var(--space-3);
+    height: 36px;
     display: flex;
     align-items: center;
-    color: #969696;
+    gap: var(--space-2);
+    color: var(--text-secondary);
     cursor: pointer;
     border-right: 1px solid #333;
-    font-size: 13px;
+    font-size: 0.8125rem;
     user-select: none;
-    white-space: nowrap;
+    transition: background 150ms;
 }
 
 .editor-tab.active {
     background-color: #1e1e1e;
     color: #fff;
-    border-top: 1px solid #007acc;
+    border-top: 2px solid var(--primary-500);
 }
 
-.editor-tab:hover {
+.editor-tab:hover:not(.active) {
     background-color: #2a2d2e;
 }
 
 .close-icon {
-    margin-left: 8px;
     font-size: 14px;
     opacity: 0;
-    border-radius: 3px;
-    padding: 0 2px;
+    border-radius: var(--radius-sm);
+    padding: 2px;
+    transition: all 150ms;
 }
 
 .editor-tab:hover .close-icon {
-    opacity: 1;
+    opacity: 0.7;
 }
 
 .close-icon:hover {
-    background-color: #444;
+    background-color: rgba(255, 255, 255, 0.1);
+    opacity: 1 !important;
 }
 
 .monaco-container {
     flex: 1;
     min-height: 0;
-    /* Necessary for nested flex containers */
     width: 100%;
 }
 
 /* Bottom Panel */
 .bottom-panel {
-    height: 250px;
-    background: var(--bg-secondary);
+    height: 280px;
+    background: #1e1e1e;
     border-top: 1px solid var(--border-primary);
+    display: flex;
+    flex-direction: column;
 }
 
 /* Terminal */
@@ -317,33 +286,10 @@
     height: 100%;
     width: 100%;
     background: #1e1e1e;
-    overflow: hidden;
-    padding: 8px;
-    border-radius: 4px;
+    padding: var(--space-2);
 }
 
-/* Override xterm scrollbar if needed */
-.xterm-viewport {
-    scrollbar-width: thin;
-    scrollbar-color: var(--scrollbar-thumb) transparent;
-}
-
-.terminal-placeholder {
-    display: none;
-}
-
-.terminal-demo {
-    display: none;
-}
-
-.empty-state {
-    text-align: center;
-    color: var(--text-tertiary);
-    padding: var(--spacing-xl);
-    font-size: 0.875rem;
-}
-
-/* Material Tab Customization */
+/* Material Tabs Override for Bottom Panel */
 ::ng-deep .mat-mdc-tab-group {
     height: 100%;
 }
@@ -353,23 +299,61 @@
 }
 
 ::ng-deep .mat-mdc-tab-labels {
-    background: var(--bg-secondary);
+    background: #252526 !important;
+    border-bottom: 1px solid #333;
 }
 
 ::ng-deep .mat-mdc-tab {
-    color: var(--text-secondary);
+    color: var(--text-secondary) !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    height: 36px !important;
+    padding: 0 var(--space-3) !important;
+    min-width: 80px !important;
 }
 
 ::ng-deep .mat-mdc-tab.mdc-tab--active {
-    color: var(--accent-400);
+    color: var(--primary-400) !important;
 }
 
-@media (max-width: 768px) {
-    .file-explorer {
-        width: 200px;
-    }
+::ng-deep .mdc-tab-indicator__content--underline {
+    border-color: var(--primary-500) !important;
+}
 
-    .bottom-panel {
-        height: 200px;
-    }
+/* Scrollbars */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Empty State */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-tertiary);
+    opacity: 0.5;
+}
+
+.empty-state mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: var(--space-4);
 }

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { BaseApiService } from './base-api.service';
+import { BaseResponse } from '../../models/index';
 import {
   IDEWorkspaceRequest,
   IDEWorkspace,
@@ -23,7 +24,6 @@ import {
   RefactorRequest,
   RefactorResponse
 } from '../../models/ai-agent/ai-agent.model';
-import { StandardResponse } from '../../models/common/api-response.model';
 import { GitDiffResponse } from '../../models/git/git.model';
 
 /**
@@ -37,174 +37,208 @@ export class IDEService extends BaseApiService {
 
   /**
    * Get project structure
-   * GET /ide/structure/{workspace_id}
+   * GET /api/v1/ide/structure/{workspace_id}
    */
   getProjectStructure(workspaceId: string): Observable<{ files: FileTreeNode[] }> {
-    return this.get<{ files: FileTreeNode[] }>(`/ide/structure/${workspaceId}`);
+    return this.get<BaseResponse<{ files: FileTreeNode[] }>>(`ide/structure/${workspaceId}`).pipe(
+      map(res => res.data)
+    );
   }
 
   /**
    * Get file content
-   * GET /ide/files/{workspace_id}/{path}
+   * GET /api/v1/ide/files/{workspace_id}/{path}
    */
   getFileContent(workspaceId: string, filePath: string): Observable<FileContentResponse> {
-    return this.get<FileContentResponse>(`/ide/files/${workspaceId}/${encodeURIComponent(filePath)}`);
+    return this.get<BaseResponse<FileContentResponse>>(`ide/files/${workspaceId}/${encodeURIComponent(filePath)}`).pipe(
+      map(res => res.data)
+    );
   }
 
   /**
    * Update file content
-   * PATCH /ide/files/{workspace_id}/{path}
+   * PATCH /api/v1/ide/files/{workspace_id}/{path}
    */
-  updateFileContent(workspaceId: string, filePath: string, request: IDEFileWriteRequest): Observable<StandardResponse> {
-    return this.patch<StandardResponse>(`/ide/files/${workspaceId}/${encodeURIComponent(filePath)}`, request);
+  updateFileContent(workspaceId: string, filePath: string, request: IDEFileWriteRequest): Observable<any> {
+    return this.patch<BaseResponse<any>>(`ide/files/${workspaceId}/${encodeURIComponent(filePath)}`, request).pipe(
+      map(res => res.data)
+    );
   }
 
   /**
    * Create terminal session
-   * POST /ide/terminal
+   * POST /api/v1/ide/terminal
    */
-  createTerminal(request: IDETerminalRequest): Observable<TerminalSession & StandardResponse> {
-    return this.post<TerminalSession & StandardResponse>('/ide/terminal', request);
+  createTerminal(request: IDETerminalRequest): Observable<TerminalSession> {
+    return this.post<BaseResponse<TerminalSession>>('ide/terminal', request).pipe(
+      map(res => res.data)
+    );
   }
 
-  // ==================== Debugging ====================
+  // ==================== IDE Workspace ====================
 
   /**
    * Create IDE workspace
-   * POST /ide/workspace
+   * POST /api/v1/ide/workspace
    */
-  createWorkspace(request: IDEWorkspaceRequest): Observable<StandardResponse> {
-    return this.post<StandardResponse>('/ide/workspace', request);
+  createWorkspace(request: IDEWorkspaceRequest): Observable<any> {
+    return this.post<BaseResponse<any>>('ide/workspace', request).pipe(
+      map(res => res.data)
+    );
   }
 
   // ==================== File Operations ====================
 
   /**
    * Read file content
-   * GET /ide/files/{workspace_id}/{path}
+   * GET /api/v1/ide/files/{workspace_id}/{path}
    */
   readFile(workspaceId: string, filePath: string): Observable<FileContentResponse> {
-    return this.get<FileContentResponse>(`/ide/files/${workspaceId}/${encodeURIComponent(filePath)}`);
+    // Alias to getFileContent
+    return this.getFileContent(workspaceId, filePath);
   }
 
   /**
    * Write file content
-   * POST /ide/files/{workspace_id}/{path}
+   * POST /api/v1/ide/files/{workspace_id}/{path}
    */
-  writeFile(workspaceId: string, filePath: string, content: string): Observable<StandardResponse> {
+  writeFile(workspaceId: string, filePath: string, content: string): Observable<any> {
     const request: IDEFileWriteRequest = { content };
-    return this.post<StandardResponse>(`/ide/files/${workspaceId}/${encodeURIComponent(filePath)}`, request);
+    return this.post<BaseResponse<any>>(`ide/files/${workspaceId}/${encodeURIComponent(filePath)}`, request).pipe(
+      map(res => res.data)
+    );
   }
 
   /**
    * Delete file
-   * DELETE /ide/files/{workspace_id}/{path}
+   * DELETE /api/v1/ide/files/{workspace_id}/{path}
    */
-  deleteFile(workspaceId: string, filePath: string): Observable<StandardResponse> {
-    return this.delete<StandardResponse>(`/ide/files/${workspaceId}/${encodeURIComponent(filePath)}`);
+  deleteFile(workspaceId: string, filePath: string): Observable<any> {
+    return this.delete<BaseResponse<any>>(`ide/files/${workspaceId}/${encodeURIComponent(filePath)}`).pipe(
+      map(res => res.data)
+    );
   }
 
   /**
    * List files in directory
-   * GET /ide/files/{workspace_id}
+   * GET /api/v1/ide/files/{workspace_id}
    */
   listFiles(workspaceId: string, directory: string = '.'): Observable<{ files: FileInfo[] }> {
-    return this.get<{ files: FileInfo[] }>(`/ide/files/${workspaceId}`, { directory });
+    return this.get<BaseResponse<{ files: FileInfo[] }>>(`ide/files/${workspaceId}`, { directory }).pipe(
+      map(res => res.data)
+    );
   }
 
   /**
    * Get complete file tree
-   * GET /ide/tree/{workspace_id}
+   * GET /api/v1/ide/tree/{workspace_id}
    */
   getFileTree(workspaceId: string): Observable<FileTreeNode> {
-    return this.get<FileTreeNode>(`/ide/tree/${workspaceId}`);
+    return this.get<BaseResponse<FileTreeNode>>(`ide/tree/${workspaceId}`).pipe(
+      map(res => res.data)
+    );
   }
 
   // ==================== Debugging ====================
 
   /**
    * Create debug session
-   * POST /ide/debug
+   * POST /api/v1/ide/debug
    */
-  createDebugSession(request: IDEDebugRequest): Observable<StandardResponse> {
-    return this.post<StandardResponse>('/ide/debug', request);
+  createDebugSession(request: IDEDebugRequest): Observable<any> {
+    return this.post<BaseResponse<any>>('ide/debug', request).pipe(
+      map(res => res.data)
+    );
   }
 
   /**
    * Handle DAP message
-   * POST /ide/debug/{session_id}/dap
+   * POST /api/v1/ide/debug/{session_id}/dap
    */
   handleDAPMessage(sessionId: string, message: DAPMessage): Observable<DAPMessage> {
-    return this.post<DAPMessage>(`/ide/debug/${sessionId}/dap`, message);
+    return this.post<BaseResponse<DAPMessage>>(`ide/debug/${sessionId}/dap`, message).pipe(
+      map(res => res.data)
+    );
   }
 
   // ==================== Code Intelligence ====================
 
   /**
    * Get code completions
-   * POST /ide/intelligence/completions/{workspace_id}/{path}
+   * POST /api/v1/ide/intelligence/completions/{workspace_id}/{path}
    */
   getCompletions(
     workspaceId: string,
     filePath: string,
     request: CompletionRequest
   ): Observable<{ completions: CompletionItem[] }> {
-    return this.post<{ completions: CompletionItem[] }>(
-      `/ide/intelligence/completions/${workspaceId}/${encodeURIComponent(filePath)}`,
+    return this.post<BaseResponse<{ completions: CompletionItem[] }>>(
+      `ide/intelligence/completions/${workspaceId}/${encodeURIComponent(filePath)}`,
       request
+    ).pipe(
+      map(res => res.data)
     );
   }
 
   /**
    * Get hover information
-   * POST /ide/intelligence/hover/{workspace_id}/{path}
+   * POST /api/v1/ide/intelligence/hover/{workspace_id}/{path}
    */
   getHoverInfo(
     workspaceId: string,
     filePath: string,
     request: HoverRequest
   ): Observable<HoverInfo> {
-    return this.post<HoverInfo>(
-      `/ide/intelligence/hover/${workspaceId}/${encodeURIComponent(filePath)}`,
+    return this.post<BaseResponse<HoverInfo>>(
+      `ide/intelligence/hover/${workspaceId}/${encodeURIComponent(filePath)}`,
       request
+    ).pipe(
+      map(res => res.data)
     );
   }
 
   /**
    * Get diagnostics
-   * GET /ide/intelligence/diagnostics/{workspace_id}/{path}
+   * GET /api/v1/ide/intelligence/diagnostics/{workspace_id}/{path}
    */
   getDiagnostics(
     workspaceId: string,
     filePath: string,
     language?: string
   ): Observable<{ diagnostics: Diagnostic[] }> {
-    return this.get<{ diagnostics: Diagnostic[] }>(
-      `/ide/intelligence/diagnostics/${workspaceId}/${encodeURIComponent(filePath)}`,
+    return this.get<BaseResponse<{ diagnostics: Diagnostic[] }>>(
+      `ide/intelligence/diagnostics/${workspaceId}/${encodeURIComponent(filePath)}`,
       { language }
+    ).pipe(
+      map(res => res.data)
     );
   }
 
   /**
    * AI-powered refactoring
-   * POST /ide/intelligence/refactor/{workspace_id}/{path}
+   * POST /api/v1/ide/intelligence/refactor/{workspace_id}/{path}
    */
   aiRefactor(
     workspaceId: string,
     filePath: string,
     request: RefactorRequest
   ): Observable<RefactorResponse> {
-    return this.post<RefactorResponse>(
-      `/ide/intelligence/refactor/${workspaceId}/${encodeURIComponent(filePath)}`,
+    return this.post<BaseResponse<RefactorResponse>>(
+      `ide/intelligence/refactor/${workspaceId}/${encodeURIComponent(filePath)}`,
       request,
       { timeout: 60000 }
+    ).pipe(
+      map(res => res.data)
     );
   }
 
   /**
    * Search files in workspace
+   * GET /api/v1/ide/search/{workspace_id}
    */
   searchFiles(workspaceId: string, query: string): Observable<any> {
-    return this.get(`/ide/search/${workspaceId}`, { query });
+    return this.get<BaseResponse<any>>(`ide/search/${workspaceId}`, { query }).pipe(
+      map(res => res.data)
+    );
   }
 }

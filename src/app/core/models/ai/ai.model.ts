@@ -1,194 +1,162 @@
 /**
- * AI Model information
+ * AI Models matching OpenAPI definitions
  */
-export interface AIModel {
-  name: string;
-  provider: string;
-  type: 'chat' | 'code' | 'embedding';
-  context_length: number;
-  loaded: boolean;
-  memory_usage?: number;
-  parameters?: Record<string, any>;
-}
+
+import { ProjectCreateRequest, ProjectResponse } from '../project/project.model';
 
 /**
- * AI Models list response
+ * Task type enumeration
  */
-export interface AIModelsResponse {
-  models: AIModel[];
-  pagination: {
-    page: number;
-    page_size: number;
-    total: number;
-    total_pages: number;
-  };
-}
-
-/**
- * Inference request
- */
-export interface InferenceRequest {
-  prompt: string;
-  task_type: TaskType;
-  model?: string;
-  parameters?: InferenceParameters;
-  context?: Record<string, any>;
-}
-
 export type TaskType =
   | 'code_generation'
-  | 'code_completion'
-  | 'code_explanation'
   | 'code_review'
-  | 'code_fix'
-  | 'code_refactor'
-  | 'code_test'
-  | 'code_optimize'
+  | 'reasoning'
+  | 'quick_query'
+  | 'creative_writing'
+  | 'data_analysis'
+  | 'documentation'
   | 'chat'
-  | 'analysis';
+  | 'embedding';
 
 /**
- * Inference parameters
+ * Model capabilities
  */
-export interface InferenceParameters {
-  temperature?: number;
-  max_tokens?: number;
-  top_p?: number;
-  top_k?: number;
-  stop_sequences?: string[];
+export interface ModelInfo {
+  name: string;
+  family: string;
+  size: string;
+  context_length: number;
+  capabilities: string[];
+  specialization: string;
+  status: 'available' | 'loading' | 'loaded' | 'unloading' | 'error' | 'unavailable';
+  quantization?: string[];
+}
+
+/**
+ * Orchestration execution mode
+ */
+export type ExecutionMode = 'sequential' | 'parallel' | 'hierarchical';
+
+/**
+ * Agent selection mode
+ */
+export type AgentSelectionMode = 'auto' | 'manual';
+
+/**
+ * Orchestration Request
+ */
+export interface OrchestrationRequest {
+  prompt: string;
+  context?: OrchestrationContext;
+  agent_selection?: AgentSelectionMode;
+  specific_agents?: string[];
+  execution_mode?: ExecutionMode;
   stream?: boolean;
+  max_iterations?: number;
 }
 
 /**
- * Inference response
+ * Orchestration Context
  */
-export interface InferenceResponse {
-  output: string;
-  model: string;
-  task_type: string;
-  tokens_used: number;
-  latency_ms: number;
-  metadata?: Record<string, any>;
+export interface OrchestrationContext {
+  code?: string;
+  files?: FileContext[];
+  conversation_history?: MessageDTO[];
+  external_context?: Record<string, any>;
 }
 
 /**
- * Code fix request
+ * File Context
  */
-export interface FixCodeRequest {
+export interface FileContext {
+  path: string;
+  content: string;
+  language?: string;
+}
+
+/**
+ * Message DTO from conversation history
+ */
+export interface MessageDTO {
+  role: 'user' | 'assistant' | 'system' | 'tool';
+  content: string;
+  timestamp?: string;
+}
+
+/**
+ * Orchestration Response DTO
+ */
+export interface OrchestrationResponse {
+  execution_id: string;
+  status: 'queued' | 'running' | 'completed' | 'failed' | 'cancelled';
+  message: string;
+  result_url: string;
+  websocket_url?: string;
+  estimated_duration_ms?: number;
+  timestamp: string;
+}
+
+/**
+ * Swarm Response DTO
+ */
+export interface SwarmResponse {
+  status: string;
+  type: string;
+  decomposition?: any[]; // Detailed step breakdown
+  worker_results?: Record<string, any>;
+  migrated_files?: Record<string, string>;
+  generated_files?: Record<string, string>;
+  agent?: string;
+}
+
+/**
+ * Optimize Code Request
+ */
+export interface OptimizeCodeRequest {
   code: string;
-  issue: string;
-  language: string;
+  language?: string;
+  optimization_goal?: 'performance' | 'memory_usage' | 'readability';
 }
 
 /**
- * Code analysis request
+ * Refactor Code Request
  */
-export interface AnalyzeCodeRequest {
+export interface RefactorCodeRequest {
   code: string;
-  analysis_type: AnalysisType;
-  language: string;
+  language?: string;
+  refactoring_goal: string;
 }
 
-export type AnalysisType = 'quality' | 'security' | 'performance' | 'complexity' | 'all';
-
 /**
- * Test generation request
+ * Test Code Request
  */
 export interface TestCodeRequest {
   code: string;
-  language: string;
+  language?: string;
   test_framework?: string;
 }
 
 /**
- * Code optimization request
+ * Update Agent Request
  */
-export interface OptimizeCodeRequest {
-  code: string;
-  optimization_goal: OptimizationGoal;
-  language: string;
-}
-
-export type OptimizationGoal = 'performance' | 'readability' | 'memory' | 'all';
-
-/**
- * Code documentation request
- */
-export interface DocumentCodeRequest {
-  code: string;
-  language: string;
-  style?: 'jsdoc' | 'docstring' | 'markdown';
+export interface UpdateAgentRequest {
+  display_name?: string;
+  description?: string;
+  system_prompt?: string;
+  temperature?: number;
+  max_tokens?: number;
+  tools?: string[];
+  metadata?: Record<string, any>;
 }
 
 /**
- * Code review request
+ * Security Scan Request
  */
-export interface ReviewCodeRequest {
-  code: string;
-  language: string;
-  focus_areas?: string[];
+export interface SecurityScanRequest {
+  project_path: string;
+  language?: string;
+  type?: 'all' | 'sast' | 'dast' | 'dependencies';
 }
 
-/**
- * Code explanation request
- */
-export interface ExplainCodeRequest {
-  code: string;
-  language: string;
-  detail_level?: 'brief' | 'detailed' | 'comprehensive';
-}
-
-/**
- * Code refactor request
- */
-export interface RefactorCodeRequest {
-  code: string;
-  refactoring_goal: string;
-  language: string;
-}
-
-/**
- * Standard response
- */
-export interface StandardResponse {
-  status: 'success' | 'failed';
-  result?: any;
-  message?: string;
-}
-
-/**
- * Swarm response (for generation/migration)
- */
-export interface SwarmResponse {
-  status: string;
-  project_id?: string;
-  files_generated?: number;
-  agents_used?: string[];
-  duration_ms?: number;
-  result?: any;
-}
-
-/**
- * Project generation request
- */
-export interface GenerateProjectRequest {
-  project_name: string;
-  description: string;
-  language: string;
-  framework?: string;
-  database?: string;
-  features?: string[];
-  architecture?: string;
-}
-
-/**
- * Project migration request
- */
-export interface MigrateProjectRequest {
-  source_path: string;
-  source_language: string;
-  source_framework?: string;
-  target_language: string;
-  target_framework?: string;
-  preserve_logic?: boolean;
-}
+// Re-export specific types if needed by consumers of ai.model specifically, or they can import from project
+export { ProjectCreateRequest, ProjectResponse };

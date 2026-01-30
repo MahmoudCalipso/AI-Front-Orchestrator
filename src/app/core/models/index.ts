@@ -267,10 +267,15 @@ export interface KubernetesContainer {
 
 // ==================== API Response Wrappers ====================
 
-export interface ApiResponse<T> {
-    data: T;
+export type ResponseStatus = 'success' | 'error' | 'warning' | 'info' | 'partial_success' | 'accepted' | 'denied';
+
+export interface BaseResponse<T = any> {
+    status: ResponseStatus;
+    code: string;
     message?: string;
-    status: 'success' | 'error';
+    data: T;
+    meta?: Record<string, any>;
+    timestamp: string;
 }
 
 export interface PaginatedResponse<T> {
@@ -281,12 +286,27 @@ export interface PaginatedResponse<T> {
     total_pages: number;
 }
 
+/**
+ * @deprecated Use BaseResponse instead
+ */
+export interface ApiResponse<T> {
+    data: T;
+    message?: string;
+    status: 'success' | 'error';
+}
+
+/**
+ * @deprecated Use BaseResponse instead
+ */
 export interface StandardResponse {
     message: string;
     status: 'success' | 'error';
     data?: any;
 }
 
+/**
+ * @deprecated Use BaseResponse instead
+ */
 export interface SwarmResponse {
     task_id: string;
     status: 'pending' | 'running' | 'completed' | 'failed';

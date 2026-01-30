@@ -1,7 +1,10 @@
 /**
- * Workspace management models
+ * Workspace management models matching OpenAPI
  */
 
+/**
+ * Workspace info
+ */
 export interface Workspace {
     id: string;
     name: string;
@@ -41,21 +44,29 @@ export interface WorkspaceMember {
     last_active?: string;
 }
 
-export interface CreateWorkspaceRequest {
+/**
+ * Workspace Create Request
+ */
+export interface WorkspaceCreateRequest {
     name: string;
     description?: string;
     settings?: WorkspaceSettings;
+    // OpenAPI has owner_id/name sometimes, but usually derived from auth.
+}
+
+/**
+ * Workspace Invite Request
+ */
+export interface WorkspaceInviteRequest {
+    inviter_id?: string; // Optional if derived from context
+    user_id: string;
+    role?: 'admin' | 'member' | 'viewer'; // Default developer/member
 }
 
 export interface UpdateWorkspaceRequest {
     name?: string;
     description?: string;
     settings?: WorkspaceSettings;
-}
-
-export interface AddMemberRequest {
-    user_id: string;
-    role: 'admin' | 'member' | 'viewer';
 }
 
 export interface WorkspaceListResponse {

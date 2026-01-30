@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { Observable, Subject, BehaviorSubject, Subscription, throwError } from 'rxjs';
+import { Observable, Subject, BehaviorSubject, Subscription, throwError, interval } from 'rxjs';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { tap, catchError } from 'rxjs/operators';
 import { environment } from '@environments/environment';
@@ -27,6 +27,10 @@ export class BaseWebSocketService implements OnDestroy {
   protected maxReconnectAttempts = 5;
   protected reconnectInterval = 3000;
   protected subscriptions: Subscription[] = [];
+
+  // Heartbeat configuration
+  protected heartbeatIntervalMs = 30000;
+  protected heartbeatSubscription: Subscription | null = null;
 
   public messages$ = this.messagesSubject.asObservable();
   public connectionState$ = this.connectionStateSubject.asObservable();
@@ -74,11 +78,13 @@ export class BaseWebSocketService implements OnDestroy {
           if (environment.enableLogging) {
             console.log(`WebSocket connected to ${url}`);
           }
+          this.startHeartbeat();
         }
       },
       closeObserver: {
         next: (event) => {
           this.connectionStateSubject.next('disconnected');
+          this.stopHeartbeat();
           if (environment.enableLogging) {
             console.log(`WebSocket disconnected from ${url}`, event);
           }
@@ -165,6 +171,7 @@ export class BaseWebSocketService implements OnDestroy {
       this.socket$ = null;
     }
     this.connectionStateSubject.next('disconnected');
+    this.stopHeartbeat();
     this.reconnectAttempts = this.maxReconnectAttempts; // Prevent auto-reconnect
   }
 
@@ -180,6 +187,34 @@ export class BaseWebSocketService implements OnDestroy {
    */
   resetReconnection(): void {
     this.reconnectAttempts = 0;
+  }
+
+  /**
+   * Start heartbeat mechanism
+   */
+  protected startHeartbeat(): void {
+    this.stopHeartbeat();
+
+    // Create a timer that emits every 30 seconds
+    this.heartbeatSubscription = interval(this.heartbeatIntervalMs).subscribe(() => {
+      if (this.isConnected()) {
+        this.send({
+          type: 'heartbeat',
+          data: {},
+          timestamp: Date.now()
+        } as any);
+      }
+    });
+  }
+
+  /**
+   * Stop heartbeat mechanism
+   */
+  protected stopHeartbeat(): void {
+    if (this.heartbeatSubscription) {
+      this.heartbeatSubscription.unsubscribe();
+      this.heartbeatSubscription = null;
+    }
   }
 
   ngOnDestroy(): void {

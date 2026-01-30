@@ -333,9 +333,71 @@ $header-height: 4rem;
     white-space: nowrap;
 }
 
-@mixin line-clamp($lines) {
-    display: -webkit-box;
-    -webkit-line-clamp: $lines;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+// ==================== CSS Variables Export ====================
+
+:root {
+    // Colors - Primary
+    --primary-50: #{$primary-50};
+    --primary-100: #{$primary-100};
+    --primary-200: #{$primary-200};
+    --primary-300: #{$primary-300};
+    --primary-400: #{$primary-400};
+    --primary-500: #{$primary-500};
+    --primary-600: #{$primary-600};
+    --primary-700: #{$primary-700};
+    --primary-800: #{$primary-800};
+    --primary-900: #{$primary-900};
+
+    // Colors - Accent
+    --accent-50: #{$accent-50};
+    --accent-100: #{$accent-100};
+    --accent-200: #{$accent-200};
+    --accent-300: #{$accent-300};
+    --accent-400: #{$accent-400};
+    --accent-500: #{$accent-500};
+    --accent-600: #{$accent-600};
+    --accent-700: #{$accent-700};
+    --accent-800: #{$accent-800};
+    --accent-900: #{$accent-900};
+
+    // Colors - Semantic
+    --success: #{$success};
+    --warning: #{$warning};
+    --error: #{$error};
+    --info: #{$info};
+
+    // Dark Theme
+    --bg-primary: #{$dark-bg-primary};
+    --bg-secondary: #{$dark-bg-secondary};
+    --bg-tertiary: #{$dark-bg-tertiary};
+    --bg-elevated: #{$dark-bg-elevated};
+
+    // Glass
+    --glass-bg: #{$glass-bg};
+    --glass-border: #{$glass-border};
+    --glass-shadow: #{$glass-shadow};
+
+    // Text
+    --text-primary: #{$text-primary};
+    --text-secondary: #{$text-secondary};
+    --text-tertiary: #{$text-tertiary};
+
+    // Spacing
+    --space-1: #{$space-1};
+    --space-2: #{$space-2};
+    --space-4: #{$space-4};
+    --space-6: #{$space-6};
+    --space-8: #{$space-8};
+
+    // Radius
+    --radius-sm: #{$radius-sm};
+    --radius-md: #{$radius-md};
+    --radius-lg: #{$radius-lg};
+    --radius-full: #{$radius-full};
+
+    // Gradients
+    --gradient-primary: #{$gradient-primary};
+    --gradient-accent: #{$gradient-accent};
+    --gradient-success: #{$gradient-success};
+    --gradient-dark: #{$gradient-dark};
 }

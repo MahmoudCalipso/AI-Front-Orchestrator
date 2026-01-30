@@ -1,0 +1,311 @@
+/* Studio Container */
+.studio-container {
+    padding: var(--space-8);
+    min-height: 100vh;
+    background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.studio-container::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    right: -10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(168, 85, 247, 0.1) 0%, transparent 70%);
+    filter: blur(80px);
+    z-index: 0;
+    pointer-events: none;
+    animation: float 20s infinite ease-in-out;
+}
+
+.studio-header {
+    text-align: center;
+    margin-bottom: var(--space-8);
+    position: relative;
+    z-index: 1;
+    animation: slideInDown 500ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.studio-header h1 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: var(--space-2);
+}
+
+.studio-header h1 mat-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    color: var(--primary-500);
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 1.125rem;
+    margin: 0;
+}
+
+/* Wizard Card */
+.wizard-card {
+    max-width: 900px;
+    margin: 0 auto;
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-xl);
+    position: relative;
+    z-index: 1;
+    animation: slideInUp 500ms ease-out;
+}
+
+/* Stepper Overrides */
+::ng-deep .mat-stepper-horizontal {
+    background: transparent !important;
+}
+
+::ng-deep .mat-step-header {
+    padding: 0 !important;
+}
+
+/* Step Content */
+.step-content {
+    min-height: 400px;
+    padding: var(--space-6) 0;
+}
+
+h2 {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: var(--space-2);
+}
+
+.step-description {
+    color: var(--text-secondary);
+    margin-bottom: var(--space-6);
+}
+
+.full-width {
+    width: 100%;
+    margin-bottom: var(--space-4);
+}
+
+.code-font textarea {
+    font-family: var(--font-mono) !important;
+}
+
+/* Role Grid */
+.role-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+}
+
+.role-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    text-align: center;
+    cursor: pointer;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.role-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-2px);
+}
+
+.role-card.selected {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.role-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--bg-elevated);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--space-3);
+    color: var(--text-secondary);
+}
+
+.role-card.selected .role-icon {
+    background: var(--gradient-primary);
+    color: white;
+}
+
+.role-card h3 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin-bottom: var(--space-1);
+    color: var(--text-primary);
+}
+
+.role-card p {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    line-height: 1.3;
+    margin: 0;
+}
+
+/* Slider Group */
+.slider-group {
+    margin-bottom: var(--space-6);
+    background: rgba(255, 255, 255, 0.02);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+}
+
+.slider-group label {
+    display: block;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-2);
+    font-weight: 500;
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    margin-top: -10px;
+}
+
+/* Tools List */
+.tools-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.tool-item {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3);
+    transition: all 200ms;
+}
+
+.tool-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tool-info {
+    display: flex;
+    flex-direction: column;
+    margin-left: var(--space-2);
+}
+
+.tool-info strong {
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+}
+
+.tool-info span {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+
+/* Review Card */
+.review-card {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+}
+
+.review-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.review-row:last-child {
+    border-bottom: none;
+}
+
+.review-row .label {
+    color: var(--text-secondary);
+}
+
+.review-row .value {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.role-badge {
+    background: rgba(99, 102, 241, 0.15);
+    color: var(--primary-300);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+/* Step Actions */
+.step-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: var(--space-6);
+    padding-top: var(--space-6);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Animations */
+@keyframes float {
+    0% {
+        transform: translate(0, 0);
+    }
+
+    50% {
+        transform: translate(20px, 20px);
+    }
+
+    100% {
+        transform: translate(0, 0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

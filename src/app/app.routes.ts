@@ -46,5 +46,9 @@ export const routes: Routes = [
     path: 'testing',
     loadChildren: () => import('./features/testing/testing.routes').then(m => m.TESTING_ROUTES)
   },
+  {
+    path: 'agents',
+    loadChildren: () => import('./features/agents/agents.routes').then(m => m.AGENTS_ROUTES)
+  },
   { path: '**', redirectTo: 'dashboard' }
 ];

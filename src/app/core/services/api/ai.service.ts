@@ -1,23 +1,21 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { BaseApiService } from './base-api.service';
+import { BaseResponse } from '../../models/index';
 import {
-  AIModel,
-  AIModelsResponse,
-  InferenceRequest,
-  InferenceResponse,
+  ModelInfo,
+  OrchestrationRequest,
+  OrchestrationResponse,
   FixCodeRequest,
   AnalyzeCodeRequest,
   TestCodeRequest,
   OptimizeCodeRequest,
-  DocumentCodeRequest,
-  ReviewCodeRequest,
-  ExplainCodeRequest,
   RefactorCodeRequest,
-  StandardResponse,
   SwarmResponse,
-  GenerateProjectRequest,
-  MigrateProjectRequest
+  ProjectCreateRequest,
+  ProjectResponse,
+  UpdateAgentRequest,
+  SecurityScanRequest
 } from '../../models/ai/ai.model';
 import { environment } from '@environments/environment';
 
@@ -34,181 +32,153 @@ export class AIService extends BaseApiService {
 
   /**
    * List all available AI models
-   * GET /models
+   * GET /api/v1/models
    */
-  listModels(params?: { page?: number; page_size?: number }): Observable<AIModelsResponse> {
-    return this.get<AIModelsResponse>('/models', params);
+  listModels(): Observable<ModelInfo[]> {
+    return this.get<BaseResponse<ModelInfo[]>>('models').pipe(
+      map(res => res.data)
+    );
   }
 
   /**
    * Get model information
-   * GET /models/{model_name}
+   * GET /api/v1/models/{model_name}
    */
-  getModelInfo(modelName: string): Observable<AIModel> {
-    return this.get<AIModel>(`/models/${modelName}`);
+  getModelInfo(modelName: string): Observable<ModelInfo> {
+    return this.get<BaseResponse<ModelInfo>>(`models/${modelName}`).pipe(
+      map(res => res.data)
+    );
   }
 
   /**
    * Load a model into memory
-   * POST /models/{model_name}/load
+   * POST /api/v1/models/{model_name}/load
    */
-  loadModel(modelName: string): Observable<{ status: string; model: string; details: any }> {
-    return this.post<{ status: string; model: string; details: any }>(
-      `/models/${modelName}/load`,
-      {}
+  loadModel(modelName: string): Observable<any> {
+    return this.post<BaseResponse<any>>(`models/${modelName}/load`, {}).pipe(
+      map(res => res.data)
     );
   }
 
   /**
    * Unload a model from memory
-   * POST /models/{model_name}/unload
+   * POST /api/v1/models/{model_name}/unload
    */
-  unloadModel(modelName: string): Observable<{ status: string; model: string; details: any }> {
-    return this.post<{ status: string; model: string; details: any }>(
-      `/models/${modelName}/unload`,
-      {}
+  unloadModel(modelName: string): Observable<any> {
+    return this.post<BaseResponse<any>>(`models/${modelName}/unload`, {}).pipe(
+      map(res => res.data)
     );
   }
 
-  // ==================== Inference ====================
+  // ==================== Inference & Orchestration ====================
 
   /**
-   * Run AI inference
-   * POST /inference
+   * Run AI orchestration (Agent Swarm)
+   * POST /api/v1/orchestrate
    */
-  runInference(request: InferenceRequest): Observable<InferenceResponse> {
-    return this.post<InferenceResponse>('/inference', request, {
-      timeout: 120000 // 2 minutes for inference
-    });
+  orchestrate(request: OrchestrationRequest): Observable<OrchestrationResponse> {
+    return this.post<BaseResponse<OrchestrationResponse>>('orchestrate', request, {
+      timeout: 300000 // 5 minutes
+    }).pipe(
+      map(res => res.data)
+    );
   }
 
   /**
-   * Run streaming AI inference (SSE)
-   * POST /inference/stream
+   * Update Agent Configuration
+   * PATCH /api/v1/agents/{agent_id}
    */
-  runInferenceStream(request: InferenceRequest): Observable<string> {
-    return new Observable(observer => {
-      const url = `${environment.apiUrl}/inference/stream`;
-
-      fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': environment.apiKey
-        },
-        body: JSON.stringify(request)
-      }).then(async response => {
-        const reader = response.body?.getReader();
-        const decoder = new TextDecoder();
-
-        if (!reader) {
-          observer.error(new Error('No response body'));
-          return;
-        }
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value);
-          const lines = chunk.split('\n');
-
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const data = line.slice(6);
-              observer.next(data);
-            }
-          }
-        }
-
-        observer.complete();
-      }).catch(error => {
-        observer.error(error);
-      });
-    });
+  updateAgent(agentId: string, request: UpdateAgentRequest): Observable<any> {
+    return this.patch<BaseResponse<any>>(`agents/${agentId}`, request).pipe(
+      map(res => res.data)
+    );
   }
 
   // ==================== Code Operations ====================
 
   /**
    * Fix code issues
-   * POST /api/fix
+   * POST /api/v1/code/fix
    */
-  fixCode(request: FixCodeRequest): Observable<StandardResponse> {
-    return this.post<StandardResponse>('/api/fix', request, {
-      timeout: 60000
-    });
+  fixCode(request: FixCodeRequest): Observable<any> { // TODO: Define specific response or use OrchestrationResponse
+    return this.post<BaseResponse<any>>('code/fix', request).pipe(
+      map(res => res.data)
+    );
   }
 
   /**
    * Analyze code
-   * POST /api/analyze
+   * POST /api/v1/code/analyze
    */
-  analyzeCode(request: AnalyzeCodeRequest): Observable<StandardResponse> {
-    return this.post<StandardResponse>('/api/analyze', request, {
-      timeout: 60000
-    });
+  analyzeCode(request: AnalyzeCodeRequest): Observable<any> {
+    return this.post<BaseResponse<any>>('code/analyze', request).pipe(
+      map(res => res.data)
+    );
   }
 
   /**
    * Generate tests
-   * POST /api/test
+   * POST /api/v1/code/test
    */
-  generateTests(request: TestCodeRequest): Observable<StandardResponse> {
-    return this.post<StandardResponse>('/api/test', request, {
-      timeout: 60000
-    });
+  generateTests(request: TestCodeRequest): Observable<any> {
+    return this.post<BaseResponse<any>>('code/test', request).pipe(
+      map(res => res.data)
+    );
   }
 
   /**
    * Optimize code
-   * POST /api/optimize
+   * POST /api/v1/code/optimize
    */
-  optimizeCode(request: OptimizeCodeRequest): Observable<StandardResponse> {
-    return this.post<StandardResponse>('/api/optimize', request, {
-      timeout: 60000
-    });
-  }
-
-  /**
-   * Explain code
-   * POST /api/explain
-   */
-  explainCode(request: ExplainCodeRequest): Observable<StandardResponse> {
-    return this.post<StandardResponse>('/api/explain', request, {
-      timeout: 60000
-    });
+  optimizeCode(request: OptimizeCodeRequest): Observable<any> {
+    return this.post<BaseResponse<any>>('code/optimize', request).pipe(
+      map(res => res.data)
+    );
   }
 
   /**
    * Refactor code
-   * POST /api/refactor
+   * POST /api/v1/code/refactor
    */
-  refactorCode(request: RefactorCodeRequest): Observable<StandardResponse> {
-    return this.post<StandardResponse>('/api/refactor', request, {
-      timeout: 60000
-    });
+  refactorCode(request: RefactorCodeRequest): Observable<any> {
+    return this.post<BaseResponse<any>>('code/refactor', request).pipe(
+      map(res => res.data)
+    );
   }
 
-  // ==================== Project Generation & Migration ====================
+  /**
+   * Security Scan
+   * POST /api/v1/security/scan
+   */
+  securityScan(request: SecurityScanRequest): Observable<any> {
+    return this.post<BaseResponse<any>>('security/scan', request).pipe(
+      map(res => res.data)
+    );
+  }
+
+  // ==================== Project Generation & Migration (Swarm) ====================
 
   /**
    * Generate a full project
-   * POST /api/generate
+   * POST /api/v1/swarm/generate
    */
-  generateProject(request: GenerateProjectRequest): Observable<SwarmResponse> {
-    return this.post<SwarmResponse>('/api/generate', request, {
-      timeout: 600000 // 10 minutes for full project generation
-    });
+  generateProject(request: ProjectCreateRequest): Observable<SwarmResponse> {
+    return this.post<BaseResponse<SwarmResponse>>('swarm/generate', request, {
+      timeout: 600000 // 10 minutes
+    }).pipe(
+      map(res => res.data)
+    );
   }
 
   /**
    * Migrate a project
-   * POST /api/migrate
+   * POST /api/v1/swarm/migrate
    */
-  migrateProject(request: MigrateProjectRequest): Observable<SwarmResponse> {
-    return this.post<SwarmResponse>('/api/migrate', request, {
-      timeout: 600000 // 10 minutes for migration
-    });
+  migrateProject(request: any): Observable<SwarmResponse> {
+    return this.post<BaseResponse<SwarmResponse>>('swarm/migrate', request, {
+      timeout: 600000 // 10 minutes
+    }).pipe(
+      map(res => res.data)
+    );
   }
 }

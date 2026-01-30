@@ -37,7 +37,13 @@ export class BaseApiService {
    * Build URL with path
    */
   protected buildUrl(path: string): string {
-    const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+    let cleanPath = path.startsWith('/') ? path.substring(1) : path;
+
+    // Prepend /api/v1 if not already present and not a health check
+    if (!cleanPath.startsWith('api/v1') && !cleanPath.startsWith('health')) {
+      cleanPath = `api/v1/${cleanPath}`;
+    }
+
     return `${this.baseUrl}/${cleanPath}`;
   }
 

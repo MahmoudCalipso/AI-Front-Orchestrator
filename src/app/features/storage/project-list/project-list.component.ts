@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -12,6 +12,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDividerModule } from '@angular/material/divider';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import { StorageService } from '../../../core/services/api/storage.service';
 import { Project } from '../../../core/models';
 import { CardComponent } from '../../../shared/components/card/card.component';
@@ -36,10 +37,12 @@ import { SignalStoreService } from '../../../core/services/signal-store.service'
         MatPaginatorModule,
         MatDividerModule,
         CardComponent,
-        ButtonComponent
+        ButtonComponent,
+        ScrollingModule
     ],
     templateUrl: './project-list.component.html',
-    styleUrl: './project-list.component.scss'
+    styleUrl: './project-list.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProjectListComponent implements OnInit {
     private storageService = inject(StorageService);
@@ -207,5 +210,9 @@ export class ProjectListComponent implements OnInit {
         this.page.set(event.pageIndex + 1);
         this.pageSize.set(event.pageSize);
         this.loadProjects();
+    }
+
+    trackByProjectId(index: number, project: Project): string {
+        return project.id;
     }
 }

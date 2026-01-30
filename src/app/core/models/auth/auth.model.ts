@@ -1,16 +1,19 @@
 /**
- * User registration request - matches backend UserRegister schema
+ * Auth Models matching OpenAPI definitions
+ */
+
+/**
+ * User registration request
  */
 export interface RegisterRequest {
   email: string;
   password: string;
-  full_name: string;
-  username: string; // Added username
+  full_name?: string;
   tenant_name: string;
 }
 
 /**
- * User login request - matches backend UserLogin schema
+ * User login request
  */
 export interface LoginRequest {
   email: string;
@@ -18,82 +21,36 @@ export interface LoginRequest {
 }
 
 /**
- * Token response from backend
+ * Token response DTO
  */
 export interface TokenResponse {
   access_token: string;
   refresh_token: string;
+  token_type: string;
   expires_in: number;
 }
 
 /**
- * Auth response with user info
- */
-export interface AuthResponse extends TokenResponse {
-  user?: UserInfo;
-}
-
-/**
- * User information - matches backend UserResponse
+ * User information DTO
  */
 export interface UserInfo {
   id: string;
-  tenant_id: string;
   email: string;
-  username?: string; // Added username
   full_name?: string;
-  role: UserRole;
+  role: string;
+  tenant_id: string;
   is_active: boolean;
-  avatar_url?: string; // Added for profile
-  bio?: string; // Added for profile
-  organization?: string; // Added for profile
-  preferences?: UserPreferences; // Added for profile
-  password_changed_at?: string; // Added for security section
-  two_factor_enabled?: boolean; // Added for security section
+  is_verified: boolean;
   created_at: string;
-  last_login?: string;
-  credentials_accepted?: boolean;
 }
 
 /**
- * User roles
- */
-export type UserRole = 'admin' | 'enterprise' | 'developer';
-
-/**
- * Me response - matches backend MeResponse with extended user properties
- */
-export interface MeResponse {
-  user: UserInfo;
-  tenant: TenantInfo;
-  permissions: string[];
-  external_accounts: ExternalAccount[];
-  // Extended properties for user profile
-  username?: string;
-  email: string;
-  bio?: string;
-  organization?: string;
-  preferences?: UserPreferences;
-  avatar_url?: string;
-}
-
-/**
- * User preferences
- */
-export interface UserPreferences {
-  theme: 'dark' | 'light' | 'auto';
-  language: string;
-  notifications_enabled: boolean;
-  email_notifications: boolean;
-}
-
-/**
- * Tenant information
+ * Tenant information DTO
  */
 export interface TenantInfo {
   id: string;
   name: string;
-  plan: 'free' | 'pro' | 'enterprise';
+  plan: string;
   storage_quota_gb: number;
   storage_used_gb: number;
   storage_usage_percent: number;
@@ -104,7 +61,17 @@ export interface TenantInfo {
 }
 
 /**
- * External account (OAuth connections)
+ * Me response DTO
+ */
+export interface MeResponse {
+  user: UserInfo;
+  tenant: TenantInfo;
+  permissions: string[];
+  external_accounts: ExternalAccount[];
+}
+
+/**
+ * External account DTO
  */
 export interface ExternalAccount {
   id: string;
@@ -122,14 +89,6 @@ export interface ExternalAccount {
  */
 export interface RefreshTokenRequest {
   refresh_token: string;
-}
-
-/**
- * Logout request
- */
-export interface LogoutRequest {
-  refresh_token?: string;
-  all_devices?: boolean;
 }
 
 /**
@@ -156,13 +115,13 @@ export interface PasswordResetRequest {
 }
 
 /**
- * API key - matches backend APIKeyResponse
+ * API Key DTO
  */
 export interface ApiKey {
   id: string;
   name: string;
-  key?: string; // Only returned on creation
   created_at: string;
+  key?: string; // Only returned once
   expires_at?: string;
   last_used?: string;
   usage_count: number;
@@ -175,19 +134,6 @@ export interface ApiKey {
 export interface CreateApiKeyRequest {
   name: string;
   expires_in_days?: number;
-}
-
-/**
- * Session information
- */
-export interface SessionInfo {
-  session_id: string;
-  user_id: string;
-  device: string;
-  ip_address: string;
-  created_at: string;
-  last_activity: string;
-  is_current: boolean;
 }
 
 /**

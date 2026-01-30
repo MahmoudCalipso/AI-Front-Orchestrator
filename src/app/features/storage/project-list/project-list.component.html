@@ -82,9 +82,11 @@
     }
 
     @if (!loading() && filteredProjects().length > 0) {
-    <div [class]="viewMode() === 'grid' ? 'projects-grid' : 'projects-list'">
+    @if (viewMode() === 'grid') {
+    <div class="projects-grid">
         @for (project of filteredProjects(); track project.id) {
         <app-card [hoverable]="true" [clickable]="true" customClass="project-card" (click)="openProject(project)">
+            <!-- Grid Card Content -->
             <div class="project-header">
                 <div class="project-icon" [style.background]="getProjectColor(project.language)">
                     <mat-icon>{{ getProjectIcon(project.language) }}</mat-icon>
@@ -93,32 +95,11 @@
                     <h3>{{ project.project_name }}</h3>
                     <p class="project-meta">{{ project.language }} • {{ formatDate(project.created_at) }}</p>
                 </div>
-                <button mat-icon-button [matMenuTriggerFor]="menu" (click)="$event.stopPropagation()">
+                <button mat-icon-button [matMenuTriggerFor]="actionsMenu" [matMenuTriggerData]="{project: project}"
+                    (click)="$event.stopPropagation()">
                     <mat-icon>more_vert</mat-icon>
                 </button>
-                <mat-menu #menu="matMenu">
-                    <button mat-menu-item (click)="openInIDE(project)">
-                        <mat-icon>code</mat-icon>
-                        <span>Open in IDE</span>
-                    </button>
-                    <button mat-menu-item (click)="downloadProject(project)">
-                        <mat-icon>download</mat-icon>
-                        <span>Download</span>
-                    </button>
-                    <button mat-menu-item (click)="duplicateProject(project)">
-                        <mat-icon>content_copy</mat-icon>
-                        <span>Duplicate</span>
-                    </button>
-                    <mat-divider></mat-divider>
-                    <button mat-menu-item (click)="archiveProject(project)">
-                        <mat-icon>archive</mat-icon>
-                        <span>Archive</span>
-                    </button>
-                    <button mat-menu-item (click)="deleteProject(project)" class="danger">
-                        <mat-icon>delete</mat-icon>
-                        <span>Delete</span>
-                    </button>
-                </mat-menu>
+                <!-- Menu actions are now handled by the shared menu -->
             </div>
 
             <div class="project-body">
@@ -154,7 +135,65 @@
         </app-card>
         }
     </div>
+    } @else {
+    <cdk-virtual-scroll-viewport itemSize="180" class="project-list-viewport">
+        <div *cdkVirtualFor="let project of filteredProjects(); trackBy: trackByProjectId" class="project-list-item">
+            <app-card [hoverable]="true" [clickable]="true" customClass="project-card" (click)="openProject(project)">
+                <div class="project-header">
+                    <div class="project-icon" [style.background]="getProjectColor(project.language)">
+                        <mat-icon>{{ getProjectIcon(project.language) }}</mat-icon>
+                    </div>
+                    <div class="project-info">
+                        <h3>{{ project.project_name }}</h3>
+                        <p class="project-meta">{{ project.language }} • {{ formatDate(project.created_at) }}</p>
+                    </div>
+                    <button mat-icon-button [matMenuTriggerFor]="actionsMenu" [matMenuTriggerData]="{project: project}"
+                        (click)="$event.stopPropagation()">
+                        <mat-icon>more_vert</mat-icon>
+                    </button>
+                </div>
+                <!-- Footer only for list items if compact, or full content -->
+                <div class="project-body">
+                    <p class="project-description">{{ project.description || 'No description' }}</p>
+                </div>
+                <div class="project-footer">
+                    <span class="status-badge" [class]="'status-' + project.status">
+                        {{ project.status }}
+                    </span>
+                    <span class="last-modified">Updated {{ formatRelativeTime(project.updated_at) }}</span>
+                </div>
+            </app-card>
+        </div>
+    </cdk-virtual-scroll-viewport>
     }
+    }
+
+    <!-- Shared Actions Menu -->
+    <mat-menu #actionsMenu="matMenu">
+        <ng-template matMenuContent let-project="project">
+            <button mat-menu-item (click)="openInIDE(project)">
+                <mat-icon>code</mat-icon>
+                <span>Open in IDE</span>
+            </button>
+            <button mat-menu-item (click)="downloadProject(project)">
+                <mat-icon>download</mat-icon>
+                <span>Download</span>
+            </button>
+            <button mat-menu-item (click)="duplicateProject(project)">
+                <mat-icon>content_copy</mat-icon>
+                <span>Duplicate</span>
+            </button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="archiveProject(project)">
+                <mat-icon>archive</mat-icon>
+                <span>Archive</span>
+            </button>
+            <button mat-menu-item (click)="deleteProject(project)" class="danger">
+                <mat-icon>delete</mat-icon>
+                <span>Delete</span>
+            </button>
+        </ng-template>
+    </mat-menu>
 
     @if (!loading() && filteredProjects().length === 0) {
     <div class="empty-state">
