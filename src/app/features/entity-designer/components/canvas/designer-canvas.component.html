@@ -1,0 +1,25 @@
+<div class="designer-layout">
+    <app-designer-toolbar></app-designer-toolbar>
+
+    <div class="designer-main">
+        <app-entity-list-panel></app-entity-list-panel>
+
+        <div class="canvas-container">
+            <ngx-xyflow [nodes]="nodes()" [edges]="edges()" (nodesChange)="onNodesChange($event)"
+                (edgesChange)="onEdgesChange($event)" (connect)="onConnect($event)" (nodeClick)="onNodeClick($event)"
+                (edgeClick)="onEdgeClick($event)" (paneClick)="onPaneClick()" [fitView]="true">
+                <ngx-xyflow-node nodeType="entity">
+                    <ng-template #template let-node>
+                        <app-entity-node [node]="node"></app-entity-node>
+                    </ng-template>
+                </ngx-xyflow-node>
+
+                <ngx-xyflow-background [variant]="BackgroundVariant.Dots" [gap]="20" [size]="1"></ngx-xyflow-background>
+                <ngx-xyflow-controls></ngx-xyflow-controls>
+                <ngx-xyflow-minimap></ngx-xyflow-minimap>
+            </ngx-xyflow>
+        </div>
+
+        <app-entity-properties-panel></app-entity-properties-panel>
+    </div>
+</div>

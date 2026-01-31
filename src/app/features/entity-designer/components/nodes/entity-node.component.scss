@@ -1,0 +1,143 @@
+.entity-node {
+    min-width: 220px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(8px);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-top-width: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.2s ease;
+    overflow: visible;
+
+    &:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+}
+
+.node-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+
+    .header-main {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        mat-icon {
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+        }
+    }
+
+    .title-container {
+        display: flex;
+        flex-direction: column;
+
+        .entity-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #111827;
+            line-height: 1.2;
+        }
+
+        .table-name {
+            font-size: 11px;
+            color: #6b7280;
+            font-style: italic;
+        }
+    }
+
+    .collapse-btn {
+        width: 24px;
+        height: 24px;
+        line-height: 24px;
+
+        mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+        }
+    }
+}
+
+.node-content {
+    padding: 4px 0;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.field-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 12px;
+    gap: 12px;
+
+    &:hover {
+        background: rgba(0, 0, 0, 0.02);
+    }
+
+    .field-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .field-spacer {
+        width: 14px;
+    }
+
+    mat-icon {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+
+        &.pk-icon {
+            color: #f59e0b;
+        }
+
+        &.fk-icon {
+            color: #6366f1;
+        }
+    }
+
+    .field-name {
+        font-size: 13px;
+        color: #374151;
+
+        &.pk {
+            font-weight: 600;
+        }
+    }
+
+    .field-type {
+        font-size: 11px;
+        color: #9ca3af;
+        font-family: 'JetBrains Mono', monospace;
+    }
+}
+
+// Styling the XYFlow handles
+::ng-deep {
+    .react-flow__handle {
+        width: 8px;
+        height: 8px;
+        background: #ffffff;
+        border: 2px solid #94a3b8;
+
+        &:hover {
+            background: #3b82f6;
+            border-color: #2563eb;
+        }
+
+        &.connecting {
+            background: #10b981;
+            border-color: #059669;
+        }
+    }
+}

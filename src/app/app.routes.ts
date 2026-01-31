@@ -62,5 +62,9 @@ export const routes: Routes = [
     path: 'enterprise',
     loadChildren: () => import('./features/enterprise/enterprise.routes').then(m => m.ENTERPRISE_ROUTES)
   },
+  {
+    path: 'entity-designer',
+    loadChildren: () => import('./features/entity-designer/entity-designer.routes').then(m => m.ENTITY_DESIGNER_ROUTES)
+  },
   { path: '**', redirectTo: 'dashboard' }
 ];

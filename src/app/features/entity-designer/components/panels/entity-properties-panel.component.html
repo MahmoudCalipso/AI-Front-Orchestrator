@@ -1,0 +1,68 @@
+<div class="panel-container">
+    <div class="panel-header">
+        <h3>Properties</h3>
+        @if (selectedNode()) {
+        <button mat-icon-button color="warn" (click)="deleteEntity()" title="Delete Entity">
+            <mat-icon>delete</mat-icon>
+        </button>
+        }
+    </div>
+
+    @if (selectedNode(); as node) {
+    <div class="panel-scroll-content">
+        <div class="section">
+            <div class="section-title">General Settings</div>
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Entity Name</mat-label>
+                <input matInput [ngModel]="node.data.entity.name" (ngModelChange)="updateName($event)">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Table Name</mat-label>
+                <input matInput [ngModel]="node.data.entity.table_name" (ngModelChange)="updateTable($event)">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Description</mat-label>
+                <textarea matInput rows="2" [ngModel]="node.data.entity.description"
+                    (ngModelChange)="updateDesc($event)"></textarea>
+            </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">Fields ({{ node.data.entity.fields.length }})</div>
+                <button mat-button color="primary" class="small-btn" (click)="addField()">
+                    <mat-icon>add</mat-icon> Add
+                </button>
+            </div>
+
+            <div class="fields-list">
+                @for (field of node.data.entity.fields; track $index) {
+                <div class="field-row">
+                    <div class="field-info">
+                        <span class="field-name" [class.pk]="field.primary_key">{{ field.name }}</span>
+                        <span class="field-type">{{ field.type }}</span>
+                    </div>
+                    <div class="field-actions">
+                        <button mat-icon-button class="tiny-btn" (click)="editField($index)">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button class="tiny-btn" (click)="deleteField($index)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+    } @else {
+    <div class="empty-state">
+        <mat-icon>mouse</mat-icon>
+        <p>Select an entity to edit its properties</p>
+    </div>
+    }
+</div>

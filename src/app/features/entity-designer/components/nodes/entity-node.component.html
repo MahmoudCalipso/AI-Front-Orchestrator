@@ -1,0 +1,44 @@
+<div class="entity-node glass-card" [style.border-top-color]="color">
+    <!-- Header -->
+    <div class="node-header" [style.background-color]="color + '10'">
+        <div class="header-main">
+            <mat-icon [style.color]="color">{{ icon }}</mat-icon>
+            <div class="title-container">
+                <span class="entity-name">{{ entity.name }}</span>
+                <span class="table-name">{{ entity.table_name || (entity.name | lowercase) }}</span>
+            </div>
+        </div>
+        <button mat-icon-button class="collapse-btn" (click)="toggleCollapse($event)">
+            <mat-icon>{{ node.data.collapsed ? 'expand_more' : 'expand_less' }}</mat-icon>
+        </button>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Fields List -->
+    @if (!node.data.collapsed) {
+    <div class="node-content">
+        @for (field of entity.fields; track field.name) {
+        <div class="field-item">
+            <div class="field-left">
+                @if (field.primary_key) {
+                <mat-icon class="pk-icon" title="Primary Key">vpn_key</mat-icon>
+                } @else if (field.foreign_key) {
+                <mat-icon class="fk-icon" title="Foreign Key">link</mat-icon>
+                } @else {
+                <div class="field-spacer"></div>
+                }
+                <span class="field-name" [class.pk]="field.primary_key">{{ field.name }}</span>
+            </div>
+            <span class="field-type">{{ field.type }}</span>
+        </div>
+        }
+    </div>
+    }
+
+    <!-- Handles (Ports) -->
+    <ngx-xyflow-handle type="target" position="left" id="left"></ngx-xyflow-handle>
+    <ngx-xyflow-handle type="target" position="top" id="top"></ngx-xyflow-handle>
+    <ngx-xyflow-handle type="source" position="right" id="right"></ngx-xyflow-handle>
+    <ngx-xyflow-handle type="source" position="bottom" id="bottom"></ngx-xyflow-handle>
+</div>
