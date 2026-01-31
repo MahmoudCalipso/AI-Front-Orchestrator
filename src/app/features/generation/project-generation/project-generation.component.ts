@@ -157,20 +157,9 @@ export class ProjectGenerationComponent implements OnInit {
       next: (status: any) => {
         if (status.status === 'completed') {
           this.generating = false;
-          // Create project in backend using current user
-          this.authService.currentUser$.subscribe(user => {
-            if (user) {
-              const createRequest: CreateProjectRequest = {
-                project_name: this.projectName,
-                description: this.description,
-                language: this.selectedLanguage,
-                framework: this.selectedFramework
-              };
-              this.projectService.createProject(user.id, createRequest).subscribe((project: Project) => {
-                this.router.navigate(['/ide', project.id]);
-              });
-            }
-          });
+          // Project generation completed, navigate to IDE directly
+          // The generation service creates the project in the backend
+          this.router.navigate(['/ide', this.generationId]);
         } else if (status.status === 'failed') {
           this.generating = false;
           alert('Project generation failed. Please try again.');

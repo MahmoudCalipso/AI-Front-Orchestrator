@@ -32,6 +32,10 @@
         <button mat-icon-button (click)="toggleSearch()" [class.accent-color]="isSearchOpen" matTooltip="Toggle Search">
             <mat-icon>search</mat-icon>
         </button>
+        <button mat-icon-button (click)="toggleEmulator()" [class.accent-color]="isEmulatorOpen"
+            matTooltip="Toggle Mobile Emulator">
+            <mat-icon>smartphone</mat-icon>
+        </button>
         <button mat-icon-button (click)="toggleChat()" [class.accent-color]="isChatOpen" matTooltip="Toggle AI Chat">
             <mat-icon>chat</mat-icon>
         </button>
@@ -92,10 +96,16 @@
             </app-ide-chat>
         </mat-sidenav>
 
+        <!-- Right Emulator Sidebar -->
+        <mat-sidenav position="end" mode="side" [opened]="isEmulatorOpen" class="emulator-sidebar"
+            [style.width.px]="emulatorWidth">
+            <app-emulator-window></app-emulator-window>
+        </mat-sidenav>
+
         <!-- Resize Gutter (Right) -->
-        @if (isChatOpen || isGitOpen || isSearchOpen) {
+        @if (isChatOpen || isGitOpen || isSearchOpen || isEmulatorOpen) {
         <div class="resize-gutter vertical right"
-            (mousedown)="startResizing($event, isChatOpen ? 'chat' : (isGitOpen ? 'git' : 'search'))">
+            (mousedown)="startResizing($event, isChatOpen ? 'chat' : (isEmulatorOpen ? 'emulator' : (isGitOpen ? 'git' : 'search')))">
         </div>
         }
 

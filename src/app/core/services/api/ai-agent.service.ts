@@ -121,10 +121,10 @@ export class AiAgentService extends BaseApiService {
 
   /**
    * Analyze Figma design
-   * POST /api/figma/analyze
+   * POST /api/v1/figma/analyze
    */
   analyzeFigma(request: FigmaAnalyzeRequest): Observable<FigmaAnalyzeResponse> {
-    return this.post<FigmaAnalyzeResponse>('/api/figma/analyze', request, {
+    return this.post<FigmaAnalyzeResponse>('figma/analyze', request, {
       timeout: 120000 // 2 minutes
     });
   }

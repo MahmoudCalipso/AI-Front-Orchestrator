@@ -9,115 +9,115 @@ import { BaseApiService } from './base-api.service';
 @Injectable({
     providedIn: 'root'
 })
+    import { Injectable } from '@angular/core';
+import { Observable, map } from 'rxjs';
+import { BaseApiService } from './base-api.service';
+import { BaseResponse } from '../../models/index';
+
+/**
+ * Enterprise Service
+ * Handles multi-tenant enterprise features as defined in OpenAPI
+ */
+@Injectable({
+    providedIn: 'root'
+})
 export class EnterpriseService extends BaseApiService {
 
     /**
-     * Create enterprise user
-     * POST /api/enterprise/users
+     * Add Organization User (Add user to the organization)
+     * POST /api/v1/enterprise/users
      */
-    createUser(userData: {
-        username: string;
+    addOrganizationUser(userData: {
+        username?: string;
         email: string;
-        password: string;
         role?: string;
-        organization?: string;
-    }): Observable<{
-        message: string;
-        user: {
-            id: string;
-            username: string;
-            email: string;
-            role: string;
-        };
-    }> {
-        return this.post('/api/enterprise/users', userData);
+        password?: string;
+    }): Observable<any> {
+        return this.post<BaseResponse<any>>('enterprise/users', userData).pipe(
+            map(res => res.data)
+        );
     }
 
     /**
-     * Get enterprise users
-     * GET /api/enterprise/users
+     * List Organization Users
+     * GET /api/v1/enterprise/users
      */
-    getUsers(params?: {
+    listOrganizationUsers(params?: {
+        search?: string;
         page?: number;
         page_size?: number;
-        organization?: string;
-        role?: string;
     }): Observable<{
-        users: Array<{
-            id: string;
-            username: string;
-            email: string;
-            role: string;
-            organization?: string;
-            created_at: string;
-        }>;
+        // Adjusting return type to match typical list response if model isn't strictly typed here yet,
+        // relying on generic BaseResponse structure
+        users: any[];
         total: number;
-    }> {
-        return this.get('/api/enterprise/users', params);
+    } | any> {
+        return this.get<BaseResponse<any>>('enterprise/users', params).pipe(
+            map(res => res.data)
+        );
     }
 
     /**
-     * Delete enterprise user
-     * DELETE /api/enterprise/users/{user_id}
+     * Remove Organization User
+     * DELETE /api/v1/enterprise/users/{user_id}
      */
-    deleteUser(userId: string): Observable<{ message: string }> {
-        return this.delete(`/api/enterprise/users/${userId}`);
+    removeOrganizationUser(userId: string): Observable<any> {
+        return this.delete<BaseResponse<any>>(`enterprise/users/${userId}`).pipe(
+            map(res => res.data)
+        );
     }
 
     /**
-     * Get enterprise projects
-     * GET /api/enterprise/projects
+     * List Organization Projects
+     * GET /api/v1/enterprise/projects
      */
-    getProjects(params?: {
+    listOrganizationProjects(params?: {
+        search?: string;
         page?: number;
         page_size?: number;
-        organization?: string;
-    }): Observable<{
-        projects: Array<{
-            id: string;
-            name: string;
-            owner_id: string;
-            organization?: string;
-            created_at: string;
-            protected: boolean;
-        }>;
-        total: number;
-    }> {
-        return this.get('/api/enterprise/projects', params);
+    }): Observable<any> {
+        return this.get<BaseResponse<any>>('enterprise/projects', params).pipe(
+            map(res => res.data)
+        );
     }
 
     /**
-     * Protect project (prevent deletion)
-     * POST /api/enterprise/projects/{project_id}/protect
+     * Set Project Protection
+     * POST /api/v1/enterprise/projects/{project_id}/protect
      */
-    protectProject(projectId: string, protect: boolean = true): Observable<{
-        message: string;
-        project_id: string;
-        protected: boolean;
-    }> {
-        return this.post(`/api/enterprise/projects/${projectId}/protect`, { protect });
+    setProjectProtection(projectId: string, protect: boolean = true): Observable<any> {
+        return this.post<BaseResponse<any>>(`enterprise/projects/${projectId}/protect`, { protect }).pipe(
+            map(res => res.data)
+        );
     }
 
     /**
-     * Get organization statistics
+     * Force Delete Project
+     * DELETE /api/v1/enterprise/projects/{project_id}
      */
-    getOrganizationStats(organizationId: string): Observable<{
-        total_users: number;
-        total_projects: number;
-        storage_used_gb: number;
-        active_workspaces: number;
-    }> {
-        return this.get(`/api/enterprise/organizations/${organizationId}/stats`);
+    forceDeleteProject(projectId: string): Observable<any> {
+        return this.delete<BaseResponse<any>>(`enterprise/projects/${projectId}`).pipe(
+            map(res => res.data)
+        );
     }
 
     /**
-     * Assign user to organization
+     * Monitor Active Workbenches
+     * GET /api/v1/enterprise/workbenches
      */
-    assignUserToOrganization(userId: string, organizationId: string): Observable<{
-        message: string;
-    }> {
-        return this.post(`/api/enterprise/users/${userId}/organization`, {
-            organization_id: organizationId
-        });
+    monitorActiveWorkbenches(): Observable<any> {
+        return this.get<BaseResponse<any>>('enterprise/workbenches').pipe(
+            map(res => res.data)
+        );
+    }
+
+    /**
+     * Update User Permissions
+     * PUT /api/v1/enterprise/users/{user_id}/permissions
+     */
+    updateUserPermissions(userId: string, permissions: any): Observable<any> {
+        return this.put<BaseResponse<any>>(`enterprise/users/${userId}/permissions`, permissions).pipe(
+            map(res => res.data)
+        );
     }
 }

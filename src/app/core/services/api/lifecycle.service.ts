@@ -19,10 +19,10 @@ export class LifecycleService extends BaseApiService {
 
     /**
      * Execute lifecycle workflow
-     * POST /api/lifecycle/execute
+     * POST /api/v1/lifecycle/execute
      */
     executeWorkflow(request: LifecycleExecuteRequest): Observable<LifecycleExecuteResponse> {
-        return this.post<LifecycleExecuteResponse>('/api/lifecycle/execute', request, {
+        return this.post<LifecycleExecuteResponse>('lifecycle/execute', request, {
             timeout: 300000 // 5 minutes
         });
     }
