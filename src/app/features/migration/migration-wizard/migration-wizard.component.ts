@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatButtonModule } from '@angular/material/button';
@@ -48,7 +48,7 @@ interface MigrationFile {
   templateUrl: './migration-wizard.component.html',
   styleUrl: './migration-wizard.component.css'
 })
-export class MigrationWizardComponent implements OnInit {
+export class MigrationWizardComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private migrationService = inject(MigrationService);
   private databaseService = inject(DatabaseService);
@@ -68,10 +68,17 @@ export class MigrationWizardComponent implements OnInit {
   migrationProgress = signal(0);
   migrationResult = signal<any>(null);
   selectedFile = signal<MigrationFile | null>(null);
+  private progressInterval: any;
 
   ngOnInit(): void {
     this.initializeForms();
     this.loadFrameworks();
+  }
+
+  ngOnDestroy(): void {
+    if (this.progressInterval) {
+      clearInterval(this.progressInterval);
+    }
   }
 
   initializeForms(): void {
@@ -141,13 +148,13 @@ export class MigrationWizardComponent implements OnInit {
       dry_run: false
     };
 
-    const progressInterval = setInterval(() => {
+    this.progressInterval = setInterval(() => {
       this.migrationProgress.update(p => p < 90 ? p + 10 : p);
     }, 800);
 
     this.migrationService.migrateProject(request).subscribe({
       next: (result) => {
-        clearInterval(progressInterval);
+        if (this.progressInterval) clearInterval(this.progressInterval);
         this.migrationProgress.set(100);
         this.migrationResult.set(result);
         this.migrating.set(false);
@@ -155,7 +162,7 @@ export class MigrationWizardComponent implements OnInit {
         if (result?.migrated_files && result.migrated_files.length > 0) this.selectedFile.set(result.migrated_files[0]);
       },
       error: () => {
-        clearInterval(progressInterval);
+        if (this.progressInterval) clearInterval(this.progressInterval);
         this.migrating.set(false);
         this.migrationProgress.set(0);
         this.toast.error('Migration failed');

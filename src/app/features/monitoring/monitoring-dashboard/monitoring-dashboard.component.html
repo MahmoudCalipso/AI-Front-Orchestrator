@@ -140,23 +140,24 @@
         </mat-card-header>
         <mat-card-content>
             <div class="build-list">
-                @for (build of buildHistory(); track build.timestamp) {
-                <div class="build-item">
-                    <div class="build-info">
-                        <mat-icon class="build-icon">folder</mat-icon>
-                        <div class="build-details">
-                            <h4>{{ build.project }}</h4>
-                            <p>{{ build.timestamp | date:'short' }}</p>
+                <cdk-virtual-scroll-viewport itemSize="64" class="build-history-viewport">
+                    <div *cdkVirtualFor="let build of buildHistory(); trackBy: trackByTimestamp" class="build-item">
+                        <div class="build-info">
+                            <mat-icon class="build-icon">folder</mat-icon>
+                            <div class="build-details">
+                                <h4>{{ build.project }}</h4>
+                                <p>{{ build.timestamp | date:'short' }}</p>
+                            </div>
+                        </div>
+                        <div class="build-stats">
+                            <span class="duration">{{ build.duration }}s</span>
+                            <span class="badge" [class]="'badge-' + getStatusColor(build.status)">
+                                {{ build.status }}
+                            </span>
                         </div>
                     </div>
-                    <div class="build-stats">
-                        <span class="duration">{{ build.duration }}s</span>
-                        <span class="badge" [class]="'badge-' + getStatusColor(build.status)">
-                            {{ build.status }}
-                        </span>
-                    </div>
-                </div>
-                } @empty {
+                </cdk-virtual-scroll-viewport>
+                @if (buildHistory().length === 0) {
                 <div class="empty-state">No builds found</div>
                 }
             </div>

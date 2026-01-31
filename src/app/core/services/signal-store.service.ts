@@ -1,5 +1,5 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { Project, UserInfo } from '../models';
+import { Project, UserInfo } from '../models/index';
 
 export interface AppState {
     currentUser: UserInfo | null;

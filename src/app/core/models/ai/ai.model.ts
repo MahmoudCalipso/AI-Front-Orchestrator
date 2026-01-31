@@ -159,4 +159,19 @@ export interface SecurityScanRequest {
 }
 
 // Re-export specific types if needed by consumers of ai.model specifically, or they can import from project
-export { ProjectCreateRequest, ProjectResponse };
+export type { ProjectCreateRequest, ProjectResponse };
+
+/**
+ * Code operation request types (for backward compatibility)
+ */
+export interface FixCodeRequest {
+  code: string;
+  language: string;
+  issue?: string;
+}
+
+export interface AnalyzeCodeRequest {
+  code: string;
+  language: string;
+  analysis_type?: 'security' | 'performance' | 'quality' | 'all';
+}

@@ -50,5 +50,17 @@ export const routes: Routes = [
     path: 'agents',
     loadChildren: () => import('./features/agents/agents.routes').then(m => m.AGENTS_ROUTES)
   },
+  {
+    path: 'database',
+    loadChildren: () => import('./features/database/database.routes').then(m => m.DATABASE_ROUTES)
+  },
+  {
+    path: 'kubernetes',
+    loadChildren: () => import('./features/kubernetes/kubernetes.routes').then(m => m.KUBERNETES_ROUTES)
+  },
+  {
+    path: 'enterprise',
+    loadChildren: () => import('./features/enterprise/enterprise.routes').then(m => m.ENTERPRISE_ROUTES)
+  },
   { path: '**', redirectTo: 'dashboard' }
 ];

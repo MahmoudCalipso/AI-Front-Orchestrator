@@ -97,8 +97,8 @@
                     </mat-checkbox>
 
                     <div class="form-actions">
-                        <button mat-raised-button color="primary" (click)="editingUser() ? updateUser() : createUser()"
-                            [disabled]="userForm.invalid">
+                        <button mat-flat-button color="primary"
+                            (click)="editingUser() ? handleUpdateUser() : createUser()" [disabled]="userForm.invalid">
                             <mat-icon>{{ editingUser() ? 'save' : 'add' }}</mat-icon>
                             {{ editingUser() ? 'Update User' : 'Create User' }}
                         </button>

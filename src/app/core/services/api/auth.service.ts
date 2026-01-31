@@ -145,6 +145,16 @@ export class AuthService extends BaseApiService {
     return this.post<BaseResponse>('auth/reset-password', request);
   }
 
+  /**
+   * Update user profile
+   * PATCH /api/v1/users/{userId}
+   */
+  updateUserAccount(userId: string, updates: Partial<any>): Observable<any> {
+    return this.patch<BaseResponse<any>>(`users/${userId}`, updates).pipe(
+      map(res => res.data)
+    );
+  }
+
   // ==================== OAuth External Accounts ====================
 
   /**

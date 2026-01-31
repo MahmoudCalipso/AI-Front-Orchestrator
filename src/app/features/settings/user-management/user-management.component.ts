@@ -40,7 +40,7 @@ import { User } from '../../../core/models';
     styleUrl: './user-management.component.css'
 })
 export class UserManagementComponent implements OnInit {
-    private authService = inject(AuthService);
+    private authService: AuthService = inject(AuthService);
     private toast = inject(ToastService);
     private fb = inject(FormBuilder);
 
@@ -116,9 +116,9 @@ export class UserManagementComponent implements OnInit {
         this.userForm.get('password')?.updateValueAndValidity();
     }
 
-    updateUser(): void {
+    handleUpdateUser(): void {
         if (this.userForm.invalid || !this.editingUser()) return;
-        this.authService.updateUser(this.editingUser()!.id, this.userForm.value).subscribe({
+        this.authService.updateUserAccount(this.editingUser()!.id, this.userForm.value).subscribe({
             next: () => {
                 this.toast.success('User updated successfully');
                 this.loadUsers();
@@ -142,7 +142,7 @@ export class UserManagementComponent implements OnInit {
 
     toggleUserStatus(user: User): void {
         const newStatus = !user.is_active;
-        this.authService.updateUser(user.id, { is_active: newStatus }).subscribe({
+        this.authService.updateUserAccount(user.id, { is_active: newStatus }).subscribe({
             next: () => {
                 this.toast.success(`User ${newStatus ? 'activated' : 'deactivated'}`);
                 this.loadUsers();

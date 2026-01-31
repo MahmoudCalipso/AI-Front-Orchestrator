@@ -72,11 +72,9 @@ export class IdeChatComponent {
         this.userInput = '';
 
         this.aiService.chat({
-            project_id: this.workspaceId,
-            message: prompt,
-            context: {
-                active_file: this.contextFile || undefined
-            }
+            prompt: prompt,
+            model: 'default',
+            temperature: 0.7
         }).subscribe({
             next: (response: any) => {
                 this.isThinking = false;

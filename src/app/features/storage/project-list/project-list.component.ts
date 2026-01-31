@@ -14,7 +14,7 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDividerModule } from '@angular/material/divider';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { StorageService } from '../../../core/services/api/storage.service';
-import { Project } from '../../../core/models';
+import { Project } from '../../../core/models/index';
 import { CardComponent } from '../../../shared/components/card/card.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { SignalStoreService } from '../../../core/services/signal-store.service';

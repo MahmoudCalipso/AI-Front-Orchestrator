@@ -70,7 +70,8 @@ export class RegisterComponent {
             this.loading.set(true);
             const { username, email, password } = this.registerForm.value;
             this.authService.register({
-                username, email, password,
+                email,
+                password,
                 full_name: username,
                 tenant_name: `${username}-tenant`
             }).subscribe({

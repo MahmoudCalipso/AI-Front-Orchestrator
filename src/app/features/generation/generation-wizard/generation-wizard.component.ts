@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -47,7 +47,7 @@ interface Framework {
     templateUrl: './generation-wizard.component.html',
     styleUrl: './generation-wizard.component.css'
 })
-export class GenerationWizardComponent implements OnInit {
+export class GenerationWizardComponent implements OnInit, OnDestroy {
     private fb = inject(FormBuilder);
     private generationService = inject(GenerationService);
     private databaseService = inject(DatabaseService);
@@ -71,10 +71,17 @@ export class GenerationWizardComponent implements OnInit {
     generationProgress = 0;
     analysisResult: any = null;
     generationResult: any = null;
+    private progressInterval: any;
 
     ngOnInit(): void {
         this.initializeForms();
         this.loadLanguages();
+    }
+
+    ngOnDestroy(): void {
+        if (this.progressInterval) {
+            clearInterval(this.progressInterval);
+        }
     }
 
     initializeForms(): void {
@@ -189,23 +196,23 @@ export class GenerationWizardComponent implements OnInit {
         };
 
         // Simulate progress
-        const progressInterval = setInterval(() => {
+        this.progressInterval = setInterval(() => {
             this.generationProgress += 10;
             if (this.generationProgress >= 90) {
-                clearInterval(progressInterval);
+                if (this.progressInterval) clearInterval(this.progressInterval);
             }
         }, 500);
 
         this.generationService.generateProject(request).subscribe({
             next: (result) => {
-                clearInterval(progressInterval);
+                if (this.progressInterval) clearInterval(this.progressInterval);
                 this.generationProgress = 100;
                 this.generationResult = result;
                 this.generating = false;
                 this.toast.success('Project generated successfully!');
             },
             error: (error) => {
-                clearInterval(progressInterval);
+                if (this.progressInterval) clearInterval(this.progressInterval);
                 this.generating = false;
                 this.generationProgress = 0;
                 this.toast.error('Failed to generate project');

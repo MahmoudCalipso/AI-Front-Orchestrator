@@ -51,6 +51,20 @@ export class RegistryService extends BaseApiService {
     }
 
     /**
+     * Get frameworks by language (alias for getFrameworks)
+     */
+    getFrameworksByLanguage(language: string): Observable<any> {
+        return this.getFrameworks(language);
+    }
+
+    /**
+     * Get all frameworks (alias for getFrameworks with no filter)
+     */
+    getAllFrameworks(): Observable<any> {
+        return this.getFrameworks();
+    }
+
+    /**
      * Get specific framework details
      * GET /api/v1/registry/frameworks/{framework_name}
      */

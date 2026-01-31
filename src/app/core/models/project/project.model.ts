@@ -21,6 +21,10 @@ export interface ProjectResponse {
   build_status?: string;
   run_status?: string;
   extra_metadata?: Record<string, any>;
+  // Additional optional properties
+  database?: string;
+  file_count?: number;
+  size_bytes?: number;
 }
 
 /**
@@ -43,6 +47,16 @@ export interface ProjectCreateRequest {
   language?: string;
   git_repo_url?: string;
 }
+
+/**
+ * Alias for backward compatibility
+ */
+export interface CreateProjectRequest extends ProjectCreateRequest { }
+
+/**
+ * Project Interface (extends ProjectResponse)
+ */
+export interface Project extends ProjectResponse { }
 
 /**
  * Project Protection Request

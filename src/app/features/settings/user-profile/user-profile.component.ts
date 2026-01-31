@@ -128,13 +128,13 @@ export class UserProfileComponent implements OnInit {
         if (this.profileForm.invalid || !this.user) return;
 
         this.saving = true;
-        this.authService.updateUser(this.user.id, this.profileForm.value).subscribe({
-            next: (updatedUser) => {
+        this.authService.updateUserAccount(this.user.id, this.profileForm.value).subscribe({
+            next: (updatedUser: any) => {
                 this.user = { ...this.user, ...updatedUser };
                 this.saving = false;
                 this.toast.success('Profile updated successfully');
             },
-            error: (err) => {
+            error: (err: any) => {
                 this.saving = false;
                 this.toast.error('Failed to update profile');
             }
@@ -145,8 +145,8 @@ export class UserProfileComponent implements OnInit {
         if (!this.user) return;
         this.savingPreferences = true;
         // Assuming user preferences are part of the user object and updateable via updateUser
-        this.authService.updateUser(this.user.id, { preferences: this.preferencesForm.value }).subscribe({
-            next: (updatedUser) => {
+        this.authService.updateUserAccount(this.user.id, { preferences: this.preferencesForm.value }).subscribe({
+            next: (updatedUser: any) => {
                 this.user = { ...this.user, ...updatedUser };
                 this.savingPreferences = false;
                 this.toast.success('Preferences saved');

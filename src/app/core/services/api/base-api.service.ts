@@ -1,7 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable, throwError, catchError, retry, timeout } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError, catchError, retry, timeout, timer, of, tap } from 'rxjs';
 import { environment } from '@environments/environment';
+import { ErrorHandlerService } from '../error-handler.service';
+import { CacheService } from '../cache.service';
 
 /**
  * Base API Service
@@ -12,6 +14,8 @@ import { environment } from '@environments/environment';
 })
 export class BaseApiService {
   protected readonly http = inject(HttpClient);
+  protected readonly errorHandler = inject(ErrorHandlerService);
+  protected readonly cache = inject(CacheService);
   protected readonly baseUrl = environment.apiUrl;
   protected readonly defaultTimeout = environment.defaultTimeout;
 
@@ -66,23 +70,58 @@ export class BaseApiService {
   }
 
   /**
-   * Generic GET request
+   * Exponential backoff retry strategy
+   */
+  protected retryStrategy<T>() {
+    return (source: Observable<T>) => source.pipe(
+      retry({
+        count: environment.retryAttempts,
+        delay: (error, retryCount) => {
+          // Only retry on network errors or 5xx server errors
+          if (error.status === 0 || error.status >= 500) {
+            const backoffTime = Math.pow(2, retryCount - 1) * 1000;
+            if (environment.enableLogging) {
+              console.warn(`[Retry] Attempt ${retryCount} failed. Retrying in ${backoffTime}ms...`, error.message);
+            }
+            return timer(backoffTime);
+          }
+          return throwError(() => error);
+        }
+      })
+    );
+  }
+
+  /**
+   * Generic GET request with caching
    */
   protected get<T>(
     path: string,
     params?: { [key: string]: any },
-    options?: { headers?: { [key: string]: string }, timeout?: number }
+    options?: { headers?: { [key: string]: string }, timeout?: number, useCache?: boolean, ttl?: number }
   ): Observable<T> {
+    const url = this.buildUrl(path);
+    const cacheKey = this.cache.generateKey(url, params);
+
+    if (options?.useCache) {
+      const cachedData = this.cache.get<T>(cacheKey);
+      if (cachedData) return of(cachedData);
+    }
+
     return this.http.get<T>(
-      this.buildUrl(path),
+      url,
       {
         headers: this.getHeaders(options?.headers),
         params: this.buildParams(params)
       }
     ).pipe(
-      (timeout(options?.timeout || this.defaultTimeout) as any),
-      (retry(environment.retryAttempts) as any),
-      catchError(this.handleError)
+      timeout(options?.timeout || this.defaultTimeout),
+      this.retryStrategy(),
+      tap(data => {
+        if (options?.useCache) {
+          this.cache.set(cacheKey, data, options.ttl);
+        }
+      }),
+      catchError(error => this.handleError(error))
     );
   }
 
@@ -101,8 +140,8 @@ export class BaseApiService {
         headers: this.getHeaders(options?.headers)
       }
     ).pipe(
-      (timeout(options?.timeout || this.defaultTimeout) as any),
-      catchError(this.handleError)
+      timeout(options?.timeout || this.defaultTimeout),
+      catchError(error => this.handleError(error))
     );
   }
 
@@ -121,8 +160,8 @@ export class BaseApiService {
         headers: this.getHeaders(options?.headers)
       }
     ).pipe(
-      (timeout(options?.timeout || this.defaultTimeout) as any),
-      catchError(this.handleError)
+      timeout(options?.timeout || this.defaultTimeout),
+      catchError(error => this.handleError(error))
     );
   }
 
@@ -141,8 +180,8 @@ export class BaseApiService {
         headers: this.getHeaders(options?.headers)
       }
     ).pipe(
-      (timeout(options?.timeout || this.defaultTimeout) as any),
-      catchError(this.handleError)
+      timeout(options?.timeout || this.defaultTimeout),
+      catchError(error => this.handleError(error))
     );
   }
 
@@ -161,37 +200,18 @@ export class BaseApiService {
         params: this.buildParams(params)
       }
     ).pipe(
-      (timeout(options?.timeout || this.defaultTimeout) as any),
-      catchError(this.handleError)
+      timeout(options?.timeout || this.defaultTimeout),
+      catchError(error => this.handleError(error))
     );
   }
 
   /**
    * Handle HTTP errors
    */
-  private handleError(error: any): Observable<never> {
-    let errorMessage = 'An error occurred';
-
-    if (error.error instanceof ErrorEvent) {
-      // Client-side error
-      errorMessage = `Error: ${error.error.message}`;
-    } else {
-      // Server-side error
-      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
-
-      if (error.error?.message) {
-        errorMessage = error.error.message;
-      }
-    }
-
-    if (environment.enableLogging) {
-      console.error('API Error:', errorMessage, error);
-    }
-
-    return throwError(() => ({
-      status: error.status,
-      message: errorMessage,
-      error: error.error
-    }));
+  protected handleError(error: any): Observable<never> {
+    this.errorHandler.handleError(error);
+    return throwError(() => error);
   }
 }
+
+

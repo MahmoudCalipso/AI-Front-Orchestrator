@@ -191,6 +191,11 @@
     gap: var(--spacing-md);
 }
 
+.build-history-viewport {
+    height: 400px;
+    width: 100%;
+}
+
 .build-item {
     display: flex;
     justify-content: space-between;

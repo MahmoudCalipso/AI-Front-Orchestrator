@@ -243,7 +243,7 @@ export class RegistryManagementComponent implements OnInit {
     this.frameworksLoading = true;
 
     this.registryService.getAllFrameworks().subscribe({
-      next: (response) => {
+      next: (response: any) => {
         this.frameworksByLanguage = {};
         this.frameworks = [];
 
@@ -273,7 +273,7 @@ export class RegistryManagementComponent implements OnInit {
         this.filteredFrameworks = [...this.frameworks];
         this.frameworksLoading = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         this.toast.error('Failed to load frameworks');
         this.frameworksLoading = false;
       }

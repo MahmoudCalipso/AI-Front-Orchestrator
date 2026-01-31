@@ -7,6 +7,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MonitoringService } from '../../../core/services/api/monitoring.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 
 declare const Chart: any;
 
@@ -20,7 +21,8 @@ declare const Chart: any;
     MatIconModule,
     MatSelectModule,
     MatFormFieldModule,
-    LoadingSpinnerComponent
+    LoadingSpinnerComponent,
+    ScrollingModule
   ],
   templateUrl: './monitoring-dashboard.component.html',
   styleUrl: './monitoring-dashboard.component.css'
@@ -228,5 +230,9 @@ export class MonitoringDashboardComponent implements OnInit, AfterViewInit, OnDe
   getStatusColor(status: string): string {
     const colors: Record<string, string> = { 'success': 'success', 'failed': 'error', 'running': 'warning' };
     return colors[status] || 'info';
+  }
+
+  trackByTimestamp(index: number, build: any): string {
+    return build.timestamp;
   }
 }

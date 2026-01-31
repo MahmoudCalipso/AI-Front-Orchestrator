@@ -1,6 +1,7 @@
 import { HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/api/auth.service';
+import { ErrorHandlerService } from '../services/error-handler.service';
 import { catchError, switchMap, throwError, BehaviorSubject, filter, take } from 'rxjs';
 
 // State for handling concurrent refreshes
@@ -13,6 +14,7 @@ const refreshTokenSubject = new BehaviorSubject<string | null>(null);
  */
 export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
   const authService = inject(AuthService);
+  const errorHandler = inject(ErrorHandlerService);
 
   // Skip auth for auth endpoints
   if (req.url.includes('/auth/')) {
@@ -55,6 +57,7 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
               catchError((refreshError) => {
                 isRefreshing = false;
                 authService.logout().subscribe();
+                errorHandler.handleError(refreshError);
                 return throwError(() => refreshError);
               })
             );
@@ -62,6 +65,7 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
             // No refresh token available
             isRefreshing = false;
             authService.logout().subscribe();
+            errorHandler.handleError(error);
           }
         } else {
           // Wait for token refresh
@@ -77,3 +81,4 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
     })
   );
 };
+

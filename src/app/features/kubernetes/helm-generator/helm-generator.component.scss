@@ -1,0 +1,79 @@
+.helm-container {
+    padding: var(--space-8);
+    min-height: 100vh;
+    background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+}
+
+.helm-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-8);
+}
+
+.back-btn {
+    color: var(--text-secondary);
+}
+
+.header-content h1 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.header-content h1 mat-icon {
+    color: var(--accent-500);
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    margin: var(--space-2) 0 0 0;
+}
+
+.helm-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-8);
+}
+
+.helm-panel form mat-form-field {
+    width: 100%;
+    margin-bottom: var(--space-4);
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--space-4);
+}
+
+.chart-preview {
+    margin-top: var(--space-8);
+    padding-top: var(--space-8);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.chart-preview h2 {
+    margin-bottom: var(--space-4);
+    color: var(--text-primary);
+}
+
+.chart-preview pre {
+    background: #1e1e1e;
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--accent-300);
+}
+
+.chart-preview button {
+    margin-top: var(--space-4);
+}

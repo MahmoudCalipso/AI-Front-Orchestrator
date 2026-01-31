@@ -36,7 +36,16 @@ export interface UserPreferences {
     email_notifications: boolean;
 }
 
-export * from './project/project.model';
+export type {
+    Project,
+    ProjectResponse,
+    ProjectListResponse,
+    ProjectCreateRequest,
+    CreateProjectRequest,
+    ProjectProtectionRequest,
+    WorkflowRequest,
+    WorkflowResponse
+} from './project/project.model';
 
 export interface ProjectMetadata {
     project_id: string;

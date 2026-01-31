@@ -94,6 +94,16 @@ export class AIService extends BaseApiService {
     );
   }
 
+  /**
+   * Chat with AI (simple inference)
+   * POST /api/v1/ai/chat
+   */
+  chat(request: { prompt: string; model?: string; temperature?: number }): Observable<{ response: string }> {
+    return this.post<BaseResponse<{ response: string }>>('ai/chat', request).pipe(
+      map(res => res.data)
+    );
+  }
+
   // ==================== Code Operations ====================
 
   /**

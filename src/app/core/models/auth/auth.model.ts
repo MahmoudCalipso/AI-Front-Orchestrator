@@ -68,6 +68,17 @@ export interface MeResponse {
   tenant: TenantInfo;
   permissions: string[];
   external_accounts: ExternalAccount[];
+  // Additional properties used by components
+  username?: string;
+  email?: string;
+  bio?: string;
+  organization?: string;
+  preferences?: {
+    theme?: string;
+    language?: string;
+    notifications_enabled?: boolean;
+    email_notifications?: boolean;
+  };
 }
 
 /**

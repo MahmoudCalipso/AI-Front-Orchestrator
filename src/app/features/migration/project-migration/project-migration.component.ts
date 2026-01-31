@@ -75,7 +75,7 @@ export class ProjectMigrationComponent {
       this.sourceFrameworks = [];
       return;
     }
-    this.registryService.getFrameworksByLanguage(this.selectedSourceLanguage).subscribe(res => {
+    this.registryService.getFrameworksByLanguage(this.selectedSourceLanguage).subscribe((res: any) => {
       const data = res.data || {};
       this.sourceFrameworks = Object.keys(data).map(name => ({ name }));
     });
@@ -86,7 +86,7 @@ export class ProjectMigrationComponent {
       this.targetFrameworks = [];
       return;
     }
-    this.registryService.getFrameworksByLanguage(this.selectedTargetLanguage).subscribe(res => {
+    this.registryService.getFrameworksByLanguage(this.selectedTargetLanguage).subscribe((res: any) => {
       const data = res.data || {};
       this.targetFrameworks = Object.keys(data).map(name => ({ name }));
     });
