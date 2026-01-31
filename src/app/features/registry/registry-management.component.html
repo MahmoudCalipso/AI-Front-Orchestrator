@@ -5,7 +5,8 @@
   </div>
 
   <!-- Registry Info Card -->
-  <mat-card class="registry-info-card" *ngIf="registryInfo">
+  @if (registryInfo) {
+  <mat-card class="registry-info-card">
     <mat-card-header>
       <mat-card-title>Registry Information</mat-card-title>
     </mat-card-header>
@@ -29,31 +30,34 @@
         </div>
       </div>
       <div class="actions">
-        <button mat-raised-button color="primary"
-                (click)="syncRegistry()"
-                [disabled]="syncLoading">
-          <mat-icon *ngIf="syncLoading">sync</mat-icon>
-          <mat-icon *ngIf="!syncLoading">refresh</mat-icon>
+        <button mat-raised-button color="primary" (click)="syncRegistry()" [disabled]="syncLoading">
+          @if (syncLoading) {
+          <mat-icon>sync</mat-icon>
+          } @else {
+          <mat-icon>refresh</mat-icon>
+          }
           {{ syncLoading ? 'Syncing...' : 'Sync Registry' }}
         </button>
       </div>
     </mat-card-content>
   </mat-card>
+  }
 
   <!-- Main Content Area -->
   <div class="main-content">
     <!-- Languages View -->
-    <div *ngIf="!showFrameworksView" class="languages-view">
+    @if (!showFrameworksView) {
+    <div class="languages-view">
       <div class="view-header">
         <h2>Choose a Programming Language</h2>
         <p>Select a language to view available frameworks and tools</p>
       </div>
 
       <!-- Language Grid -->
-      <div class="languages-grid" *ngIf="!languagesLoading; else loadingSpinner">
-        <mat-card class="language-card"
-                  *ngFor="let language of filteredLanguages"
-                  (click)="selectLanguage(language)">
+      @if (!languagesLoading) {
+      <div class="languages-grid">
+        @for (language of filteredLanguages; track language.name) {
+        <mat-card class="language-card" (click)="selectLanguage(language)">
           <mat-card-content>
             <div class="language-header">
               <mat-icon class="language-icon">code</mat-icon>
@@ -75,11 +79,17 @@
             </div>
           </mat-card-content>
         </mat-card>
+        }
       </div>
+      } @else {
+      <ng-container *ngTemplateOutlet="loadingSpinner"></ng-container>
+      }
     </div>
+    }
 
     <!-- Frameworks View -->
-    <div *ngIf="showFrameworksView" class="frameworks-view">
+    @if (showFrameworksView) {
+    <div class="frameworks-view">
       <div class="view-header">
         <button mat-icon-button (click)="backToLanguages()" class="back-button" matTooltip="Back to Languages">
           <mat-icon>arrow_back</mat-icon>
@@ -89,8 +99,10 @@
       </div>
 
       <!-- Frameworks Grid -->
-      <div class="frameworks-grid" *ngIf="!frameworksLoading; else loadingSpinner">
-        <mat-card class="framework-card" *ngFor="let framework of filteredFrameworks">
+      @if (!frameworksLoading) {
+      <div class="frameworks-grid">
+        @for (framework of filteredFrameworks; track framework.name) {
+        <mat-card class="framework-card">
           <mat-card-content>
             <div class="framework-header">
               <mat-icon class="framework-icon">build</mat-icon>
@@ -103,14 +115,18 @@
               {{ framework.description | slice:0:100 }}{{ framework.description.length > 100 ? '...' : '' }}
             </p>
             <div class="framework-meta">
-              <span class="meta-item" *ngIf="framework.architectures">
+              @if (framework.architectures) {
+              <span class="meta-item">
                 <mat-icon>architecture</mat-icon>
                 {{ framework.architectures.length }} architectures
               </span>
-              <span class="meta-item" *ngIf="framework.templates">
+              }
+              @if (framework.templates) {
+              <span class="meta-item">
                 <mat-icon>template</mat-icon>
                 {{ framework.templates.length }} templates
               </span>
+              }
             </div>
             <div class="framework-actions">
               <button mat-raised-button color="primary" (click)="viewFrameworkDetails(framework)">
@@ -120,8 +136,13 @@
             </div>
           </mat-card-content>
         </mat-card>
+        }
       </div>
+      } @else {
+      <ng-container *ngTemplateOutlet="loadingSpinner"></ng-container>
+      }
     </div>
+    }
 
     <!-- Legacy Tab View (Hidden but kept for compatibility) -->
     <mat-tab-group style="display: none;">
@@ -134,10 +155,8 @@
               <div class="filters-row">
                 <mat-form-field appearance="outline" class="search-field">
                   <mat-label>Search Languages</mat-label>
-                  <input matInput
-                         placeholder="Search by name..."
-                         (input)="onLanguageSearch($event.target.value)"
-                         #languageSearchInput>
+                  <input matInput placeholder="Search by name..." (input)="onLanguageSearch($event.target.value)"
+                    #languageSearchInput>
                   <mat-icon matSuffix>search</mat-icon>
                 </mat-form-field>
 
@@ -168,209 +187,218 @@
               <mat-card-subtitle>{{ filteredLanguages.length }} languages</mat-card-subtitle>
             </mat-card-header>
             <mat-card-content>
-              <div class="table-container" *ngIf="!languagesLoading; else loadingSpinner">
-                <table mat-table [dataSource]="filteredLanguages" matSort #languageSort="matSort" class="languages-table">
-                <ng-container matColumnDef="name">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-                  <td mat-cell *matCellDef="let language">
-                    <div class="language-name">
-                      <mat-icon class="language-icon">code</mat-icon>
-                      {{ language.name }}
-                    </div>
-                  </td>
-                </ng-container>
+              @if (!languagesLoading) {
+              <div class="table-container">
+                <table mat-table [dataSource]="filteredLanguages" matSort #languageSort="matSort"
+                  class="languages-table">
+                  <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+                    <td mat-cell *matCellDef="let language">
+                      <div class="language-name">
+                        <mat-icon class="language-icon">code</mat-icon>
+                        {{ language.name }}
+                      </div>
+                    </td>
+                  </ng-container>
 
-                <ng-container matColumnDef="version">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Version</th>
-                  <td mat-cell *matCellDef="let language">{{ language.version }}</td>
-                </ng-container>
+                  <ng-container matColumnDef="version">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Version</th>
+                    <td mat-cell *matCellDef="let language">{{ language.version }}</td>
+                  </ng-container>
 
-                <ng-container matColumnDef="framework_count">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Frameworks</th>
-                  <td mat-cell *matCellDef="let language">
-                    <mat-chip-listbox>
-                      <mat-chip>{{ language.framework_count }}</mat-chip>
-                    </mat-chip-listbox>
-                  </td>
-                </ng-container>
+                  <ng-container matColumnDef="framework_count">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Frameworks</th>
+                    <td mat-cell *matCellDef="let language">
+                      <mat-chip-listbox>
+                        <mat-chip>{{ language.framework_count }}</mat-chip>
+                      </mat-chip-listbox>
+                    </td>
+                  </ng-container>
 
-                <ng-container matColumnDef="package_manager">
-                  <th mat-header-cell *matHeaderCellDef>Package Manager</th>
-                  <td mat-cell *matCellDef="let language">
-                    <span class="package-manager">{{ language.package_manager }}</span>
-                    <span *ngIf="language.build_tool" class="build-tool">({{ language.build_tool }})</span>
-                  </td>
-                </ng-container>
+                  <ng-container matColumnDef="package_manager">
+                    <th mat-header-cell *matHeaderCellDef>Package Manager</th>
+                    <td mat-cell *matCellDef="let language">
+                      <span class="package-manager">{{ language.package_manager }}</span>
+                      @if (language.build_tool) {
+                      <span class="build-tool">({{ language.build_tool }})</span>
+                      }
+                    </td>
+                  </ng-container>
 
-                <ng-container matColumnDef="actions">
-                  <th mat-header-cell *matHeaderCellDef>Actions</th>
-                  <td mat-cell *matCellDef="let language">
-                    <button mat-icon-button (click)="viewLanguageDetails(language)" matTooltip="View Details">
-                      <mat-icon>visibility</mat-icon>
-                    </button>
-                  </td>
-                </ng-container>
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef>Actions</th>
+                    <td mat-cell *matCellDef="let language">
+                      <button mat-icon-button (click)="viewLanguageDetails(language)" matTooltip="View Details">
+                        <mat-icon>visibility</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
 
-                <tr mat-header-row *matHeaderRowDef="languageColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: languageColumns;"></tr>
-              </table>
+                  <tr mat-header-row *matHeaderRowDef="languageColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: languageColumns;"></tr>
+                </table>
 
-              <mat-paginator #languagePaginator="matPaginator"
-                            [pageSizeOptions]="[5, 10, 20, 50]"
-                            [pageSize]="languageFilters.page_size"
-                            [pageIndex]="languageFilters.page - 1"
-                            [length]="filteredLanguages.length"
-                            showFirstLastButtons>
-              </mat-paginator>
-            </div>
-
-            <ng-template #loadingSpinner>
-              <div class="loading-container">
-                <mat-spinner diameter="40"></mat-spinner>
-                <p>Loading languages...</p>
+                <mat-paginator #languagePaginator="matPaginator" [pageSizeOptions]="[5, 10, 20, 50]"
+                  [pageSize]="languageFilters.page_size" [pageIndex]="languageFilters.page - 1"
+                  [length]="filteredLanguages.length" showFirstLastButtons>
+                </mat-paginator>
               </div>
-            </ng-template>
-          </mat-card-content>
-        </mat-card>
-      </div>
-    </mat-tab>
+              } @else {
+              <ng-container *ngTemplateOutlet="loadingSpinner"></ng-container>
+              }
 
-    <!-- Frameworks Tab -->
-    <mat-tab label="Frameworks">
-      <div class="tab-content">
-        <!-- Filters Section -->
-        <mat-card class="filters-card">
-          <mat-card-content>
-            <div class="filters-row">
-              <mat-form-field appearance="outline" class="search-field">
-                <mat-label>Search Frameworks</mat-label>
-                <input matInput
-                       placeholder="Search by name or description..."
-                       (input)="onFrameworkSearch($event.target.value)"
-                       #frameworkSearchInput>
-                <mat-icon matSuffix>search</mat-icon>
-              </mat-form-field>
+              <ng-template #loadingSpinner>
+                <div class="loading-container">
+                  <mat-spinner diameter="40"></mat-spinner>
+                  <p>Loading languages...</p>
+                </div>
+              </ng-template>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
 
-              <mat-form-field appearance="outline">
-                <mat-label>Language</mat-label>
-                <mat-select [(ngModel)]="frameworkFilters.language" (selectionChange)="onFrameworkLanguageFilterChange()">
-                  <mat-option value="">All Languages</mat-option>
-                  <mat-option *ngFor="let language of getLanguageOptions()" [value]="language">
-                    {{ language }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
+      <!-- Frameworks Tab -->
+      <mat-tab label="Frameworks">
+        <div class="tab-content">
+          <!-- Filters Section -->
+          <mat-card class="filters-card">
+            <mat-card-content>
+              <div class="filters-row">
+                <mat-form-field appearance="outline" class="search-field">
+                  <mat-label>Search Frameworks</mat-label>
+                  <input matInput placeholder="Search by name or description..."
+                    (input)="onFrameworkSearch($event.target.value)" #frameworkSearchInput>
+                  <mat-icon matSuffix>search</mat-icon>
+                </mat-form-field>
 
-              <mat-form-field appearance="outline">
-                <mat-label>Sort By</mat-label>
-                <mat-select [(ngModel)]="frameworkFilters.sort_by" (selectionChange)="loadFrameworks()">
-                  <mat-option value="name">Name</mat-option>
-                  <mat-option value="language">Language</mat-option>
-                  <mat-option value="version">Version</mat-option>
-                </mat-select>
-              </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Language</mat-label>
+                  <mat-select [(ngModel)]="frameworkFilters.language"
+                    (selectionChange)="onFrameworkLanguageFilterChange()">
+                    <mat-option value="">All Languages</mat-option>
+                    @for (language of getLanguageOptions(); track language) {
+                    <mat-option [value]="language">
+                      {{ language }}
+                    </mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
 
-              <mat-form-field appearance="outline">
-                <mat-label>Order</mat-label>
-                <mat-select [(ngModel)]="frameworkFilters.sort_direction" (selectionChange)="loadFrameworks()">
-                  <mat-option value="asc">Ascending</mat-option>
-                  <mat-option value="desc">Descending</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-          </mat-card-content>
-        </mat-card>
+                <mat-form-field appearance="outline">
+                  <mat-label>Sort By</mat-label>
+                  <mat-select [(ngModel)]="frameworkFilters.sort_by" (selectionChange)="loadFrameworks()">
+                    <mat-option value="name">Name</mat-option>
+                    <mat-option value="language">Language</mat-option>
+                    <mat-option value="version">Version</mat-option>
+                  </mat-select>
+                </mat-form-field>
 
-        <!-- Frameworks Table -->
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>Available Frameworks</mat-card-title>
-            <mat-card-subtitle>{{ filteredFrameworks.length }} frameworks</mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="table-container" *ngIf="!frameworksLoading; else loadingSpinner">
-              <table mat-table [dataSource]="filteredFrameworks" matSort #frameworkSort="matSort" class="frameworks-table">
-                <ng-container matColumnDef="name">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-                  <td mat-cell *matCellDef="let framework">
-                    <div class="framework-name">
-                      <mat-icon class="framework-icon">build</mat-icon>
-                      {{ framework.name }}
-                    </div>
-                  </td>
-                </ng-container>
-
-                <ng-container matColumnDef="language">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Language</th>
-                  <td mat-cell *matCellDef="let framework">
-                    <mat-chip-listbox>
-                      <mat-chip [class]="'lang-' + framework.language.toLowerCase()">
-                        {{ framework.language }}
-                      </mat-chip>
-                    </mat-chip-listbox>
-                  </td>
-                </ng-container>
-
-                <ng-container matColumnDef="version">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Version</th>
-                  <td mat-cell *matCellDef="let framework">
-                    <div class="version-info">
-                      <span class="current-version">{{ framework.version }}</span>
-                      <span *ngIf="framework.version !== framework.latest_version"
-                            class="latest-version">(Latest: {{ framework.latest_version }})</span>
-                    </div>
-                  </td>
-                </ng-container>
-
-                <ng-container matColumnDef="latest_version">
-                  <th mat-header-cell *matHeaderCellDef>Latest</th>
-                  <td mat-cell *matCellDef="let framework">
-                    <span [class]="framework.version === framework.latest_version ? 'up-to-date' : 'outdated'">
-                      {{ framework.latest_version }}
-                    </span>
-                  </td>
-                </ng-container>
-
-                <ng-container matColumnDef="description">
-                  <th mat-header-cell *matHeaderCellDef>Description</th>
-                  <td mat-cell *matCellDef="let framework">
-                    <div class="description" [matTooltip]="framework.description">
-                      {{ framework.description | slice:0:80 }}{{ framework.description.length > 80 ? '...' : '' }}
-                    </div>
-                  </td>
-                </ng-container>
-
-                <ng-container matColumnDef="actions">
-                  <th mat-header-cell *matHeaderCellDef>Actions</th>
-                  <td mat-cell *matCellDef="let framework">
-                    <button mat-icon-button (click)="viewFrameworkDetails(framework)" matTooltip="View Details">
-                      <mat-icon>visibility</mat-icon>
-                    </button>
-                  </td>
-                </ng-container>
-
-                <tr mat-header-row *matHeaderRowDef="frameworkColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: frameworkColumns;"></tr>
-              </table>
-
-              <mat-paginator #frameworkPaginator="matPaginator"
-                            [pageSizeOptions]="[5, 10, 20, 50]"
-                            [pageSize]="frameworkFilters.page_size"
-                            [pageIndex]="frameworkFilters.page - 1"
-                            [length]="filteredFrameworks.length"
-                            showFirstLastButtons>
-              </mat-paginator>
-            </div>
-
-            <ng-template #loadingSpinner>
-              <div class="loading-container">
-                <mat-spinner diameter="40"></mat-spinner>
-                <p>Loading frameworks...</p>
+                <mat-form-field appearance="outline">
+                  <mat-label>Order</mat-label>
+                  <mat-select [(ngModel)]="frameworkFilters.sort_direction" (selectionChange)="loadFrameworks()">
+                    <mat-option value="asc">Ascending</mat-option>
+                    <mat-option value="desc">Descending</mat-option>
+                  </mat-select>
+                </mat-form-field>
               </div>
-            </ng-template>
-          </mat-card-content>
-        </mat-card>
-      </div>
-    </mat-tab>
-  </mat-tab-group>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Frameworks Table -->
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Available Frameworks</mat-card-title>
+              <mat-card-subtitle>{{ filteredFrameworks.length }} frameworks</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              @if (!frameworksLoading) {
+              <div class="table-container">
+                <table mat-table [dataSource]="filteredFrameworks" matSort #frameworkSort="matSort"
+                  class="frameworks-table">
+                  <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+                    <td mat-cell *matCellDef="let framework">
+                      <div class="framework-name">
+                        <mat-icon class="framework-icon">build</mat-icon>
+                        {{ framework.name }}
+                      </div>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="language">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Language</th>
+                    <td mat-cell *matCellDef="let framework">
+                      <mat-chip-listbox>
+                        <mat-chip [class]="'lang-' + framework.language.toLowerCase()">
+                          {{ framework.language }}
+                        </mat-chip>
+                      </mat-chip-listbox>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="version">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Version</th>
+                    <td mat-cell *matCellDef="let framework">
+                      <div class="version-info">
+                        <span class="current-version">{{ framework.version }}</span>
+                        @if (framework.version !== framework.latest_version) {
+                        <span class="latest-version">(Latest: {{ framework.latest_version }})</span>
+                        }
+                      </div>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="latest_version">
+                    <th mat-header-cell *matHeaderCellDef>Latest</th>
+                    <td mat-cell *matCellDef="let framework">
+                      <span [class]="framework.version === framework.latest_version ? 'up-to-date' : 'outdated'">
+                        {{ framework.latest_version }}
+                      </span>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="description">
+                    <th mat-header-cell *matHeaderCellDef>Description</th>
+                    <td mat-cell *matCellDef="let framework">
+                      <div class="description" [matTooltip]="framework.description">
+                        {{ framework.description | slice:0:80 }}{{ framework.description.length > 80 ? '...' : '' }}
+                      </div>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef>Actions</th>
+                    <td mat-cell *matCellDef="let framework">
+                      <button mat-icon-button (click)="viewFrameworkDetails(framework)" matTooltip="View Details">
+                        <mat-icon>visibility</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="frameworkColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: frameworkColumns;"></tr>
+                </table>
+
+                <mat-paginator #frameworkPaginator="matPaginator" [pageSizeOptions]="[5, 10, 20, 50]"
+                  [pageSize]="frameworkFilters.page_size" [pageIndex]="frameworkFilters.page - 1"
+                  [length]="filteredFrameworks.length" showFirstLastButtons>
+                </mat-paginator>
+              </div>
+              } @else {
+              <ng-container *ngTemplateOutlet="loadingSpinner"></ng-container>
+              }
+
+              <ng-template #loadingSpinner>
+                <div class="loading-container">
+                  <mat-spinner diameter="40"></mat-spinner>
+                  <p>Loading frameworks...</p>
+                </div>
+              </ng-template>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
 </div>

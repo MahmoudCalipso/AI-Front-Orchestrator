@@ -63,14 +63,17 @@
 
       <button type="submit" class="btn btn-primary login-button" [disabled]="loginForm.invalid || isLoading"
         mat-raised-button>
-        <ng-container *ngIf="isLoading; else loginText">
+        @if (isLoading) {
+        <ng-container>
           <mat-spinner diameter="20" strokeWidth="2"></mat-spinner>
           <span>Signing in...</span>
         </ng-container>
-        <ng-template #loginText>
+        } @else {
+        <ng-container>
           <span>Sign In</span>
           <mat-icon>arrow_forward</mat-icon>
-        </ng-template>
+        </ng-container>
+        }
       </button>
 
       <div class="divider">

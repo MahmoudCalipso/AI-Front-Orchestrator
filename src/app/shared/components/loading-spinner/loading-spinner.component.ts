@@ -1,18 +1,19 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'app-loading-spinner',
-    imports: [CommonModule],
-    template: `
+  selector: 'app-loading-spinner',
+  imports: [],
+  template: `
     <div class="loading-spinner-container" [class.fullscreen]="fullscreen">
       <div class="spinner-wrapper">
         <div class="spinner" [style.width.px]="size" [style.height.px]="size"></div>
-        <p *ngIf="message" class="loading-message">{{ message }}</p>
+        @if (message) {
+          <p class="loading-message">{{ message }}</p>
+        }
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .loading-spinner-container {
       display: flex;
       align-items: center;
@@ -56,7 +57,7 @@ import { CommonModule } from '@angular/common';
   `]
 })
 export class LoadingSpinnerComponent {
-    @Input() size: number = 40;
-    @Input() message?: string;
-    @Input() fullscreen: boolean = false;
+  @Input() size: number = 40;
+  @Input() message?: string;
+  @Input() fullscreen: boolean = false;
 }

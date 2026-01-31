@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -7,17 +7,17 @@ import { MatListModule } from '@angular/material/list';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
-    selector: 'app-agent-chat-layout',
-    standalone: true,
-    imports: [
-        CommonModule,
-        RouterModule,
-        MatButtonModule,
-        MatIconModule,
-        MatListModule,
-        MatTooltipModule
-    ],
-    template: `
+  selector: 'app-agent-chat-layout',
+  standalone: true,
+  imports: [
+    DatePipe,
+    RouterModule,
+    MatButtonModule,
+    MatIconModule,
+    MatListModule,
+    MatTooltipModule
+  ],
+  template: `
     <div class="chat-layout">
       <!-- Sidebar -->
       <aside class="chat-sidebar glass-panel">
@@ -58,29 +58,31 @@ import { MatTooltipModule } from '@angular/material/tooltip';
       <!-- Main Chat Area (Placeholder for actual chat component) -->
       <main class="chat-main">
         <!-- We will likely reuse or adapt the IDE chat component here, or build a dedicated one -->
-        <div class="empty-state" *ngIf="!activeSessionId()">
-          <mat-icon class="empty-icon">forum</mat-icon>
-          <h2>Select a session or start a new chat</h2>
-          <p>Connect with your autonomous agents to build something great.</p>
-        </div>
-        
-        <!-- Placeholder for active chat interface -->
-        <div class="active-chat-placeholder" *ngIf="activeSessionId()">
-           <!-- Implemented in next step: AgentChatComponent -->
-           <router-outlet></router-outlet>
-        </div>
+        @if (!activeSessionId()) {
+          <div class="empty-state">
+            <mat-icon class="empty-icon">forum</mat-icon>
+            <h2>Select a session or start a new chat</h2>
+            <p>Connect with your autonomous agents to build something great.</p>
+          </div>
+        } @else {
+          <!-- Placeholder for active chat interface -->
+          <div class="active-chat-placeholder">
+             <!-- Implemented in next step: AgentChatComponent -->
+             <router-outlet></router-outlet>
+          </div>
+        }
       </main>
     </div>
   `,
-    styleUrls: ['./agent-chat-layout.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrls: ['./agent-chat-layout.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AgentChatLayoutComponent {
-    activeSessionId = signal<string | null>('1');
+  activeSessionId = signal<string | null>('1');
 
-    sessions = signal([
-        { id: '1', title: 'Refactoring Auth Service', date: new Date() },
-        { id: '2', title: 'Debugging Kubernetes', date: new Date(Date.now() - 86400000) },
-        { id: '3', title: 'Frontend Architecture', date: new Date(Date.now() - 86400000 * 2) }
-    ]);
+  sessions = signal([
+    { id: '1', title: 'Refactoring Auth Service', date: new Date() },
+    { id: '2', title: 'Debugging Kubernetes', date: new Date(Date.now() - 86400000) },
+    { id: '3', title: 'Frontend Architecture', date: new Date(Date.now() - 86400000 * 2) }
+  ]);
 }

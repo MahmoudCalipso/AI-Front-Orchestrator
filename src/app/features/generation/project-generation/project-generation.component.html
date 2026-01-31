@@ -30,8 +30,12 @@
 
         <button mat-flat-button color="accent" class="analyze-btn" (click)="analyzeDescription()"
           [disabled]="!description || loading">
-          <mat-spinner diameter="18" *ngIf="loading"></mat-spinner>
-          <mat-icon *ngIf="!loading">analytics</mat-icon>
+          @if (loading) {
+          <mat-spinner diameter="18"></mat-spinner>
+          }
+          @if (!loading) {
+          <mat-icon>analytics</mat-icon>
+          }
           Analyze Requirement
         </button>
 
@@ -39,14 +43,18 @@
           <mat-form-field appearance="outline">
             <mat-label>Target Language</mat-label>
             <mat-select [(ngModel)]="selectedLanguage" (selectionChange)="onLanguageChange()">
-              <mat-option *ngFor="let lang of languages" [value]="lang.name">{{lang.display_name}}</mat-option>
+              @for (lang of languages; track lang.name) {
+              <mat-option [value]="lang.name">{{lang.display_name}}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Primary Framework</mat-label>
             <mat-select [(ngModel)]="selectedFramework">
-              <mat-option *ngFor="let fw of frameworks" [value]="fw.name">{{fw.name}} ({{fw.version}})</mat-option>
+              @for (fw of frameworks; track fw.name) {
+              <mat-option [value]="fw.name">{{fw.name}} ({{fw.version}})</mat-option>
+              }
             </mat-select>
           </mat-form-field>
         </div>
@@ -92,17 +100,21 @@
     </div>
   </div>
 
-  <div class="analysis-overlay" *ngIf="analysis">
+  @if (analysis) {
+  <div class="analysis-overlay">
     <div class="glass-chip">Project Type: {{analysis.project_type}}</div>
     <div class="glass-chip">Complexity: {{analysis.estimated_complexity}}</div>
     <div class="glass-chip">Timeline: {{analysis.estimated_time}}</div>
   </div>
+  }
 
-  <div class="progress-overlay" *ngIf="generating">
+  @if (generating) {
+  <div class="progress-overlay">
     <div class="progress-content">
       <mat-spinner diameter="60"></mat-spinner>
       <h2>Orchestrating Source...</h2>
       <p>Building scaffolds, configuring DI, and wiring cloud manifests.</p>
     </div>
   </div>
+  }
 </div>
