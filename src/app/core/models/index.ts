@@ -398,3 +398,21 @@ export interface ReviewCodeRequest {
     language: string;
     focus_areas?: string[];
 }
+
+// ==================== New Model Exports ====================
+
+// Agent Entity Models
+export * from './ai-agent/agent-entity.model';
+
+// Admin Models
+export * from './backend/dtos/responses/admin.models';
+
+// Database Explorer Models
+export * from './database/database-explorer.model';
+
+// Emulator Models
+export * from './backend/dtos/responses/emulator.models';
+
+// Monitoring Models (existing)
+export * from './monitoring/monitoring.model';
+

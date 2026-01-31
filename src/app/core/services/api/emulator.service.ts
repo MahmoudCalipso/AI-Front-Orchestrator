@@ -2,23 +2,14 @@ import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { BaseApiService } from './base-api.service';
 import { BaseResponse } from '../../models/index';
-
-export interface EmulatorStartRequest {
-    platform: 'android' | 'ios';
-    device_name?: string;
-    os_version?: string;
-    headless?: boolean;
-}
-
-export interface EmulatorResponseDTO {
-    id: string;
-    name: string;
-    platform: string;
-    status: string;
-    vnc_port?: number;
-    adb_port?: number;
-    web_url?: string;
-}
+import {
+    EmulatorStartRequest,
+    EmulatorResponseDTO,
+    EmulatorStopRequest,
+    EmulatorControlAction,
+    EmulatorScreenshotResponse,
+    EmulatorListResponse
+} from '../../models/backend/dtos/responses/emulator.models';
 
 /**
  * Emulator Service
@@ -43,8 +34,8 @@ export class EmulatorService extends BaseApiService {
      * Stop a mobile emulator
      * POST /api/v1/emulator/stop
      */
-    stopEmulator(emulatorId: string): Observable<any> {
-        return this.post<BaseResponse<any>>('emulator/stop', { emulator_id: emulatorId }).pipe(
+    stopEmulator(request: EmulatorStopRequest): Observable<any> {
+        return this.post<BaseResponse<any>>('emulator/stop', request).pipe(
             map(res => res.data)
         );
     }
@@ -53,9 +44,60 @@ export class EmulatorService extends BaseApiService {
      * List all active emulators
      * GET /api/v1/emulator/active
      */
-    listActiveEmulators(): Observable<EmulatorResponseDTO[]> {
-        return this.get<BaseResponse<EmulatorResponseDTO[]>>('emulator/active').pipe(
+    listActiveEmulators(): Observable<EmulatorListResponse> {
+        return this.get<BaseResponse<EmulatorListResponse>>('emulator/active').pipe(
+            map(res => res.data)
+        );
+    }
+
+    /**
+     * Get emulator details
+     * GET /api/v1/emulator/{emulator_id}
+     */
+    getEmulator(emulatorId: string): Observable<EmulatorResponseDTO> {
+        return this.get<BaseResponse<EmulatorResponseDTO>>(`emulator/${emulatorId}`).pipe(
+            map(res => res.data)
+        );
+    }
+
+    /**
+     * Control emulator (rotate, home, back, etc.)
+     * POST /api/v1/emulator/{emulator_id}/control
+     */
+    controlEmulator(action: EmulatorControlAction): Observable<any> {
+        return this.post<BaseResponse<any>>(`emulator/${action.emulator_id}/control`, action).pipe(
+            map(res => res.data)
+        );
+    }
+
+    /**
+     * Take emulator screenshot
+     * POST /api/v1/emulator/{emulator_id}/screenshot
+     */
+    takeScreenshot(emulatorId: string): Observable<EmulatorScreenshotResponse> {
+        return this.post<BaseResponse<EmulatorScreenshotResponse>>(`emulator/${emulatorId}/screenshot`, {}).pipe(
+            map(res => res.data)
+        );
+    }
+
+    /**
+     * Pause emulator
+     * POST /api/v1/emulator/{emulator_id}/pause
+     */
+    pauseEmulator(emulatorId: string): Observable<EmulatorResponseDTO> {
+        return this.post<BaseResponse<EmulatorResponseDTO>>(`emulator/${emulatorId}/pause`, {}).pipe(
+            map(res => res.data)
+        );
+    }
+
+    /**
+     * Resume emulator
+     * POST /api/v1/emulator/{emulator_id}/resume
+     */
+    resumeEmulator(emulatorId: string): Observable<EmulatorResponseDTO> {
+        return this.post<BaseResponse<EmulatorResponseDTO>>(`emulator/${emulatorId}/resume`, {}).pipe(
             map(res => res.data)
         );
     }
 }
+
