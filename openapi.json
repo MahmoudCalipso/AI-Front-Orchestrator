@@ -5999,14 +5999,14 @@
                 }
             }
         },
-        "/api/v1/api/figma/analyze": {
+        "/api/v1/figma/analyze": {
             "post": {
                 "tags": [
                     "Tools"
                 ],
                 "summary": "Analyze Figma Design",
                 "description": "Analyze Figma design for code generation using AI.",
-                "operationId": "analyze_figma_design_api_v1_api_figma_analyze_post",
+                "operationId": "analyze_figma_design_api_v1_figma_analyze_post",
                 "parameters": [
                     {
                         "name": "x-api-key",
@@ -6059,14 +6059,14 @@
                 }
             }
         },
-        "/api/v1/api/kubernetes/generate": {
+        "/api/v1/kubernetes/generate": {
             "post": {
                 "tags": [
                     "Tools"
                 ],
                 "summary": "Generate Kubernetes Config",
                 "description": "Generate Kubernetes manifests with AI refinement.",
-                "operationId": "generate_kubernetes_config_api_v1_api_kubernetes_generate_post",
+                "operationId": "generate_kubernetes_config_api_v1_kubernetes_generate_post",
                 "parameters": [
                     {
                         "name": "x-api-key",
@@ -6121,14 +6121,14 @@
                 }
             }
         },
-        "/api/v1/api/security/scan": {
+        "/api/v1/security/scan": {
             "post": {
                 "tags": [
                     "Tools"
                 ],
                 "summary": "Security Scan",
                 "description": "Perform security scan with AI remediation.",
-                "operationId": "security_scan_api_v1_api_security_scan_post",
+                "operationId": "security_scan_api_v1_security_scan_post",
                 "parameters": [
                     {
                         "name": "x-api-key",
@@ -6181,14 +6181,14 @@
                 }
             }
         },
-        "/api/v1/api/lifecycle/execute": {
+        "/api/v1/lifecycle/execute": {
             "post": {
                 "tags": [
                     "Tools"
                 ],
                 "summary": "Execute Lifecycle",
                 "description": "Execute E2E Project Lifecycle",
-                "operationId": "execute_lifecycle_api_v1_api_lifecycle_execute_post",
+                "operationId": "execute_lifecycle_api_v1_lifecycle_execute_post",
                 "parameters": [
                     {
                         "name": "project_id",
