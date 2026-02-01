@@ -41,7 +41,7 @@ export class IDEService extends BaseApiService {
    */
   getProjectStructure(workspaceId: string): Observable<{ files: FileTreeNode[] }> {
     return this.get<BaseResponse<{ files: FileTreeNode[] }>>(`ide/structure/${workspaceId}`).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -51,7 +51,7 @@ export class IDEService extends BaseApiService {
    */
   getFileContent(workspaceId: string, filePath: string): Observable<FileContentResponse> {
     return this.get<BaseResponse<FileContentResponse>>(`ide/files/${workspaceId}/${encodeURIComponent(filePath)}`).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -61,7 +61,7 @@ export class IDEService extends BaseApiService {
    */
   updateFileContent(workspaceId: string, filePath: string, request: IDEFileWriteRequest): Observable<any> {
     return this.patch<BaseResponse<any>>(`ide/files/${workspaceId}/${encodeURIComponent(filePath)}`, request).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -71,7 +71,7 @@ export class IDEService extends BaseApiService {
    */
   createTerminal(request: IDETerminalRequest): Observable<TerminalSession> {
     return this.post<BaseResponse<TerminalSession>>('ide/terminal', request).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -83,7 +83,7 @@ export class IDEService extends BaseApiService {
    */
   createWorkspace(request: IDEWorkspaceRequest): Observable<any> {
     return this.post<BaseResponse<any>>('ide/workspace', request).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -110,12 +110,19 @@ export class IDEService extends BaseApiService {
   }
 
   /**
+   * Save file content (Alias for writeFile)
+   */
+  saveFile(workspaceId: string, filePath: string, content: string): Observable<any> {
+    return this.writeFile(workspaceId, filePath, content);
+  }
+
+  /**
    * Delete file
    * DELETE /api/v1/ide/files/{workspace_id}/{path}
    */
   deleteFile(workspaceId: string, filePath: string): Observable<any> {
     return this.delete<BaseResponse<any>>(`ide/files/${workspaceId}/${encodeURIComponent(filePath)}`).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -125,7 +132,7 @@ export class IDEService extends BaseApiService {
    */
   listFiles(workspaceId: string, directory: string = '.'): Observable<{ files: FileInfo[] }> {
     return this.get<BaseResponse<{ files: FileInfo[] }>>(`ide/files/${workspaceId}`, { directory }).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -135,7 +142,7 @@ export class IDEService extends BaseApiService {
    */
   getFileTree(workspaceId: string): Observable<FileTreeNode> {
     return this.get<BaseResponse<FileTreeNode>>(`ide/tree/${workspaceId}`).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -147,7 +154,7 @@ export class IDEService extends BaseApiService {
    */
   createDebugSession(request: IDEDebugRequest): Observable<any> {
     return this.post<BaseResponse<any>>('ide/debug', request).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -176,7 +183,7 @@ export class IDEService extends BaseApiService {
       `ide/intelligence/completions/${workspaceId}/${encodeURIComponent(filePath)}`,
       request
     ).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -193,7 +200,7 @@ export class IDEService extends BaseApiService {
       `ide/intelligence/hover/${workspaceId}/${encodeURIComponent(filePath)}`,
       request
     ).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -210,7 +217,7 @@ export class IDEService extends BaseApiService {
       `ide/intelligence/diagnostics/${workspaceId}/${encodeURIComponent(filePath)}`,
       { language }
     ).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -228,7 +235,7 @@ export class IDEService extends BaseApiService {
       request,
       { timeout: 60000 }
     ).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 

@@ -7,7 +7,8 @@ import { GenerationService } from '@core/services/api/generation.service';
 import { RegistryService } from '@core/services/api/registry.service';
 import { AuthService } from '@core/services/api/auth.service';
 import { GenerationRequest, AnalysisResponse, GenerationResponse } from '@core/models/generation/generation.model';
-import { CreateProjectRequest, Project } from '@core/models/project/project.model';
+import { ProjectResponseDTO as Project } from '@core/models/project/project.responses';
+import { ProjectCreateRequest as CreateProjectRequest } from '@core/models/project/project.model';
 import { LanguageRegistry } from '@core/models/database/database.model';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -140,7 +141,7 @@ export class ProjectGenerationComponent implements OnInit {
     const request: GenerationRequest = {
       project_name: this.projectName,
       description: this.description,
-      languages: [{ name: this.selectedLanguage, framework: this.selectedFramework }],
+      languages: [{ name: this.selectedLanguage, framework: this.selectedFramework, version: 'latest' }],
       database: { type: this.selectedDatabase as 'postgresql' | 'mysql' | 'mongodb' | 'redis' | 'elasticsearch' | 'cassandra' }
     };
 

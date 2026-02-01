@@ -1,8 +1,3 @@
-/**
- * Core Models and Interfaces
- * TypeScript interfaces for all API models
- */
-
 // ==================== User Models ====================
 
 export interface User {
@@ -27,8 +22,6 @@ export interface UserProfile {
     preferences?: UserPreferences;
 }
 
-export * from './auth/auth.model';
-
 export interface UserPreferences {
     theme: 'dark' | 'light' | 'auto';
     language: string;
@@ -36,16 +29,7 @@ export interface UserPreferences {
     email_notifications: boolean;
 }
 
-export type {
-    Project,
-    ProjectResponse,
-    ProjectListResponse,
-    ProjectCreateRequest,
-    CreateProjectRequest,
-    ProjectProtectionRequest,
-    WorkflowRequest,
-    WorkflowResponse
-} from './project/project.model';
+// ==================== Project Models ====================
 
 export interface ProjectMetadata {
     project_id: string;
@@ -80,33 +64,6 @@ export interface BuildProgress {
     logs: string[];
     started_at: string;
     completed_at?: string;
-}
-
-// ==================== Git Models ====================
-
-export interface GitRepository {
-    id: string;
-    name: string;
-    url: string;
-    provider: GitProvider;
-    branch: string;
-    last_commit?: GitCommit;
-    created_at: string;
-}
-
-export type GitProvider = 'github' | 'gitlab' | 'bitbucket' | 'azure_devops';
-
-export interface GitCommit {
-    sha: string;
-    message: string;
-    author: string;
-    timestamp: string;
-}
-
-export interface GitCredentials {
-    provider: GitProvider;
-    token: string;
-    username?: string;
 }
 
 // ==================== AI Models ====================
@@ -196,16 +153,6 @@ export interface SystemMetrics {
     timestamp: number;
 }
 
-export interface AlertNotification {
-    id: string;
-    type: 'info' | 'warning' | 'error' | 'success';
-    title: string;
-    message: string;
-    timestamp: number;
-    read: boolean;
-    action_url?: string;
-}
-
 // ==================== Framework Registry Models ====================
 
 export interface Language {
@@ -230,15 +177,6 @@ export interface Framework {
 
 // ==================== Workspace Models ====================
 
-export interface Workspace {
-    id: string;
-    name: string;
-    project_id?: string;
-    created_at: string;
-    last_accessed: string;
-    files: FileInfo[];
-}
-
 export interface IDESession {
     session_id: string;
     workspace_id: string;
@@ -247,172 +185,86 @@ export interface IDESession {
     active: boolean;
 }
 
-// ==================== Kubernetes Models ====================
+// ==================== Feature Exports ====================
 
-export interface KubernetesDeployment {
-    name: string;
-    namespace: string;
-    replicas: number;
-    ready_replicas: number;
-    status: 'running' | 'pending' | 'failed';
-    created_at: string;
-}
+// Common
+export * from './common/common.types';
+export * from './common/enums';
+export * from './common/filter.model';
+export * from './common/base-response.model';
+export * from './common/solution.model';
 
-export interface KubernetesPod {
-    name: string;
-    namespace: string;
-    status: 'running' | 'pending' | 'failed' | 'succeeded';
-    containers: KubernetesContainer[];
-    node: string;
-    created_at: string;
-}
+// Auth
+export * from './auth/auth.model';
+export * from './auth/auth.requests';
+export * from './auth/auth.responses';
+export * from './auth/user.model';
+export * from './auth/tenant.model';
+export * from './auth/external-account.model';
 
-export interface KubernetesContainer {
-    name: string;
-    image: string;
-    ready: boolean;
-    restart_count: number;
-}
-
-// ==================== API Response Wrappers ====================
-
-export type ResponseStatus = 'success' | 'error' | 'warning' | 'info' | 'partial_success' | 'accepted' | 'denied';
-
-export interface BaseResponse<T = any> {
-    status: ResponseStatus;
-    code: string;
-    message?: string;
-    data: T;
-    meta?: Record<string, any>;
-    timestamp: string;
-}
-
-export interface PaginatedResponse<T> {
-    items: T[];
-    total: number;
-    page: number;
-    page_size: number;
-    total_pages: number;
-}
-
-/**
- * @deprecated Use BaseResponse instead
- */
-export interface ApiResponse<T> {
-    data: T;
-    message?: string;
-    status: 'success' | 'error';
-}
-
-/**
- * @deprecated Use BaseResponse instead
- */
-export interface StandardResponse {
-    message: string;
-    status: 'success' | 'error';
-    data?: any;
-}
-
-/**
- * @deprecated Use BaseResponse instead
- */
-export interface SwarmResponse {
-    task_id: string;
-    status: 'pending' | 'running' | 'completed' | 'failed';
-    result?: any;
-    error?: string;
-    progress?: number;
-}
-
-// ==================== Request Models ====================
-
-export interface GenerateProjectRequest {
-    project_name: string;
-    languages: Record<string, string>;
-    frameworks?: Record<string, string>;
-    description?: string;
-    template?: string;
-    database?: DatabaseConfig;
-    figma_url?: string;
-}
-
-export interface DatabaseConfig {
-    type: 'postgresql' | 'mysql' | 'mongodb' | 'sqlite';
-    host?: string;
-    port?: number;
-    database?: string;
-    use_existing: boolean;
-}
-
-export interface MigrateProjectRequest {
-    project_id: string;
-    source_stack: string;
-    target_stack: string;
-    preserve_structure: boolean;
-}
-
-export interface FixCodeRequest {
-    code: string;
-    language: string;
-    issue?: string;
-}
-
-export interface AnalyzeCodeRequest {
-    code: string;
-    language: string;
-    analysis_type: 'security' | 'performance' | 'quality' | 'all';
-}
-
-export interface TestCodeRequest {
-    code: string;
-    language: string;
-    test_framework?: string;
-}
-
-export interface OptimizeCodeRequest {
-    code: string;
-    language: string;
-    optimization_goal: 'performance' | 'memory' | 'readability';
-}
-
-export interface RefactorCodeRequest {
-    code: string;
-    language: string;
-    refactoring_goal: string;
-}
-
-export interface ExplainCodeRequest {
-    code: string;
-    language: string;
-    detail_level: 'brief' | 'detailed' | 'expert';
-}
-
-export interface DocumentCodeRequest {
-    code: string;
-    language: string;
-    style: 'jsdoc' | 'sphinx' | 'markdown';
-}
-
-export interface ReviewCodeRequest {
-    code: string;
-    language: string;
-    focus_areas?: string[];
-}
-
-// ==================== New Model Exports ====================
-
-// Agent Entity Models
+// AI Agent
+export * from './ai-agent/agent.requests';
+export * from './ai-agent/agent.responses';
 export * from './ai-agent/agent-entity.model';
+export * from './ai-agent/ai-agent.model';
 
-// Admin Models
-export * from './backend/dtos/responses/admin.models';
+// AI
+export * from './ai/ai.model';
 
-// Database Explorer Models
+// Admin
+export * from './admin/admin.model';
+
+
+// Project
+export * from './project/project.model';
+export * from './project/project.requests';
+export * from './project/project.responses';
+
+// Database
 export * from './database/database-explorer.model';
 
-// Emulator Models
-export * from './backend/dtos/responses/emulator.models';
+// Emulator
+export * from './emulator/emulator.model';
 
-// Monitoring Models (existing)
+// Enterprise
+export * from './enterprise/enterprise.model';
+
+// Figma
+export * from './figma/figma.model';
+
+// Generation
+export * from './generation/generation.model';
+
+// Git
+export * from './git/git.model';
+
+// IDE
+export * from './ide/ide.model';
+
+// Kubernetes
+export * from './kubernetes/kubernetes.model';
+
+// Lifecycle
+export * from './lifecycle/lifecycle.model';
+
+// Migration
+export * from './migration/migration.model';
+
+// Monitoring
 export * from './monitoring/monitoring.model';
+
+// Orchestrate
+export * from './orchestrate/orchestrate.dtos';
+
+// Registry
+export * from './registry/registry.model';
+
+// Security
+export * from './security/security.model';
+
+// System
+export * from './system/system.model';
+
+// Workspace
+export * from './workspace/workspace.model';
 

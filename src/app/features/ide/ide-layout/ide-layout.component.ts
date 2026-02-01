@@ -110,6 +110,41 @@ export class IdeLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
   isSearchOpen = false;
   isEmulatorOpen = false;
 
+  ngOnInit(): void {
+    const projId = this.route.snapshot.paramMap.get('id');
+    if (projId) this.workspaceId = projId;
+    this.loadProjectStructure();
+    this.registerCommands();
+  }
+
+  ngAfterViewInit(): void {
+    this.initTerminal();
+  }
+
+  ngOnDestroy(): void {
+    this.term?.dispose();
+    this.socket?.close();
+  }
+
+  loadProjectStructure(): void {
+    this.ideService.getProjectStructure(this.workspaceId).subscribe({
+      next: (res) => {
+        this.fileTree = res.files as unknown as FileNode[];
+        this.dataSource.data = this.fileTree;
+      }
+    });
+  }
+
+  private initTerminal(): void {
+    // Basic terminal placeholder
+    this.term = new Terminal({ theme: { background: '#1e1e1e' } });
+    this.fitAddon = new FitAddon();
+    this.term.loadAddon(this.fitAddon);
+    this.term.open(this.terminalContainer.nativeElement);
+    this.fitAddon.fit();
+    this.term.writeln('AI Orchestrator Terminal Ready.');
+  }
+
   toggleChat(): void {
     this.isChatOpen = !this.isChatOpen;
     this.isGitOpen = false;
@@ -155,7 +190,12 @@ export class IdeLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     this.resizeAll();
   }
 
-  // ... (resizeAll method follows)
+  resizeAll(): void {
+    setTimeout(() => {
+      this.editorGroups.forEach(g => g.editorInstance?.layout() || g.diffEditorInstance?.layout());
+      this.fitAddon?.fit();
+    }, 100);
+  }
 
   // ... (registerCommands overrides)
   registerCommands(): void {
@@ -213,7 +253,134 @@ export class IdeLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  // ... rest of methods
+  saveFile(): void {
+    const activeGroup = this.editorGroups.find(g => g.id === this.activeGroupId);
+    if (!activeGroup || !activeGroup.activeFile) return;
+
+    const content = activeGroup.editorInstance?.getValue();
+    if (!content) return;
+
+    this.ideService.saveFile(this.workspaceId, activeGroup.activeFile.path, content).subscribe({
+      next: () => this.toast.success('File saved'),
+      error: () => this.toast.error('Failed to save file')
+    });
+  }
+
+  splitEditor(direction: 'vertical' | 'horizontal'): void {
+    this.toast.info(`Split editor ${direction} implementation coming soon`);
+  }
+
+  formatCode(): void {
+    const activeGroup = this.editorGroups.find(g => g.id === this.activeGroupId);
+    if (!activeGroup || !activeGroup.editorInstance) return;
+
+    activeGroup.editorInstance.getAction('editor.action.formatDocument').run();
+  }
+
+  getActiveGroup(): EditorGroup | null {
+    return this.editorGroups.find(g => g.id === this.activeGroupId) || null;
+  }
+
+  handleAiApply(change: any): void {
+    const activeGroup = this.getActiveGroup();
+    if (!activeGroup || !activeGroup.editorInstance) return;
+
+    // Apply code change to editor
+    if (change.code) {
+      activeGroup.editorInstance.setValue(change.code);
+      this.toast.success('AI changes applied');
+    }
+  }
+
+  handleGitStatusChange(): void {
+    this.loadProjectStructure();
+    this.toast.info('Git status updated');
+  }
+
+  openFile(file: any): void {
+    const fileNode: FileNode = {
+      name: file.name,
+      path: file.path,
+      isDirectory: file.isDirectory || false
+    };
+
+    let activeGroup = this.getActiveGroup();
+    if (!activeGroup) {
+      activeGroup = {
+        id: 'group-' + Date.now(),
+        files: [],
+        activeFile: null
+      };
+      this.editorGroups.push(activeGroup);
+      this.activeGroupId = activeGroup.id;
+    }
+
+    const existingFile = activeGroup.files.find(f => f.path === fileNode.path);
+    if (!existingFile) {
+      activeGroup.files.push(fileNode);
+    }
+
+    activeGroup.activeFile = fileNode;
+    this.resizeAll();
+  }
+
+  closeEditorGroup(groupId: string): void {
+    const index = this.editorGroups.findIndex(g => g.id === groupId);
+    if (index === -1) return;
+
+    const group = this.editorGroups[index];
+    group.editorInstance?.dispose();
+    group.diffEditorInstance?.dispose();
+    this.editorGroups.splice(index, 1);
+
+    if (this.activeGroupId === groupId) {
+      this.activeGroupId = this.editorGroups[0]?.id || '';
+    }
+    this.resizeAll();
+  }
+
+  closeFile(file: FileNode, group: EditorGroup, event: MouseEvent): void {
+    event.stopPropagation();
+    const index = group.files.findIndex(f => f.path === file.path);
+    if (index === -1) return;
+
+    group.files.splice(index, 1);
+
+    if (group.activeFile?.path === file.path) {
+      group.activeFile = group.files[0] || null;
+      if (group.activeFile) {
+        // Redraw or switch content logic should be here
+        this.resizeAll();
+      }
+    }
+
+    if (group.files.length === 0) {
+      this.closeEditorGroup(group.id);
+    }
+  }
+
+  setActiveFile(file: FileNode, group: EditorGroup): void {
+    group.activeFile = file;
+    this.activeGroupId = group.id;
+    this.resizeAll();
+  }
+
+  handleGitDiff(event: any): void {
+    const activeGroup = this.getActiveGroup();
+    if (!activeGroup) return;
+
+    activeGroup.isDiffMode = true;
+    this.toast.info('Viewing diff');
+    this.resizeAll();
+  }
+
+  runCode(): void {
+    const activeGroup = this.getActiveGroup();
+    if (!activeGroup || !activeGroup.activeFile) return;
+
+    this.toast.info(`Running ${activeGroup.activeFile.name}...`);
+    // Logic for running code via terminal or API
+  }
 
   // Update startResizing
   startResizing(event: MouseEvent, edge: string): void {

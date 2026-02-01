@@ -47,21 +47,8 @@ export interface CreateAgentRequest {
 }
 
 /**
- * Update Agent Request
- */
-export interface UpdateAgentRequest {
-    display_name?: string;
-    description?: string;
-    model?: string;
-    temperature?: number;
-    max_tokens?: number;
-    tools?: string[];
-    metadata?: Record<string, any>;
-}
-
-/**
  * Agent Response DTO
- */
+    */
 export interface AgentResponseDTO {
     id: string;
     name: string;

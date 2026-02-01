@@ -1,15 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { BaseApiService } from './base-api.service';
-
-/**
- * Enterprise Service
- * Handles multi-tenant enterprise features
- */
-@Injectable({
-    providedIn: 'root'
-})
-    import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { BaseApiService } from './base-api.service';
 import { BaseResponse } from '../../models/index';
@@ -28,10 +17,10 @@ export class EnterpriseService extends BaseApiService {
      * POST /api/v1/enterprise/users
      */
     addOrganizationUser(userData: {
-        username?: string;
         email: string;
+        full_name: string;
+        password: string;
         role?: string;
-        password?: string;
     }): Observable<any> {
         return this.post<BaseResponse<any>>('enterprise/users', userData).pipe(
             map(res => res.data)
@@ -47,8 +36,6 @@ export class EnterpriseService extends BaseApiService {
         page?: number;
         page_size?: number;
     }): Observable<{
-        // Adjusting return type to match typical list response if model isn't strictly typed here yet,
-        // relying on generic BaseResponse structure
         users: any[];
         total: number;
     } | any> {
@@ -85,8 +72,8 @@ export class EnterpriseService extends BaseApiService {
      * Set Project Protection
      * POST /api/v1/enterprise/projects/{project_id}/protect
      */
-    setProjectProtection(projectId: string, protect: boolean = true): Observable<any> {
-        return this.post<BaseResponse<any>>(`enterprise/projects/${projectId}/protect`, { protect }).pipe(
+    setProjectProtection(projectId: string, enabled: boolean = true, allowedUsers?: string[]): Observable<any> {
+        return this.post<BaseResponse<any>>(`enterprise/projects/${projectId}/protect`, { enabled, allowed_users: allowedUsers }).pipe(
             map(res => res.data)
         );
     }

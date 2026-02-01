@@ -1,187 +1,169 @@
 /**
- * Real-time metrics
+ * Monitoring Models
+ * All Monitoring-related DTOs matching backend Python models
  */
-export interface RealtimeMetrics {
+
+// ==================== Metrics ====================
+export interface MetricsDTO {
   timestamp: string;
   cpu_usage: number;
   memory_usage: number;
   disk_usage: number;
-  active_connections: number;
-  requests_per_second: number;
-  average_response_time: number;
-  error_rate: number;
+  network_in: number;
+  network_out: number;
+  active_models: number;
+  active_projects: number;
+  active_users: number;
+  active_connections?: number;
+  requests_per_second?: number;
+  average_response_time?: number;
+  error_rate?: number;
 }
 
-/**
- * Historical metrics request
- */
-export interface HistoricalMetricsRequest {
-  start_time: string;
-  end_time: string;
-  interval?: '1m' | '5m' | '15m' | '1h' | '1d';
-  metrics?: string[];
+export type RealtimeMetrics = MetricsDTO;
+export type BuildDetails = BuildInfoDTO;
+export type BuildsListResponse = BuildListResponseDTO;
+
+export interface AlertHistory {
+  alerts: AlertNotification[];
+  total: number;
 }
 
-/**
- * Historical metrics response
- */
-export interface HistoricalMetricsResponse {
-  metrics: TimeSeriesMetric[];
-  start_time: string;
-  end_time: string;
-  interval: string;
+// ==================== Metrics List ====================
+export interface MetricsListResponseDTO {
+  metrics: MetricsDTO[];
+  total: number;
 }
 
-/**
- * Time series metric
- */
-export interface TimeSeriesMetric {
-  name: string;
-  data_points: DataPoint[];
-  unit: string;
-  aggregation: 'avg' | 'sum' | 'min' | 'max';
-}
-
-/**
- * Data point
- */
-export interface DataPoint {
-  timestamp: string;
-  value: number;
-}
-
-/**
- * Build information
- */
-export interface BuildInfo {
-  build_id: string;
+// ==================== Build Info ====================
+export interface BuildInfoDTO {
+  id: string;
   project_id: string;
   project_name: string;
-  status: 'queued' | 'running' | 'success' | 'failed' | 'cancelled';
-  trigger: 'manual' | 'commit' | 'schedule' | 'api';
-  branch?: string;
-  commit?: string;
-  started_at?: string;
+  status: string;
+  started_at: string;
   completed_at?: string;
   duration?: number;
-  logs_url?: string;
+  logs?: string[];
+  error?: string;
 }
 
-/**
- * Builds list response
- */
-export interface BuildsListResponse {
-  builds: BuildInfo[];
+// ==================== Build List ====================
+export interface BuildListResponseDTO {
+  builds: BuildInfoDTO[];
   total: number;
   page: number;
   page_size: number;
 }
 
-/**
- * Build details
- */
-export interface BuildDetails extends BuildInfo {
-  steps: BuildStep[];
-  artifacts?: Artifact[];
-  test_results?: TestSummary;
-  logs?: string;
-  error?: string;
-}
-
-/**
- * Build step
- */
-export interface BuildStep {
-  step_id: string;
-  name: string;
-  status: 'pending' | 'running' | 'success' | 'failed' | 'skipped';
-  started_at?: string;
-  completed_at?: string;
-  duration?: number;
-  logs?: string;
-}
-
-/**
- * Build artifact
- */
-export interface Artifact {
-  name: string;
-  path: string;
-  size: number;
-  type: string;
-  download_url: string;
-}
-
-/**
- * Test summary
- */
-export interface TestSummary {
-  total: number;
-  passed: number;
-  failed: number;
-  skipped: number;
-  duration: number;
-  coverage?: number;
-}
-
-/**
- * Alert rule
- */
-export interface AlertRule {
-  rule_id: string;
-  name: string;
-  metric: string;
-  condition: 'gt' | 'lt' | 'eq' | 'gte' | 'lte';
-  threshold: number;
-  duration: number;
-  severity: 'info' | 'warning' | 'critical';
-  enabled: boolean;
-  notifications: NotificationChannel[];
-}
-
-/**
- * Notification channel
- */
-export interface NotificationChannel {
-  type: 'email' | 'slack' | 'webhook' | 'sms';
-  destination: string;
-  enabled: boolean;
-}
-
-/**
- * Alert
- */
-export interface Alert {
-  alert_id: string;
-  rule_id: string;
-  rule_name: string;
-  severity: 'info' | 'warning' | 'critical';
-  message: string;
-  current_value: number;
-  threshold: number;
-  triggered_at: string;
-  resolved_at?: string;
-  status: 'firing' | 'resolved' | 'acknowledged';
-}
-
-/**
- * Service health
- */
-export interface ServiceHealth {
-  service_name: string;
-  status: 'healthy' | 'degraded' | 'unhealthy';
+// ==================== System Metrics ====================
+export interface MonitoringSystemMetricsDTO {
+  cpu: {
+    usage: number;
+    cores: number;
+    load_average: number[];
+  };
+  memory: {
+    total: number;
+    used: number;
+    free: number;
+    usage: number;
+  };
+  disk: {
+    total: number;
+    used: number;
+    free: number;
+    usage: number;
+  };
+  network: {
+    in: number;
+    out: number;
+  };
   uptime: number;
-  last_check: string;
-  response_time: number;
-  error_rate: number;
-  dependencies?: ServiceHealth[];
-}
-
-/**
- * System health response
- */
-export interface SystemHealthResponse {
-  overall_status: 'healthy' | 'degraded' | 'unhealthy';
-  services: ServiceHealth[];
   timestamp: string;
 }
+
+// ==================== Workbench Metrics ====================
+export interface WorkbenchMetricsDTO {
+  workbench_id: string;
+  project_id: string;
+  status: string;
+  cpu_usage: number;
+  memory_usage: number;
+  uptime: number;
+  last_activity: string;
+}
+
+// ==================== Workbench List ====================
+export interface WorkbenchListResponseDTO {
+  workbenches: WorkbenchMetricsDTO[];
+  total: number;
+}
+
+// ==================== Build Status ====================
+export enum BuildStatus {
+  PENDING = 'pending',
+  RUNNING = 'running',
+  SUCCESS = 'success',
+  FAILED = 'failed',
+  CANCELLED = 'cancelled'
+}
+
+// ==================== Compatibility Aliases ====================
+export type BuildSummaryDTO = BuildInfoDTO;
+export type MetricsFilter = MetricsFilterDTO;
+export interface MetricsFilterDTO {
+  start_date?: string;
+  end_date?: string;
+  limit?: number;
+  offset?: number;
+}
+export type HistoricalMetricsRequest = MetricsFilterDTO;
+
+export interface HistoricalMetricsResponse {
+  metrics: MetricsDTO[];
+  summary: {
+    avg_cpu: number;
+    avg_memory: number;
+    total_network_in: number;
+    total_network_out: number;
+  };
+}
+
+// ==================== Health ====================
+export interface SystemHealthResponse {
+  overall_status: string;
+  timestamp: string;
+  services: ServiceHealth[];
+}
+
+export interface ServiceHealth {
+  name: string;
+  status: string;
+  details?: Record<string, any>;
+}
+// ==================== Alerts and Notifications ====================
+export interface AlertNotification {
+  id: string;
+  severity: 'info' | 'warning' | 'critical';
+  message: string;
+  timestamp: string;
+  is_acknowledged: boolean;
+  metadata?: Record<string, any>;
+}
+
+export interface AlertRule {
+  id: string;
+  name: string;
+  condition: string;
+  threshold: number;
+  severity: string;
+  enabled: boolean;
+}
+
+export interface MetricsConfig {
+  retention_days: number;
+  scraping_interval: number;
+  enabled_collectors: string[];
+}
+

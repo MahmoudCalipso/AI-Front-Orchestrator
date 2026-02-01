@@ -28,12 +28,12 @@ import {
   ProjectStatus,
   BuildStatus,
   RunStatus
-} from '../../core/models/backend';
+} from '../../core/models';
 import {
   AdminUserDTO,
   AdminProjectDTO,
-  SystemMetricsResponse
-} from '../../core/models/backend/dtos/responses/admin.responses';
+  AdminSystemMetricsResponse as SystemMetricsResponse
+} from '../../core/models/admin/admin.model';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -121,13 +121,18 @@ export class AdminDashboardComponent implements OnInit {
   ];
 
   systemMetrics = {
+    uptime: '',
+    totalProjects: 0,
     totalUsers: 0,
-    activeProjects: 0,
+    activeWorkbenches: 0,
+    cpuUsage: 0,
+    memoryUsage: 0,
     systemLoad: 0,
-    memoryUsage: 0
+    activeProjects: 0,
+    recordedActivities: 0
   };
 
-  userColumns = ['full_name', 'email', 'role', 'is_active', 'created_at', 'actions'];
+  userColumns = ['email', 'role', 'is_active', 'created_at', 'actions'];
   projectColumns = ['project_name', 'language', 'framework', 'status', 'created_at', 'actions'];
 
   ngOnInit() {
@@ -218,12 +223,12 @@ export class AdminDashboardComponent implements OnInit {
       page_size: this.userFilters.page_size,
       role: this.userFilters.role
     }).subscribe({
-      next: (response) => {
+      next: (response: any) => {
         this.users = response.users;
         this.filteredUsers = [...this.users];
         this.usersLoading = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         this.toast.error('Failed to load users');
         this.usersLoading = false;
       }
@@ -236,12 +241,12 @@ export class AdminDashboardComponent implements OnInit {
       page: this.projectFilters.page,
       page_size: this.projectFilters.page_size
     }).subscribe({
-      next: (response) => {
+      next: (response: any) => {
         this.projects = response.projects;
         this.filteredProjects = [...this.projects];
         this.projectsLoading = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         this.toast.error('Failed to load projects');
         this.projectsLoading = false;
       }
@@ -252,10 +257,15 @@ export class AdminDashboardComponent implements OnInit {
     this.adminService.getSystemMetrics().subscribe({
       next: (response) => {
         this.systemMetrics = {
+          uptime: response.uptime || '00:00:00',
+          totalProjects: response.total_projects,
           totalUsers: response.total_users,
-          activeProjects: response.active_projects,
-          systemLoad: response.cpu_usage,
-          memoryUsage: response.memory_usage
+          activeWorkbenches: response.active_workbenches || 0,
+          recordedActivities: response.recorded_activities || 0,
+          cpuUsage: response.cpu_usage || 0,
+          memoryUsage: response.memory_usage || 0,
+          systemLoad: response.cpu_usage || 0,
+          activeProjects: response.active_workbenches || 0
         };
       },
       error: (error) => {
@@ -274,10 +284,10 @@ export class AdminDashboardComponent implements OnInit {
   runSystemCleanup() {
     if (confirm('Are you sure you want to run system cleanup? This may take some time.')) {
       this.adminService.runSystemCleanup().subscribe({
-        next: (response) => {
+        next: (response: any) => {
           this.toast.success('System cleanup completed successfully');
         },
-        error: (error) => {
+        error: (error: any) => {
           this.toast.error('System cleanup failed');
         }
       });
@@ -287,10 +297,10 @@ export class AdminDashboardComponent implements OnInit {
   backupSystem() {
     if (confirm('Are you sure you want to create a system backup?')) {
       this.adminService.createSystemBackup().subscribe({
-        next: (response) => {
+        next: (response: any) => {
           this.toast.success(`System backup created successfully. Backup ID: ${response.backup_id}`);
         },
-        error: (error) => {
+        error: (error: any) => {
           this.toast.error('System backup failed');
         }
       });
@@ -302,14 +312,14 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   updateUserRole(user: AdminUserDTO) {
-    const newRole = prompt(`Update role for ${user.username || user.email}:`, user.role);
+    const newRole = prompt(`Update role for ${user.email}:`, user.role);
     if (newRole && newRole !== user.role) {
-      this.adminService.updateUserRole(user.id, newRole as 'user' | 'admin' | 'superuser').subscribe({
-        next: (response) => {
+      this.adminService.updateUserRole(user.id, { role: newRole as any }).subscribe({
+        next: (response: any) => {
           user.role = newRole;
           this.toast.success('User role updated successfully');
         },
-        error: (error) => {
+        error: (error: any) => {
           this.toast.error('Failed to update user role');
         }
       });
@@ -323,20 +333,20 @@ export class AdminDashboardComponent implements OnInit {
       this.adminService.activateUser(user.id);
 
     serviceCall.subscribe({
-      next: (response) => {
+      next: (response: any) => {
         user.is_active = !user.is_active;
         this.toast.success(`User ${user.is_active ? 'activated' : 'suspended'} successfully`);
       },
-      error: (error) => {
+      error: (error: any) => {
         this.toast.error(`Failed to ${action} user`);
       }
     });
   }
 
   deleteUser(user: AdminUserDTO) {
-    if (confirm(`Are you sure you want to delete user ${user.username || user.email}? This action cannot be undone.`)) {
+    if (confirm(`Are you sure you want to delete user ${user.email}? This action cannot be undone.`)) {
       this.adminService.deleteUser(user.id).subscribe({
-        next: (response) => {
+        next: (response: any) => {
           this.users = this.users.filter(u => u.id !== user.id);
           this.filteredUsers = this.filteredUsers.filter(u => u.id !== user.id);
           this.toast.success('User deleted successfully');

@@ -1,228 +1,204 @@
 /**
- * Language configuration
+ * Generation Models
+ * All Generation-related DTOs matching backend Python models
  */
-export interface Language {
-  name: string;
-  framework?: string;
-  version?: string;
-  features?: string[];
+
+import { ArchitecturePattern } from '../backend/types/enums';
+
+// ==================== Generation ====================
+export interface DescriptionAnalysisResponseDTO {
+  analysis: Record<string, any>;
+  generated_config: Record<string, any>;
+  summary: string;
+  project_type?: string;
+  estimated_complexity?: string;
+  estimated_time?: string;
 }
 
-/**
- * Database configuration
- */
-export interface DatabaseConfig {
-  type: 'postgresql' | 'mysql' | 'mongodb' | 'redis' | 'elasticsearch' | 'cassandra';
-  version?: string;
-  host?: string;
-  port?: number;
-  enableBackup?: boolean;
-  replication?: boolean;
-}
+export type AnalysisResponse = DescriptionAnalysisResponseDTO;
 
-/**
- * Frontend configuration
- */
-export interface FrontendConfig {
-  framework: 'react' | 'nextjs' | 'vue' | 'angular' | 'svelte';
-  version?: string;
-  typescript?: boolean;
-  ssr?: boolean;
-  styling?: 'css' | 'scss' | 'tailwind' | 'styled-project-generation';
-  ui_library?: string;
-}
-
-/**
- * Architecture patterns
- */
-export interface ArchitectureConfig {
-  patterns: ('microservices' | 'monolithic' | 'api-first' | 'event-driven' | 'serverless')[];
-  microservices?: boolean;
-  api_gateway?: boolean;
-  message_queue?: string;
-  service_mesh?: boolean;
-}
-
-/**
- * Security configuration
- */
-export interface SecurityConfig {
-  enable_authentication?: boolean;
-  enable_authorization?: boolean;
-  auth_provider?: 'jwt' | 'oauth2' | 'saml' | 'custom';
-  enable_rate_limiting?: boolean;
-  enable_encryption?: boolean;
-  pci_compliance?: boolean;
-  gdpr_compliance?: boolean;
-  hipaa_compliance?: boolean;
-}
-
-/**
- * Scalability configuration
- */
-export interface ScalabilityConfig {
-  enable_caching?: boolean;
-  cache_provider?: 'redis' | 'memcached' | 'in-memory';
-  enable_load_balancing?: boolean;
-  load_balancer_type?: 'nginx' | 'haproxy' | 'aws-elb';
-  enable_cdn?: boolean;
-  cdn_provider?: 'cloudflare' | 'aws-cloudfront' | 'fastly';
-  auto_scaling?: boolean;
-  horizontal_scaling?: boolean;
-}
-
-/**
- * Integrations configuration
- */
-export interface IntegrationsConfig {
-  payment_gateway?: boolean;
-  payment_provider?: 'stripe' | 'paypal' | 'square';
-  email_service?: boolean;
-  email_provider?: 'sendgrid' | 'mailgun' | 'ses';
-  sms_service?: boolean;
-  analytics?: boolean;
-  monitoring?: boolean;
-  logging?: boolean;
-  erp?: boolean;
-  crm?: boolean;
-}
-
-/**
- * Deployment configuration
- */
-export interface DeploymentConfig {
-  strategy: 'docker' | 'kubernetes' | 'serverless' | 'vm';
-  cloud_provider?: 'aws' | 'azure' | 'gcp' | 'on-premise';
-  generate_ci_cd?: boolean;
-  ci_cd_platform?: 'github-actions' | 'gitlab-ci' | 'jenkins' | 'circleci';
-  container_registry?: string;
-  orchestration?: string;
-}
-
-/**
- * Project generation request
- */
-export interface GenerationRequest {
-  project_name: string;
-  description: string;
-  languages?: Language[];
-  database?: DatabaseConfig;
-  frontend?: FrontendConfig;
-  architecture?: ArchitectureConfig;
-  security?: SecurityConfig;
-  scalability?: ScalabilityConfig;
-  integrations?: IntegrationsConfig;
-  deployment?: DeploymentConfig;
-  custom_requirements?: string[];
-}
-
-/**
- * Project generation response
- */
 export interface GenerationResponse {
   project_id: string;
-  project_name: string;
-  status: 'success' | 'failed' | 'partial';
-  files: GeneratedFile[];
-  structure: ProjectStructure;
-  deployment_files?: string[];
-  documentation?: string;
-  warnings?: string[];
-  errors?: string[];
-  execution_time: number;
-  timestamp: string;
+  status: string;
+  message?: string;
 }
 
-/**
- * Generated file
- */
-export interface GeneratedFile {
-  path: string;
-  content: string;
-  language: string;
-  size: number;
-  type: 'source' | 'config' | 'test' | 'documentation';
-}
-
-/**
- * Project structure
- */
-export interface ProjectStructure {
-  root: string;
-  directories: string[];
-  files: string[];
-  tree: any;
-}
-
-/**
- * Description analysis request
- */
-export interface AnalysisRequest {
-  description: string;
-  context?: string;
-  requirements?: string[];
-}
-
-/**
- * Description analysis response
- */
-export interface AnalysisResponse {
-  project_type: string;
-  languages: Language[];
-  database: DatabaseConfig;
+// ==================== Generation Request ====================
+export interface GenerationRequest {
+  project_name?: string;
+  description?: string;
+  project_type?: string;
+  languages?: string[] | LanguageFrameworkSpec[];
   frontend?: FrontendConfig;
-  architecture: ArchitectureConfig;
-  security: SecurityConfig;
-  scalability: ScalabilityConfig;
-  integrations: IntegrationsConfig;
-  deployment: DeploymentConfig;
-  detected_features: string[];
-  recommendations: string[];
-  estimated_complexity: 'low' | 'medium' | 'high' | 'very-high';
-  estimated_time: string;
-  confidence: number;
-}
-
-/**
- * Entity generation request
- */
-export interface EntityGenerationRequest {
-  entities: EntityDefinition[];
-  project_name: string;
-  target_language: string;
+  template?: TemplateSource;
+  database?: GenerationDatabaseConfig;
+  entities?: EntityDefinition[];
+  security?: SecurityConfig;
+  architecture?: ArchitectureConfig;
+  scalability?: ScalabilityConfig;
+  integrations?: IntegrationConfig;
+  deployment?: GenerationDeploymentConfig;
+  stack_components?: StackComponents;
+  features?: string[];
+  technical_requirements?: string[];
+  git?: GitActionConfig;
+  requirements?: string;
+  user_id?: string;
+  kubernetes?: KubernetesConfig;
+  target_language?: string;
   framework?: string;
   include_crud?: boolean;
   include_validation?: boolean;
   include_tests?: boolean;
 }
 
-/**
- * Entity definition
- */
+// ==================== Entity Definition ====================
 export interface EntityDefinition {
   name: string;
+  table_name?: string;
+  description?: string;
   fields: EntityField[];
-  relationships?: EntityRelationship[];
-  validations?: any;
+  relationships?: Record<string, any>[];
+  features?: string[];
 }
 
-/**
- * Entity field
- */
 export interface EntityField {
   name: string;
   type: string;
-  required?: boolean;
+  length?: number;
+  projected_name?: string;
+  description?: string;
+  nullable?: boolean;
   unique?: boolean;
-  default?: any;
-  validation?: any;
+  primary_key?: boolean;
+  auto_increment?: boolean;
+  foreign_key?: string;
+  default_value?: any;
+  validations?: ValidationRule[];
 }
 
-/**
- * Entity relationship
- */
-export interface EntityRelationship {
-  type: 'one-to-one' | 'one-to-many' | 'many-to-many';
-  target: string;
-  foreignKey?: string;
+export interface ValidationRule {
+  type: string;
+  value?: any;
+  message?: string;
+  condition?: string;
 }
+
+// ==================== Configuration ====================
+export interface FrontendConfig {
+  framework: string;
+  version: string;
+  ssr?: boolean;
+  typescript?: boolean;
+}
+
+export interface ArchitectureConfig {
+  patterns?: string[];
+  microservices?: boolean;
+  api_first?: boolean;
+  event_driven?: boolean;
+  serverless?: boolean;
+}
+
+export interface ScalabilityConfig {
+  requirements?: string[];
+  enable_caching?: boolean;
+  enable_load_balancing?: boolean;
+  enable_cdn?: boolean;
+  enable_auto_scaling?: boolean;
+  enable_horizontal_scaling?: boolean;
+}
+
+export interface SecurityConfig {
+  auth_provider?: string;
+  enable_rbac?: boolean;
+  enable_audit_logs?: boolean;
+  enable_rate_limiting?: boolean;
+  enable_cors?: boolean;
+  enable_ssl?: boolean;
+  scan_dependencies?: boolean;
+}
+
+export interface IntegrationConfig {
+  required?: string[];
+  payment_gateway?: boolean;
+  email_service?: boolean;
+  sms_service?: boolean;
+  analytics?: boolean;
+  erp?: boolean;
+  crm?: boolean;
+  logistics?: boolean;
+  social_media?: boolean;
+}
+
+export interface GenerationDeploymentConfig {
+  strategy?: string;
+  generate_dockerfile?: boolean;
+  generate_docker_compose?: boolean;
+  generate_kubernetes?: boolean;
+  generate_ci_cd?: boolean;
+}
+
+export interface StackComponents {
+  cache?: string;
+  message_queue?: string;
+  search_engine?: string;
+}
+
+export interface TemplateSource {
+  url?: string;
+  git_repo?: string;
+  local_path?: string;
+  figma_file?: string;
+}
+
+export interface LanguageFrameworkSpec {
+  name: string;
+  framework: string;
+  version: string;
+}
+
+export interface GenerationDatabaseConfig {
+  type: string;
+  connection_string?: string;
+  host?: string;
+  port?: number;
+  username?: string;
+  password?: string;
+  database_name?: string;
+  generate_from_schema?: boolean;
+}
+
+export interface GitActionConfig {
+  provider?: string;
+  repository_name?: string;
+  repository_owner?: string;
+  repository_url?: string;
+  branch?: string;
+  commit_message?: string;
+  create_repo?: boolean;
+  private?: boolean;
+  credentials?: GitCredential;
+}
+
+export interface GitCredential {
+  username?: string;
+  token?: string;
+  ssh_key?: string;
+}
+
+export interface KubernetesConfig {
+  enabled?: boolean;
+  environment?: string;
+  namespace?: string;
+  replicas?: number;
+  generate_helm_chart?: boolean;
+  ingress_domain?: string;
+  monitoring_enabled?: boolean;
+}
+
+
+
+// ==================== Compatibility Aliases ====================
+export type AnalysisRequest = GenerationRequest;
+export type EntityGenerationRequest = GenerationRequest;

@@ -5,6 +5,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { EmulatorService, EmulatorResponseDTO } from '../../../core/services/api/emulator.service';
+import { ToastService } from '../../../shared/services/toast.service';
+import { SafeResourceUrlPipe } from '../../../shared/pipes/safe-resource-url.pipe';
+import { DeviceType } from '../../../core/models/emulator/emulator.model';
 
 @Component({
     selector: 'app-emulator-window',
@@ -14,7 +17,8 @@ import { EmulatorService, EmulatorResponseDTO } from '../../../core/services/api
         MatButtonModule,
         MatIconModule,
         MatListModule,
-        MatProgressSpinnerModule
+        MatProgressSpinnerModule,
+        SafeResourceUrlPipe
     ],
     template: `
     <div class="emulator-window">
@@ -39,20 +43,20 @@ import { EmulatorService, EmulatorResponseDTO } from '../../../core/services/api
                 </button>
             </div>
         } @else {
-            @for (device of emulators(); track device.id) {
+            @for (device of emulators(); track device.emulator_id) {
                 <div class="emulator-card glass-panel">
                     <div class="device-info">
-                        <mat-icon>{{ device.platform === 'android' ? 'android' : 'phone_iphone' }}</mat-icon>
-                        <span class="device-name">{{ device.name }}</span>
+                        <mat-icon>{{ device.device_config.device_type === 'android' ? 'android' : 'phone_iphone' }}</mat-icon>
+                        <span class="device-name">{{ device.device_config.device_name }}</span>
                         <span class="status-badge" [class.active]="device.status === 'running'">{{ device.status }}</span>
                     </div>
-                    @if (device.web_url) {
+                    @if (device.preview_url) {
                         <div class="preview-area">
-                            <iframe [src]="device.web_url | safeResourceUrl" frameborder="0"></iframe>
+                            <iframe [src]="device.preview_url | safeResourceUrl" frameborder="0"></iframe>
                         </div>
                     }
                     <div class="actions">
-                        <button mat-icon-button color="warn" (click)="stopEmulator(device.id)">
+                        <button mat-icon-button color="warn" (click)="stopEmulator(device.emulator_id)">
                             <mat-icon>stop</mat-icon>
                         </button>
                     </div>
@@ -117,11 +121,24 @@ import { EmulatorService, EmulatorResponseDTO } from '../../../core/services/api
 })
 export class EmulatorWindowComponent implements OnInit {
     private emulatorService = inject(EmulatorService);
+    private toast = inject(ToastService); // Injected ToastService
 
     emulators = signal<EmulatorResponseDTO[]>([]);
     loading = signal(false);
+    activeEmulator = signal<EmulatorResponseDTO | null>(null); // Added activeEmulator signal
 
     ngOnInit() {
+        this.loadEmulators();
+    }
+
+    reset(): void {
+        this.activeEmulator.set(null);
+        this.loadEmulators();
+    }
+
+    handleSessionEnd(): void {
+        this.activeEmulator.set(null);
+        this.toast.info('Emulator session ended');
         this.loadEmulators();
     }
 
@@ -129,10 +146,10 @@ export class EmulatorWindowComponent implements OnInit {
         this.loading.set(true);
         this.emulatorService.listActiveEmulators().subscribe({
             next: (data) => {
-                this.emulators.set(data);
+                this.emulators.set(data.emulators); // Changed to data.emulators
                 this.loading.set(false);
             },
-            error: () => {
+            error: (error: any) => { // Added error type
                 this.loading.set(false);
                 // Mock for demo if backend fails/missing in dev
                 // this.emulators.set([{ id: '1', name: 'Pixel 6', platform: 'android', status: 'running' } as any]);
@@ -140,9 +157,19 @@ export class EmulatorWindowComponent implements OnInit {
         });
     }
 
-    startEmulator(platform: 'android' | 'ios') {
+    startEmulator(platform: string): void {
         this.loading.set(true);
-        this.emulatorService.startEmulator({ platform }).subscribe({
+        this.emulatorService.startEmulator({
+            project_id: 'default', // Using dummy project_id as it is required
+            device_config: {
+                device_type: (platform.toUpperCase() as keyof typeof DeviceType) === 'ANDROID' ? DeviceType.ANDROID : DeviceType.IOS,
+                device_name: platform,
+                screen_width: 375,
+                screen_height: 812,
+                pixel_density: 3,
+                os_version: 'latest'
+            }
+        }).subscribe({
             next: () => this.loadEmulators(),
             error: () => this.loading.set(false)
         });

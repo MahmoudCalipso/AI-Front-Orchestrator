@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { BaseApiService } from './base-api.service';
 import {
   MigrationRequest,
@@ -9,6 +9,7 @@ import {
   CompatibilityCheckRequest,
   CompatibilityCheckResponse
 } from '../../models/migration/migration.model';
+import { BaseResponse } from '../../models/common/base-response.model';
 
 /**
  * Migration Service
@@ -41,20 +42,22 @@ export class MigrationService extends BaseApiService {
 
   /**
    * Start migration workflow
-   * POST /migration/start
+   * POST /api/v1/migration/start
    */
   startMigrationWorkflow(request: MigrationWorkflowRequest): Observable<MigrationWorkflowResponse> {
-    return this.post<MigrationWorkflowResponse>('/migration/start', request, {
-      timeout: 300000 // 5 minutes
-    });
+    return this.post<BaseResponse<MigrationWorkflowResponse>>('migration/start', request).pipe(
+      map(res => res.data!)
+    );
   }
 
   /**
    * Get migration workflow status
-   * GET /migration/{migration_id}/status
+   * GET /api/v1/migration/{migration_id}/status
    */
   getMigrationStatus(migrationId: string): Observable<MigrationWorkflowResponse> {
-    return this.get<MigrationWorkflowResponse>(`/migration/${migrationId}/status`);
+    return this.get<BaseResponse<MigrationWorkflowResponse>>(`migration/${migrationId}/status`).pipe(
+      map(res => res.data!)
+    );
   }
 
   /**

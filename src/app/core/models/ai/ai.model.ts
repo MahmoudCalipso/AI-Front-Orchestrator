@@ -1,177 +1,127 @@
 /**
- * AI Models matching OpenAPI definitions
+ * AI Models
+ * All AI-related DTOs matching backend Python models
  */
 
-import { ProjectCreateRequest, ProjectResponse } from '../project/project.model';
+import { ModelStatus } from '../common/enums';
+import { OrchestrationRequest, OrchestrationResponseDTO as OrchestrationResponse } from '../orchestrate/orchestrate.dtos';
+import { SecurityScanRequest } from '../security/security.model';
 
-/**
- * Task type enumeration
- */
-export type TaskType =
-  | 'code_generation'
-  | 'code_review'
-  | 'reasoning'
-  | 'quick_query'
-  | 'creative_writing'
-  | 'data_analysis'
-  | 'documentation'
-  | 'chat'
-  | 'embedding';
-
-/**
- * Model capabilities
- */
-export interface ModelInfo {
+// ==================== Model Info ====================
+export interface ModelInfoDTO {
+  id: string; // Mapping name to id for trackBy
   name: string;
   family: string;
+  type?: string; // Mapping family to type for UI
   size: string;
   context_length: number;
   capabilities: string[];
   specialization: string;
-  status: 'available' | 'loading' | 'loaded' | 'unloading' | 'error' | 'unavailable';
+  status: ModelStatus;
+  loaded?: boolean; // Derived from status
   quantization?: string[];
 }
 
-/**
- * Orchestration execution mode
- */
-export type ExecutionMode = 'sequential' | 'parallel' | 'hierarchical';
+export interface ModelSummaryDTO {
+  name: string;
+  provider: string;
+  is_local: boolean;
+  size?: string;
+}
 
-/**
- * Agent selection mode
- */
-export type AgentSelectionMode = 'auto' | 'manual';
+export interface ModelListResponseDTO {
+  models: ModelSummaryDTO[];
+  total: number;
+}
 
-/**
- * Orchestration Request
- */
-export interface OrchestrationRequest {
-  prompt: string;
-  context?: OrchestrationContext;
-  agent_selection?: AgentSelectionMode;
-  specific_agents?: string[];
-  execution_mode?: ExecutionMode;
+// ==================== Inference ====================
+export interface InferenceParametersDTO {
+  temperature?: number;
+  top_p?: number;
+  top_k?: number;
+  max_tokens?: number;
+  stop_sequences?: string[];
   stream?: boolean;
-  max_iterations?: number;
 }
 
-/**
- * Orchestration Context
- */
-export interface OrchestrationContext {
-  code?: string;
-  files?: FileContext[];
-  conversation_history?: MessageDTO[];
-  external_context?: Record<string, any>;
+export interface InferenceRequest {
+  prompt: string;
+  task_type?: TaskType;
+  model?: string;
+  parameters?: InferenceParametersDTO;
+  context?: Record<string, any>;
+  system_prompt?: string;
 }
 
-/**
- * File Context
- */
-export interface FileContext {
-  path: string;
-  content: string;
-  language?: string;
+export interface InferenceResponseDTO {
+  request_id: string;
+  model: string;
+  runtime: string;
+  output: string;
+  tokens_used: number;
+  processing_time: number;
+  metadata?: Record<string, any>;
 }
 
-/**
- * Message DTO from conversation history
- */
-export interface MessageDTO {
-  role: 'user' | 'assistant' | 'system' | 'tool';
-  content: string;
-  timestamp?: string;
-}
+// Orchestration models moved to orchestrate.model.ts
 
-/**
- * Orchestration Response DTO
- */
-export interface OrchestrationResponse {
-  execution_id: string;
-  status: 'queued' | 'running' | 'completed' | 'failed' | 'cancelled';
-  message: string;
-  result_url: string;
-  websocket_url?: string;
-  estimated_duration_ms?: number;
-  timestamp: string;
-}
-
-/**
- * Swarm Response DTO
- */
-export interface SwarmResponse {
+// ==================== Swarm ====================
+export interface SwarmResponseDTO {
   status: string;
   type: string;
-  decomposition?: any[]; // Detailed step breakdown
+  decomposition?: Record<string, any>[];
   worker_results?: Record<string, any>;
   migrated_files?: Record<string, string>;
   generated_files?: Record<string, string>;
   agent?: string;
 }
 
-/**
- * Optimize Code Request
- */
-export interface OptimizeCodeRequest {
+// ==================== AI Operations ====================
+export interface AnalyzeCodeRequest {
   code: string;
   language?: string;
-  optimization_goal?: 'performance' | 'memory_usage' | 'readability';
+  analysis_type?: string;
 }
 
-/**
- * Refactor Code Request
- */
-export interface RefactorCodeRequest {
+export interface FixCodeRequest {
   code: string;
   language?: string;
-  refactoring_goal: string;
+  issue: string;
 }
 
-/**
- * Test Code Request
- */
 export interface TestCodeRequest {
   code: string;
   language?: string;
   test_framework?: string;
 }
 
-/**
- * Update Agent Request
- */
-export interface UpdateAgentRequest {
-  display_name?: string;
-  description?: string;
-  system_prompt?: string;
-  temperature?: number;
-  max_tokens?: number;
-  tools?: string[];
-  metadata?: Record<string, any>;
-}
-
-/**
- * Security Scan Request
- */
-export interface SecurityScanRequest {
-  project_path: string;
+export interface OptimizeCodeRequest {
+  code: string;
   language?: string;
-  type?: 'all' | 'sast' | 'dast' | 'dependencies';
+  optimization_goal?: string;
 }
 
-// Re-export specific types if needed by consumers of ai.model specifically, or they can import from project
-export type { ProjectCreateRequest, ProjectResponse };
-
-/**
- * Code operation request types (for backward compatibility)
- */
-export interface FixCodeRequest {
+export interface RefactorCodeRequest {
   code: string;
-  language: string;
-  issue?: string;
+  language?: string;
+  refactoring_goal?: string;
 }
 
-export interface AnalyzeCodeRequest {
+export interface ExplainCodeRequest {
   code: string;
-  language: string;
-  analysis_type?: 'security' | 'performance' | 'quality' | 'all';
+  language?: string;
 }
+
+
+
+// ==================== Compatibility Aliases ====================
+export type ModelInfo = ModelInfoDTO;
+export type SwarmResponse = SwarmResponseDTO;
+
+export {
+  OrchestrationRequest,
+  OrchestrationResponse,
+  SecurityScanRequest
+};
+
+

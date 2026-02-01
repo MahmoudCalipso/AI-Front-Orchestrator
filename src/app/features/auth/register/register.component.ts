@@ -43,6 +43,7 @@ export class RegisterComponent {
         this.registerForm = this.fb.group({
             username: ['', [Validators.required, Validators.minLength(3)]],
             email: ['', [Validators.required, Validators.email]],
+            tenantName: ['', [Validators.required, Validators.minLength(3)]],
             password: ['', [Validators.required, Validators.minLength(8), this.passwordStrengthValidator]],
             confirmPassword: ['', [Validators.required]]
         }, { validators: this.passwordMatchValidator });
@@ -68,12 +69,12 @@ export class RegisterComponent {
     onSubmit(): void {
         if (this.registerForm.valid) {
             this.loading.set(true);
-            const { username, email, password } = this.registerForm.value;
+            const { username, email, tenantName, password } = this.registerForm.value;
             this.authService.register({
                 email,
                 password,
                 full_name: username,
-                tenant_name: `${username}-tenant`
+                tenant_name: tenantName
             }).subscribe({
                 next: () => {
                     this.toast.success('Registration successful! Please log in.');

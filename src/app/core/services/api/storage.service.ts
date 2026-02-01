@@ -27,7 +27,7 @@ export class StorageService extends BaseApiService {
    */
   getStorageStats(): Observable<StorageStats> {
     return this.get<BaseResponse<StorageStats>>('storage/stats').pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -38,7 +38,7 @@ export class StorageService extends BaseApiService {
   listProjects(params?: { page?: number; pageSize?: number; status?: string }): Observable<ProjectsListResponse> {
     // Mapping params if needed, BaseApiService handles query params object
     return this.get<BaseResponse<ProjectsListResponse>>('storage/projects', params).pipe(
-      map(res => res.data)
+      map(res => res.data || { projects: [], total: 0, page: 1, page_size: 20 })
     );
   }
 
@@ -48,7 +48,7 @@ export class StorageService extends BaseApiService {
    */
   getProjectDetails(projectId: string): Observable<ProjectDetails> {
     return this.get<BaseResponse<ProjectDetails>>(`storage/projects/${projectId}`).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -58,7 +58,7 @@ export class StorageService extends BaseApiService {
    */
   deleteProject(projectId: string): Observable<void> {
     return this.delete<BaseResponse<void>>(`storage/projects/${projectId}`).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -68,7 +68,7 @@ export class StorageService extends BaseApiService {
    */
   archiveProject(projectId: string, request?: ArchiveProjectRequest): Observable<ArchiveProjectResponse> {
     return this.post<BaseResponse<ArchiveProjectResponse>>(`storage/archive/${projectId}`, request || {}).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -78,7 +78,7 @@ export class StorageService extends BaseApiService {
    */
   cleanupProjects(request: CleanupRequest): Observable<CleanupResponse> {
     return this.post<BaseResponse<CleanupResponse>>('storage/cleanup', request).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -88,7 +88,7 @@ export class StorageService extends BaseApiService {
    */
   backupProject(projectId: string, request?: BackupRequest): Observable<BackupResponse> {
     return this.post<BaseResponse<BackupResponse>>(`storage/backup/${projectId}`, request || {}).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -98,7 +98,7 @@ export class StorageService extends BaseApiService {
    */
   restoreProject(request: RestoreRequest): Observable<RestoreResponse> {
     return this.post<BaseResponse<RestoreResponse>>('storage/restore', request).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 

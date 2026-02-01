@@ -95,3 +95,11 @@ export interface FrameworkInfo {
     dependencies?: string[];
     features?: string[];
 }
+
+// ==================== Database Query ====================
+export interface DatabaseQueryResponse {
+    columns: string[];
+    rows: any[][];
+    execution_time?: number;
+    total_count?: number;
+}

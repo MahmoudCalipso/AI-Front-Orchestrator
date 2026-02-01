@@ -33,7 +33,7 @@ export class FigmaService extends BaseApiService {
      */
     analyzeDesign(request: FigmaAnalyzeRequest): Observable<FigmaAnalysisResponseDTO> {
         return this.post<BaseResponse<FigmaAnalysisResponseDTO>>('figma/analyze', request).pipe(
-            map(res => res.data)
+            map(res => res.data!)
         );
     }
 }

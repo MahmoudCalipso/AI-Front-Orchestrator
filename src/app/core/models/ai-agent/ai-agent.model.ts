@@ -279,9 +279,9 @@ export interface RefactorChange {
 }
 
 /**
- * Project-level analyze request
+ * Agent Project-level analyze request
  */
-export interface ProjectAnalyzeRequest {
+export interface AgentProjectAnalyzeRequest {
   project_path: string;
   include_dependencies?: boolean;
   analyze_architecture?: boolean;
@@ -356,9 +356,9 @@ export interface AddFeatureResponse {
 }
 
 /**
- * Figma analyze request
+ * Agent Figma analyze request
  */
-export interface FigmaAnalyzeRequest {
+export interface AgentFigmaAnalyzeRequest {
   figma_file_id: string;
   figma_token?: string; // Optional if using system configured token
   nodes?: string[];
@@ -369,7 +369,7 @@ export interface FigmaAnalyzeRequest {
 /**
  * Figma analyze response
  */
-export interface FigmaAnalyzeResponse {
+export interface AgentFigmaAnalyzeResponse {
   project_name: string;
   design_system: DesignSystem;
   components: DesignComponent[];

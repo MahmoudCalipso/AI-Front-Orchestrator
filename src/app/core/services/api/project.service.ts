@@ -3,15 +3,25 @@ import { Observable, map } from 'rxjs';
 import { BaseApiService } from './base-api.service';
 import { BaseResponse } from '../../models/index';
 import {
-  ProjectResponse,
-  ProjectListResponse,
-  ProjectCreateRequest,
-  WorkflowRequest,
-  WorkflowResponse
-} from '../../models/project/project.model';
+  ProjectUpdateRequest,
+  ProjectSearchRequest,
+  ProjectAnalyzeRequest,
+  ProjectAddFeatureRequest
+} from '../../models/project/project.requests';
+import { ProjectCreateRequest, ProjectResponse as ProjectModel } from '../../models/project/project.model';
+import {
+  ProjectResponseDTO,
+  ProjectResponseBackend,
+  ProjectListResponseDTO as ProjectListResponse
+} from '../../models/project/project.responses';
+import {
+  OrchestrationRequest as WorkflowRequest,
+  OrchestrationResponseDTO as WorkflowResponse
+} from '../../models/orchestrate/orchestrate.dtos';
 
 // Use strict types from models
-type Project = ProjectResponse;
+type Project = ProjectResponseDTO;
+type ProjectResponse = ProjectResponseBackend;
 
 /**
  * Project Service
@@ -24,6 +34,16 @@ type Project = ProjectResponse;
 export class ProjectService extends BaseApiService {
 
   // ==================== Project Lifecycle ====================
+
+  /**
+   * Create a new project
+   * POST /api/v1/projects
+   */
+  createProject(request: ProjectCreateRequest): Observable<ProjectResponse> {
+    return this.post<BaseResponse<ProjectResponse>>('projects', request).pipe(
+      map(res => res.data!)
+    );
+  }
 
   /**
    * List projects with optional filtering
@@ -43,7 +63,7 @@ export class ProjectService extends BaseApiService {
     }
   ): Observable<ProjectListResponse> {
     return this.get<BaseResponse<ProjectListResponse>>('projects', params).pipe(
-      map(res => res.data)
+      map(res => res.data || { projects: [], total: 0, page: 1, page_size: 10 })
     );
   }
 
@@ -53,7 +73,7 @@ export class ProjectService extends BaseApiService {
    */
   getProject(projectId: string): Observable<Project> {
     return this.get<BaseResponse<Project>>(`projects/${projectId}`).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -70,34 +90,22 @@ export class ProjectService extends BaseApiService {
   // ==================== Project Operations ====================
 
   /**
-   * Open a project (clone from Git and load in IDE)
-   * POST /api/v1/projects/{project_id}/open
+   * Analyze project structure
+   * POST /api/v1/projects/analyze
    */
-  openProject(projectId: string, request?: any): Observable<any> {
-    return this.post<BaseResponse<any>>(`projects/${projectId}/open`, request || {}).pipe(
-      map(res => res.data)
+  analyzeProject(request: ProjectAnalyzeRequest): Observable<Project> {
+    return this.post<BaseResponse<Project>>('projects/analyze', request).pipe(
+      map(res => res.data!)
     );
   }
 
   /**
-   * Sync project with Git remote (pull)
-   * POST /api/v1/projects/{project_id}/sync
+   * Add feature to project
+   * POST /api/v1/projects/add-feature
    */
-  syncProject(projectId: string): Observable<any> {
-    return this.post<BaseResponse<any>>(`projects/${projectId}/sync`, {}).pipe(
-      map(res => res.data)
-    );
-  }
-
-  /**
-   * Apply AI updates via chat prompt
-   * POST /api/v1/projects/{project_id}/ai-update
-   */
-  aiUpdateProject(projectId: string, request: any): Observable<any> {
-    return this.post<BaseResponse<any>>(`projects/${projectId}/ai-update`, request, {
-      timeout: 120000 // 2 minutes for AI operations
-    }).pipe(
-      map(res => res.data)
+  addFeature(request: ProjectAddFeatureRequest): Observable<Project> {
+    return this.post<BaseResponse<Project>>('projects/add-feature', request).pipe(
+      map(res => res.data!)
     );
   }
 
@@ -109,7 +117,7 @@ export class ProjectService extends BaseApiService {
    */
   executeWorkflow(projectId: string, request?: WorkflowRequest): Observable<WorkflowResponse> {
     return this.post<BaseResponse<WorkflowResponse>>(`projects/${projectId}/workflow`, request || {}).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -123,7 +131,7 @@ export class ProjectService extends BaseApiService {
     return this.post<BaseResponse<any>>(`projects/${projectId}/build`, request || {}, {
       timeout: 300000 // 5 minutes for build
     }).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -153,6 +161,24 @@ export class ProjectService extends BaseApiService {
    */
   getProjectLogs(projectId: string, lines: number = 100): Observable<any> {
     return this.get<BaseResponse<any>>(`projects/${projectId}/logs`, { lines }).pipe(
+      map(res => res.data)
+    );
+  }
+  /**
+   * Sync project with remote source
+   * POST /api/v1/projects/{project_id}/sync
+   */
+  syncProject(projectId: string): Observable<any> {
+    return this.post<BaseResponse<any>>(`projects/${projectId}/sync`, {}).pipe(
+      map(res => res.data)
+    );
+  }
+  /**
+   * Open a project
+   * POST /api/v1/projects/{project_id}/open
+   */
+  openProject(projectId: string, request?: any): Observable<any> {
+    return this.post<BaseResponse<any>>(`projects/${projectId}/open`, request || {}).pipe(
       map(res => res.data)
     );
   }

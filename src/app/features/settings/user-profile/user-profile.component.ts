@@ -85,16 +85,18 @@ export class UserProfileComponent implements OnInit {
         this.authService.getCurrentUser().subscribe({
             next: (user) => {
                 this.user = user;
+                const userInfo = user.user;
                 this.profileForm.patchValue({
-                    username: user.username,
-                    email: user.email,
-                    bio: user.bio || '',
-                    organization: user.organization || ''
+                    username: userInfo.full_name || userInfo.email.split('@')[0],
+                    email: userInfo.email,
+                    bio: '', // Bio not in backend DTO
+                    organization: user.tenant?.name || ''
                 });
 
-                if (user.preferences) {
-                    this.preferencesForm.patchValue(user.preferences);
-                }
+                // Preferences not currently in MeResponseDTO from backend
+                // if (user.preferences) {
+                //     this.preferencesForm.patchValue(user.preferences);
+                // }
             },
             error: (error) => console.error('Failed to load user profile', error)
         });

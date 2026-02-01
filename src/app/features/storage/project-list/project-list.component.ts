@@ -89,6 +89,7 @@ export class ProjectListComponent implements OnInit {
             next: (response) => {
                 const mapped = (response.projects || []).map((p: any) => ({
                     id: p.project_id || p.id,
+                    name: p.name || p.project_name,
                     project_name: p.name || p.project_name,
                     user_id: p.user_id || p.owner,
                     language: p.language || (p.languages && p.languages[0]) || 'unknown',

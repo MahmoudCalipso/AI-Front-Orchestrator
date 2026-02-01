@@ -1,86 +1,32 @@
 /**
- * IDE Workspace request
+ * IDE Models
+ * All IDE-related DTOs matching backend Python models
  */
-export interface IDEWorkspaceRequest {
-  workspace_id: string;
-  project_path?: string;
-}
 
-/**
- * IDE Workspace response
- */
-export interface IDEWorkspace {
-  id: string;
-  name: string;
+// ==================== IDE File ====================
+export interface IDEFileResponseDTO {
   path: string;
-  created_at: string;
-  last_accessed?: string;
+  content?: string;
+  size: number;
+  encoding: string;
 }
 
-/**
- * File write request
- */
 export interface IDEFileWriteRequest {
   content: string;
 }
 
-/**
- * File info
- */
-export interface FileInfo {
-  name: string;
-  path: string;
-  type: 'file' | 'directory';
-  size?: number;
-  modified?: string;
-  extension?: string;
-}
-
-/**
- * File content response
- */
-export interface FileContentResponse {
-  path: string;
-  content: string;
-  language?: string;
-  encoding?: string;
-  size: number;
-}
-
-/**
- * File tree node
- */
-export interface FileTreeNode {
-  name: string;
-  path: string;
-  type: 'file' | 'directory';
-  children?: FileTreeNode[];
-  extension?: string;
-  size?: number;
-}
-
-/**
- * Terminal request
- */
+// ==================== IDE Terminal ====================
 export interface IDETerminalRequest {
   workspace_id: string;
   shell?: string;
 }
 
-/**
- * Terminal session
- */
-export interface TerminalSession {
+export interface IDETerminalResponseDTO {
   session_id: string;
   workspace_id: string;
-  shell: string;
-  created_at: string;
 }
 
-
-/**
- * Debug request
- */
+// ==================== IDE Debug ====================
 export interface IDEDebugRequest {
   workspace_id: string;
   language: string;
@@ -88,98 +34,21 @@ export interface IDEDebugRequest {
   args?: string[];
 }
 
-/**
- * Debug session
- */
-export interface DebugSession {
-  session_id: string;
-  workspace_id: string;
-  language: string;
-  status: 'running' | 'paused' | 'stopped';
-  breakpoints?: Breakpoint[];
+// ==================== IDE Tree Node ====================
+export interface IDETreeNodeDTO {
+  name: string;
+  path: string;
+  type: 'file' | 'directory';
+  children?: IDETreeNodeDTO[];
 }
 
-/**
- * Breakpoint
- */
-export interface Breakpoint {
-  id: string;
-  file: string;
-  line: number;
-  condition?: string;
-  enabled: boolean;
+// ==================== IDE Intelligence ====================
+export interface AICompletionResponseDTO {
+  completions: string[];
+  provider: string;
 }
 
-/**
- * DAP (Debug Adapter Protocol) message
- */
-export interface DAPMessage {
-  type: 'request' | 'response' | 'event';
-  command?: string;
-  seq: number;
-  request_seq?: number;
-  success?: boolean;
-  body?: any;
-}
-
-/**
- * Code completion request
- */
-export interface CompletionRequest {
-  offset: number;
-  language?: string;
-}
-
-/**
- * Code completion item
- */
-export interface CompletionItem {
-  label: string;
-  kind: CompletionKind;
-  detail?: string;
-  documentation?: string;
-  insertText: string;
-  sortText?: string;
-}
-
-export type CompletionKind =
-  | 'text'
-  | 'method'
-  | 'function'
-  | 'constructor'
-  | 'field'
-  | 'variable'
-  | 'class'
-  | 'interface'
-  | 'module'
-  | 'property'
-  | 'unit'
-  | 'value'
-  | 'enum'
-  | 'keyword'
-  | 'snippet'
-  | 'color'
-  | 'file'
-  | 'reference'
-  | 'folder'
-  | 'constant'
-  | 'struct'
-  | 'event'
-  | 'operator'
-  | 'type_parameter';
-
-/**
- * Hover info request
- */
-export interface HoverRequest {
-  symbol: string;
-  language?: string;
-}
-
-/**
- * Hover info response
- */
-export interface HoverInfo {
+export interface AIHoverResponseDTO {
   contents: string;
   range?: {
     start: { line: number; character: number };
@@ -187,35 +56,60 @@ export interface HoverInfo {
   };
 }
 
-/**
- * Diagnostic
- */
-export interface Diagnostic {
-  range: {
-    start: { line: number; character: number };
-    end: { line: number; character: number };
+// ==================== IDE Intelligence Request ====================
+export interface AICompletionRequest {
+  cursor_position?: {
+    line: number;
+    character: number;
   };
-  severity: DiagnosticSeverity;
-  code?: string | number;
-  source?: string;
-  message: string;
-  relatedInformation?: DiagnosticRelatedInfo[];
+  language?: string;
+  context_lines?: string[];
 }
 
-export type DiagnosticSeverity = 'error' | 'warning' | 'information' | 'hint';
-
-/**
- * Diagnostic related info
- */
-export interface DiagnosticRelatedInfo {
-  location: {
-    uri: string;
-    range: {
-      start: { line: number; character: number };
-      end: { line: number; character: number };
-    };
+export interface AIHoverRequest {
+  position: {
+    line: number;
+    character: number;
   };
-  message: string;
+  language?: string;
 }
 
+export interface AIRefactorRequest {
+  refactoring_goal?: string;
+  language?: string;
+}
 
+export interface AIDiagnosticsRequest {
+  language?: string;
+}
+
+// ==================== Compatibility Aliases ====================
+export type IDEWorkspace = any;
+export type IDEWorkspaceRequest = any;
+export type IDETerminalRequest = { workspace_id: string; cwd?: string; shell?: string };
+export type TerminalSession = { id: string; workspace_id: string; cwd?: string };
+export type IDEDebugRequest = any;
+export type DebugSession = any;
+export type DAPMessage = any;
+export type CompletionRequest = any;
+export type CompletionItem = any;
+export type CompletionContext = any;
+export type HoverRequest = any;
+export type HoverInfo = any;
+export type Diagnostic = any;
+export type FileTreeNode = IDETreeNodeDTO;
+export type FileInfo = IDEFileResponseDTO;
+export type FileContentResponse = IDEFileResponseDTO;
+
+// ==================== Workspace ====================
+export interface IDEWorkspaceDTO {
+  id: string;
+  name: string;
+  path: string;
+  created_at?: string;
+}
+
+export interface IDEWorkspaceListResponse {
+  workspaces: IDEWorkspaceDTO[];
+  total: number;
+}

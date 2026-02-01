@@ -3,21 +3,22 @@ import { Observable, BehaviorSubject, tap, catchError, of, timer, map } from 'rx
 import { BaseApiService } from './base-api.service';
 import { BaseResponse } from '../../models/index';
 import {
-  RegisterRequest,
-  LoginRequest,
-  TokenResponse,
-  MeResponse,
-  UserInfo,
-  TenantInfo,
-  RefreshTokenRequest,
-  ChangePasswordRequest,
-  ForgotPasswordRequest,
-  PasswordResetRequest,
-  CreateApiKeyRequest,
-  ApiKey,
-  OAuthConnectResponse,
-  ExternalAccount
-} from '../../models/auth/auth.model';
+  UserRegisterRequest as RegisterRequest,
+  UserLoginRequest as LoginRequest,
+  TokenRefreshRequest as RefreshTokenRequest,
+  PasswordChangeRequest as ChangePasswordRequest,
+  ForgotPasswordRequest as ForgotPasswordRequest,
+  PasswordResetRequest as PasswordResetRequest,
+  APIKeyCreateRequest as CreateApiKeyRequest
+} from '../../models/auth/auth.requests';
+import {
+  TokenResponseDTO as TokenResponse,
+  UserResponseDTO as UserInfo,
+  TenantResponseDTO as TenantInfo,
+  APIKeyResponseDTO as ApiKey,
+  ExternalAccountResponseDTO as ExternalAccount,
+  MeResponseDTO as MeResponse
+} from '../../models/auth/auth.responses';
 
 @Injectable({
   providedIn: 'root'
@@ -48,7 +49,7 @@ export class AuthService extends BaseApiService {
    */
   register(request: RegisterRequest): Observable<TokenResponse> {
     return this.post<BaseResponse<TokenResponse>>('auth/register', request).pipe(
-      map(res => res.data),
+      map(res => res.data!),
       tap(data => this.handleAuthSuccess(data))
     );
   }
@@ -59,7 +60,7 @@ export class AuthService extends BaseApiService {
    */
   login(request: LoginRequest): Observable<TokenResponse> {
     return this.post<BaseResponse<TokenResponse>>('auth/login', request).pipe(
-      map(res => res.data),
+      map(res => res.data!),
       tap(data => this.handleAuthSuccess(data))
     );
   }
@@ -76,7 +77,7 @@ export class AuthService extends BaseApiService {
 
     const payload: RefreshTokenRequest = { refresh_token: token };
     return this.post<BaseResponse<TokenResponse>>('auth/refresh', payload).pipe(
-      map(res => res.data),
+      map(res => res.data!),
       tap(data => this.handleAuthSuccess(data)),
       catchError(error => {
         this.handleLogout();
@@ -101,7 +102,7 @@ export class AuthService extends BaseApiService {
    */
   getCurrentUser(): Observable<MeResponse> {
     return this.get<BaseResponse<MeResponse>>('auth/me').pipe(
-      map(res => res.data),
+      map(res => res.data!),
       tap(data => {
         if (data) {
           this.currentUserSubject.next(data.user);
@@ -151,7 +152,7 @@ export class AuthService extends BaseApiService {
    */
   updateUserAccount(userId: string, updates: Partial<any>): Observable<any> {
     return this.patch<BaseResponse<any>>(`users/${userId}`, updates).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -161,12 +162,9 @@ export class AuthService extends BaseApiService {
    * Connect external account (GitHub, GitLab, etc.)
    * GET /api/v1/auth/external/connect/{provider}
    */
-  connectExternalAccount(provider: string): Observable<OAuthConnectResponse> {
-    // Note: This endpoint might return a redirect or a JSON with auth_url.
-    // Based on openapi: BaseResponse, but generic 'schema'. Assuming Dict/Any or specific DTO.
-    // Let's assume it returns { auth_url: string, state: string } in data.
-    return this.get<BaseResponse<OAuthConnectResponse>>(`auth/external/connect/${provider}`).pipe(
-      map(res => res.data)
+  connectExternalAccount(provider: string): Observable<any> {
+    return this.get<BaseResponse<any>>(`auth/external/connect/${provider}`).pipe(
+      map(res => res.data!)
     );
   }
 
@@ -178,7 +176,7 @@ export class AuthService extends BaseApiService {
    */
   createApiKey(request: CreateApiKeyRequest): Observable<ApiKey> {
     return this.post<BaseResponse<ApiKey>>('auth/api-keys', request).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -188,28 +186,22 @@ export class AuthService extends BaseApiService {
    */
   listApiKeys(): Observable<ApiKey[]> {
     return this.get<BaseResponse<ApiKey[]>>('auth/api-keys').pipe(
-      map(res => res.data)
+      map(res => res.data || [])
     );
   }
 
   /**
    * List all users (admin only)
-   * GET /api/v1/admin/users  (Note via openapi: /api/v1/admin/users)
-   * But auth.service had /auth/users before. Checking openapi.json: /api/v1/admin/users
+   * GET /api/v1/admin/users
    */
   listUsers(): Observable<UserInfo[]> {
     return this.get<BaseResponse<UserInfo[]>>('admin/users').pipe(
-      map(res => res.data)
+      map(res => res.data || [])
     );
   }
 
   /**
    * Update user details (Admin)
-   * PUT /api/v1/admin/users/{user_id}/role or similar?
-   * Old code had PATCH /auth/users/{userId}.
-   * OpenAPI has PUT /api/v1/admin/users/{user_id}/role
-   * It doesn't seem to have a generic update user endpoint in Auth, only in Admin for role.
-   * I'll leave it as is but commented or best-effort for now, perhaps mapped to admin endpoint.
    */
   updateUserRole(userId: string, role: string): Observable<any> {
     return this.put<BaseResponse>(`admin/users/${userId}/role`, { role });
@@ -217,12 +209,8 @@ export class AuthService extends BaseApiService {
 
   /**
    * Delete user (admin only)
-   * DELETE /api/v1/enterprise/users/{user_id} or /api/v1/admin/users (not found?)
-   * OpenAPI: DELETE /api/v1/enterprise/users/{user_id} (Remove Organization User)
-   * There is no generic delete user in Auth.
    */
   deleteUser(userId: string): Observable<BaseResponse> {
-    // Using enterprise endpoint as fallback
     return this.delete<BaseResponse>(`enterprise/users/${userId}`);
   }
 
@@ -242,21 +230,15 @@ export class AuthService extends BaseApiService {
     localStorage.setItem(this.TOKEN_KEY, response.access_token);
     localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refresh_token);
 
-    // Calculate and store expiry time
     const expiryTime = Date.now() + (response.expires_in * 1000);
     localStorage.setItem(this.TOKEN_EXPIRY_KEY, expiryTime.toString());
 
     this.isAuthenticated.set(true);
-
-    // Schedule refresh
     this.scheduleTokenRefresh(response.expires_in);
-
-    // Fetch user info after successful auth
     this.getCurrentUser().subscribe();
   }
 
   private scheduleTokenRefresh(expiresIn: number): void {
-    // Refresh token 1 minute before expiration
     const refreshTime = (expiresIn - 60) * 1000;
 
     if (this.refreshTokenTimeout) {
@@ -307,7 +289,6 @@ export class AuthService extends BaseApiService {
     const expiry = localStorage.getItem(this.TOKEN_EXPIRY_KEY);
     if (!expiry) return true;
 
-    // Check if token expires in less than 5 minutes
     const fiveMinutes = 5 * 60 * 1000;
     return Date.now() > (parseInt(expiry, 10) - fiveMinutes);
   }

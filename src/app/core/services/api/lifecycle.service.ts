@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { BaseApiService } from './base-api.service';
 import {
     LifecycleExecuteRequest,
@@ -7,6 +7,7 @@ import {
     PipelineConfig
 } from '../../models/lifecycle/lifecycle.model';
 import { ApiResponse } from '../../models/common/api-response.model';
+import { BaseResponse } from '../../models/common/base-response.model';
 
 /**
  * Lifecycle Service
@@ -22,9 +23,11 @@ export class LifecycleService extends BaseApiService {
      * POST /api/v1/lifecycle/execute
      */
     executeWorkflow(request: LifecycleExecuteRequest): Observable<LifecycleExecuteResponse> {
-        return this.post<LifecycleExecuteResponse>('lifecycle/execute', request, {
+        return this.post<BaseResponse<LifecycleExecuteResponse>>('lifecycle/execute', request, {
             timeout: 300000 // 5 minutes
-        });
+        }).pipe(
+            map(res => res.data!)
+        );
     }
 
     /**
@@ -32,7 +35,9 @@ export class LifecycleService extends BaseApiService {
      * GET /api/lifecycle/execution/{execution_id}
      */
     getExecutionStatus(executionId: string): Observable<LifecycleExecuteResponse> {
-        return this.get<LifecycleExecuteResponse>(`/api/lifecycle/execution/${executionId}`);
+        return this.get<BaseResponse<LifecycleExecuteResponse>>(`lifecycle/execution/${executionId}`).pipe(
+            map(res => res.data!)
+        );
     }
 
     /**
@@ -48,7 +53,9 @@ export class LifecycleService extends BaseApiService {
      * GET /api/lifecycle/pipeline/{project_path}
      */
     getPipelineConfig(projectPath: string): Observable<PipelineConfig> {
-        return this.get<PipelineConfig>('/api/lifecycle/pipeline', { project_path: projectPath });
+        return this.get<BaseResponse<PipelineConfig>>('lifecycle/pipeline', { project_path: projectPath }).pipe(
+            map(res => res.data!)
+        );
     }
 
     /**
@@ -56,10 +63,12 @@ export class LifecycleService extends BaseApiService {
      * POST /api/lifecycle/pipeline
      */
     savePipelineConfig(projectPath: string, config: PipelineConfig): Observable<ApiResponse> {
-        return this.post<ApiResponse>('/api/lifecycle/pipeline', {
+        return this.post<BaseResponse<ApiResponse>>('/api/lifecycle/pipeline', {
             project_path: projectPath,
             config
-        });
+        }).pipe(
+            map(res => res.data!)
+        );
     }
 
     /**
@@ -67,9 +76,11 @@ export class LifecycleService extends BaseApiService {
      * GET /api/lifecycle/executions/{project_path}
      */
     listExecutions(projectPath: string, limit: number = 20): Observable<LifecycleExecuteResponse[]> {
-        return this.get<LifecycleExecuteResponse[]>('/api/lifecycle/executions', {
+        return this.get<BaseResponse<LifecycleExecuteResponse[]>>('lifecycle/executions', {
             project_path: projectPath,
             limit
-        });
+        }).pipe(
+            map(res => res.data || [])
+        );
     }
 }

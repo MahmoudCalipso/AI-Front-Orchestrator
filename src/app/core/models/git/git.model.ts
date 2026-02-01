@@ -78,8 +78,10 @@ export type GitProvider = 'github' | 'gitlab' | 'bitbucket' | 'azure';
  * Git conflict resolve request
  */
 export interface GitConflictResolve {
-  local_path: string;
+  local_path?: string;
   file_path: string;
+  resolution: string;
+  strategy?: 'manual' | 'ai' | 'ours' | 'theirs';
 }
 
 /**
@@ -148,6 +150,7 @@ export interface GitCommit {
   author_email: string;
   date: string;
   parent_hashes?: string[];
+  parents?: string[];
 }
 
 /**

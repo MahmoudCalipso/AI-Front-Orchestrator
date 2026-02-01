@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { BaseApiService } from './base-api.service';
-import { BaseResponse } from '../../models/index';
+import { BaseResponseDTO as BaseResponse } from '../../models/common/base-response.model';
 import {
     Workspace,
     WorkspaceCreateRequest,
@@ -26,7 +26,7 @@ export class WorkspaceService extends BaseApiService {
      */
     createWorkspace(request: WorkspaceCreateRequest): Observable<Workspace> {
         return this.post<BaseResponse<Workspace>>('workspace', request).pipe(
-            map(res => res.data)
+            map(res => res.data!)
         );
     }
 
@@ -36,7 +36,7 @@ export class WorkspaceService extends BaseApiService {
      */
     getWorkspace(workspaceId: string): Observable<Workspace> {
         return this.get<BaseResponse<Workspace>>(`workspace/${workspaceId}`).pipe(
-            map(res => res.data)
+            map(res => res.data!)
         );
     }
 
@@ -46,7 +46,7 @@ export class WorkspaceService extends BaseApiService {
      */
     updateWorkspace(workspaceId: string, request: UpdateWorkspaceRequest): Observable<Workspace> {
         return this.put<BaseResponse<Workspace>>(`workspace/${workspaceId}`, request).pipe(
-            map(res => res.data)
+            map(res => res.data!)
         );
     }
 
@@ -66,7 +66,7 @@ export class WorkspaceService extends BaseApiService {
      */
     listWorkspaces(page: number = 1, pageSize: number = 20): Observable<WorkspaceListResponse> {
         return this.get<BaseResponse<WorkspaceListResponse>>('workspace', { page, page_size: pageSize }).pipe(
-            map(res => res.data)
+            map(res => res.data || { workspaces: [], total: 0 })
         );
     }
 
@@ -76,7 +76,7 @@ export class WorkspaceService extends BaseApiService {
      */
     getUserWorkspaces(userId: string): Observable<Workspace[]> {
         return this.get<BaseResponse<Workspace[]>>(`workspace/user/${userId}`).pipe(
-            map(res => res.data)
+            map(res => res.data || [])
         );
     }
 
@@ -86,7 +86,7 @@ export class WorkspaceService extends BaseApiService {
      */
     getWorkspaceMembers(workspaceId: string): Observable<WorkspaceMember[]> {
         return this.get<BaseResponse<WorkspaceMember[]>>(`workspace/${workspaceId}/members`).pipe(
-            map(res => res.data)
+            map(res => res.data || [])
         );
     }
 

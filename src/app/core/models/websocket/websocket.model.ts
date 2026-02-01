@@ -86,6 +86,7 @@ export type MonitoringMessageType =
 export interface MonitoringStreamMessage {
   type: MonitoringMessageType;
   data: any;
+  payload?: any;
   timestamp: number;
 }
 

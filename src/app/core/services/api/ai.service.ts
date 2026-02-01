@@ -4,19 +4,17 @@ import { BaseApiService } from './base-api.service';
 import { BaseResponse } from '../../models/index';
 import {
   ModelInfo,
-  OrchestrationRequest,
-  OrchestrationResponse,
   FixCodeRequest,
   AnalyzeCodeRequest,
   TestCodeRequest,
   OptimizeCodeRequest,
   RefactorCodeRequest,
   SwarmResponse,
-  ProjectCreateRequest,
-  ProjectResponse,
-  UpdateAgentRequest,
-  SecurityScanRequest
-} from '../../models/ai/ai.model';
+  UpdateAgentRequest
+} from '../../models/ai-agent/agent-entity.model';
+import { ProjectCreateRequest, ProjectResponse } from '../../models/project/project.model';
+import { OrchestrationRequest, OrchestrationResponseDTO as OrchestrationResponse } from '../../models/orchestrate/orchestrate.dtos';
+import { SecurityScanRequest } from '../../models/security/security.model';
 import { environment } from '@environments/environment';
 
 /**
@@ -36,7 +34,7 @@ export class AIService extends BaseApiService {
    */
   listModels(): Observable<ModelInfo[]> {
     return this.get<BaseResponse<ModelInfo[]>>('models').pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -46,7 +44,7 @@ export class AIService extends BaseApiService {
    */
   getModelInfo(modelName: string): Observable<ModelInfo> {
     return this.get<BaseResponse<ModelInfo>>(`models/${modelName}`).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -56,7 +54,7 @@ export class AIService extends BaseApiService {
    */
   loadModel(modelName: string): Observable<any> {
     return this.post<BaseResponse<any>>(`models/${modelName}/load`, {}).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -66,7 +64,7 @@ export class AIService extends BaseApiService {
    */
   unloadModel(modelName: string): Observable<any> {
     return this.post<BaseResponse<any>>(`models/${modelName}/unload`, {}).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -80,7 +78,7 @@ export class AIService extends BaseApiService {
     return this.post<BaseResponse<OrchestrationResponse>>('orchestrate', request, {
       timeout: 300000 // 5 minutes
     }).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -90,7 +88,7 @@ export class AIService extends BaseApiService {
    */
   updateAgent(agentId: string, request: UpdateAgentRequest): Observable<any> {
     return this.patch<BaseResponse<any>>(`agents/${agentId}`, request).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -100,7 +98,7 @@ export class AIService extends BaseApiService {
    */
   chat(request: { prompt: string; model?: string; temperature?: number }): Observable<{ response: string }> {
     return this.post<BaseResponse<{ response: string }>>('ai/chat', request).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -110,9 +108,9 @@ export class AIService extends BaseApiService {
    * Fix code issues
    * POST /api/v1/code/fix
    */
-  fixCode(request: FixCodeRequest): Observable<any> { // TODO: Define specific response or use OrchestrationResponse
+  fixCode(request: FixCodeRequest): Observable<any> {
     return this.post<BaseResponse<any>>('code/fix', request).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -122,7 +120,7 @@ export class AIService extends BaseApiService {
    */
   analyzeCode(request: AnalyzeCodeRequest): Observable<any> {
     return this.post<BaseResponse<any>>('code/analyze', request).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -132,7 +130,7 @@ export class AIService extends BaseApiService {
    */
   generateTests(request: TestCodeRequest): Observable<any> {
     return this.post<BaseResponse<any>>('code/test', request).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -142,7 +140,7 @@ export class AIService extends BaseApiService {
    */
   optimizeCode(request: OptimizeCodeRequest): Observable<any> {
     return this.post<BaseResponse<any>>('code/optimize', request).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -152,7 +150,7 @@ export class AIService extends BaseApiService {
    */
   refactorCode(request: RefactorCodeRequest): Observable<any> {
     return this.post<BaseResponse<any>>('code/refactor', request).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -162,7 +160,7 @@ export class AIService extends BaseApiService {
    */
   securityScan(request: SecurityScanRequest): Observable<any> {
     return this.post<BaseResponse<any>>('security/scan', request).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -176,7 +174,7 @@ export class AIService extends BaseApiService {
     return this.post<BaseResponse<SwarmResponse>>('swarm/generate', request, {
       timeout: 600000 // 10 minutes
     }).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -188,7 +186,7 @@ export class AIService extends BaseApiService {
     return this.post<BaseResponse<SwarmResponse>>('swarm/migrate', request, {
       timeout: 600000 // 10 minutes
     }).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 }

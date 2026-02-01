@@ -1,77 +1,96 @@
-/**
- * Workspace management models matching OpenAPI
- */
+// Workspace Entity Models
 
-/**
- * Workspace info
- */
+import { UserRole, ActivityType } from '../common/enums';
+import { UUID, Timestamp, Metadata, JSONObject } from '../common/common.types';
+
 export interface Workspace {
-    id: string;
-    name: string;
-    description?: string;
-    owner_id: string;
-    created_at: string;
-    updated_at: string;
-    settings: WorkspaceSettings;
-    members?: WorkspaceMember[];
-    project_count?: number;
-    storage_used?: number;
+  id: string;
+  name: string;
+  owner_id: UUID;
+  created_at: Timestamp;
+  updated_at: Timestamp;
+  settings: WorkspaceSettings;
+  metadata?: Metadata;
 }
 
 export interface WorkspaceSettings {
-    default_language?: string;
-    default_framework?: string;
-    auto_save?: boolean;
-    theme?: 'light' | 'dark' | 'auto';
-    editor_settings?: EditorSettings;
-}
-
-export interface EditorSettings {
-    font_size?: number;
-    font_family?: string;
-    tab_size?: number;
-    word_wrap?: boolean;
-    minimap_enabled?: boolean;
-    line_numbers?: boolean;
+  default_language: string;
+  default_framework: string;
+  enable_ai_assistance: boolean;
+  enable_collaboration: boolean;
+  max_storage_gb: number;
+  max_projects: number;
+  theme?: string;
+  timezone?: string;
+  notifications_enabled: boolean;
 }
 
 export interface WorkspaceMember {
-    user_id: string;
-    username: string;
-    email: string;
-    role: 'owner' | 'admin' | 'member' | 'viewer';
-    joined_at: string;
-    last_active?: string;
+  id: number;
+  workspace_id: string;
+  user_id: UUID;
+  username?: string;
+  role: UserRole;
+  joined_at: Timestamp;
+  permissions?: WorkspacePermissions;
 }
 
-/**
- * Workspace Create Request
- */
-export interface WorkspaceCreateRequest {
-    name: string;
-    description?: string;
-    settings?: WorkspaceSettings;
-    // OpenAPI has owner_id/name sometimes, but usually derived from auth.
+export interface WorkspacePermissions {
+  can_invite_members: boolean;
+  can_remove_members: boolean;
+  can_manage_projects: boolean;
+  can_manage_settings: boolean;
+  can_view_analytics: boolean;
+  can_manage_billing: boolean;
 }
 
-/**
- * Workspace Invite Request
- */
-export interface WorkspaceInviteRequest {
-    inviter_id?: string; // Optional if derived from context
-    user_id: string;
-    role?: 'admin' | 'member' | 'viewer'; // Default developer/member
+export interface WorkspaceActivity {
+  id: number;
+  workspace_id: string;
+  user_id?: UUID;
+  activity_type: ActivityType;
+  message: string;
+  timestamp: Timestamp;
+  metadata?: JSONObject;
 }
+
+export interface WorkspaceProject {
+  workspace_id: string;
+  project_id: UUID;
+  added_by: UUID;
+  added_at: Timestamp;
+  role: 'owner' | 'editor' | 'viewer';
+  permissions?: ProjectPermissions;
+}
+
+export interface ProjectPermissions {
+  can_edit: boolean;
+  can_delete: boolean;
+  can_invite: boolean;
+  can_manage_settings: boolean;
+  can_view_analytics: boolean;
+}
+
+// ==================== Workspace Requests & Responses ====================
 
 export interface UpdateWorkspaceRequest {
-    name?: string;
-    description?: string;
-    settings?: WorkspaceSettings;
+  name?: string;
+  description?: string;
+  is_public?: boolean;
+}
+
+export interface WorkspaceInviteRequest {
+  email: string;
+  role: string;
+}
+
+export interface WorkspaceCreateRequest {
+  name: string;
+  description?: string;
+  is_public?: boolean;
 }
 
 export interface WorkspaceListResponse {
-    workspaces: Workspace[];
-    total: number;
-    page: number;
-    page_size: number;
+  workspaces: Workspace[];
+  total: number;
 }

@@ -39,6 +39,18 @@
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Tenant Name</mat-label>
+                        <input matInput type="text" formControlName="tenantName" placeholder="My Organization"
+                            autocomplete="organization">
+                        <mat-icon matPrefix>business</mat-icon>
+                        @if (registerForm.get('tenantName')?.invalid && registerForm.get('tenantName')?.touched) {
+                        <mat-error>
+                            {{ getErrorMessage('tenantName') }}
+                        </mat-error>
+                        }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="full-width">
                         <mat-label>Password</mat-label>
                         <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password"
                             placeholder="Create a strong password" autocomplete="new-password">

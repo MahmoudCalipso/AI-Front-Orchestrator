@@ -34,7 +34,7 @@ export class GitService extends BaseApiService {
    */
   setGitConfig(provider: string, config: GitConfigUpdate): Observable<any> {
     return this.post<BaseResponse<any>>(`git/config/${provider}`, config).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -44,7 +44,7 @@ export class GitService extends BaseApiService {
    */
   deleteGitConfig(provider: string): Observable<{ status: string; provider: string; message: string }> {
     return this.delete<BaseResponse<{ status: string; provider: string; message: string }>>(`git/config/${provider}`).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -54,7 +54,7 @@ export class GitService extends BaseApiService {
    */
   validateGitCredentials(provider: string): Observable<{ valid: boolean; provider: string; message: string }> {
     return this.post<BaseResponse<{ valid: boolean; provider: string; message: string }>>(`git/validate/${provider}`, {}).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -64,7 +64,7 @@ export class GitService extends BaseApiService {
    */
   getGitConfig(): Observable<{ config: Record<string, any> }> {
     return this.get<BaseResponse<{ config: Record<string, any> }>>('git/config').pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -76,7 +76,7 @@ export class GitService extends BaseApiService {
    */
   initRepository(request: GitRepoInit): Observable<any> {
     return this.post<BaseResponse<any>>('git/repositories/init', request).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -88,7 +88,7 @@ export class GitService extends BaseApiService {
     return this.post<BaseResponse<any>>('git/repositories/clone', request, {
       timeout: 300000 // 5 minutes for clone
     }).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -98,7 +98,7 @@ export class GitService extends BaseApiService {
    */
   pushRepository(repoId: string, request: GitCommitRequest): Observable<any> {
     return this.post<BaseResponse<any>>(`git/repositories/${repoId}/push`, request).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -108,7 +108,7 @@ export class GitService extends BaseApiService {
    */
   pullRepository(repoId: string, localPath: string): Observable<any> {
     return this.post<BaseResponse<any>>(`git/repositories/${repoId}/pull`, { local_path: localPath }).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -118,7 +118,7 @@ export class GitService extends BaseApiService {
    */
   getRepositoryStatus(repoId: string, localPath: string): Observable<GitStatus> {
     return this.get<BaseResponse<GitStatus>>(`git/repositories/${repoId}/status`, { local_path: localPath }).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -135,7 +135,7 @@ export class GitService extends BaseApiService {
       local_path: localPath,
       ...params
     }).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -145,7 +145,7 @@ export class GitService extends BaseApiService {
    */
   checkoutBranch(repoId: string, request: GitBranchCreate): Observable<any> {
     return this.post<BaseResponse<any>>(`git/repositories/${repoId}/checkout`, request).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -158,7 +158,7 @@ export class GitService extends BaseApiService {
       local_path: localPath,
       limit
     }).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -171,7 +171,7 @@ export class GitService extends BaseApiService {
       local_path: localPath,
       cached
     }).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -183,7 +183,7 @@ export class GitService extends BaseApiService {
     return this.post<BaseResponse<any>>(`git/repositories/${repoId}/fetch`, {}, {
       headers: { 'X-Local-Path': localPath }
     }).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -193,7 +193,7 @@ export class GitService extends BaseApiService {
    */
   mergeBranches(repoId: string, request: GitMergeRequest): Observable<any> {
     return this.post<BaseResponse<any>>(`git/repositories/${repoId}/merge`, request).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -203,7 +203,7 @@ export class GitService extends BaseApiService {
    */
   createRemoteRepository(repoId: string, request: GitRemoteCreate): Observable<any> {
     return this.post<BaseResponse<any>>(`git/repositories/${repoId}/remote`, request).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 
@@ -215,7 +215,7 @@ export class GitService extends BaseApiService {
     return this.post<BaseResponse<any>>(`git/repositories/${repoId}/resolve`, request, {
       timeout: 60000
     }).pipe(
-      map(res => res.data)
+      map(res => res.data!)
     );
   }
 }

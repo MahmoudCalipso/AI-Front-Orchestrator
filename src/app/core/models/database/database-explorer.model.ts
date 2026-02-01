@@ -1,18 +1,4 @@
-/**
- * Database Explorer Models
- * DTOs for database introspection and querying
- */
-
-/**
- * Database Type Enumeration
- */
-export enum DatabaseType {
-    POSTGRESQL = 'postgresql',
-    MYSQL = 'mysql',
-    SQLITE = 'sqlite',
-    MONGODB = 'mongodb',
-    REDIS = 'redis'
-}
+import { DatabaseType } from '../common/enums';
 
 /**
  * Database Configuration

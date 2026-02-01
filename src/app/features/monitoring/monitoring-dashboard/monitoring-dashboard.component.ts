@@ -173,14 +173,22 @@ export class MonitoringDashboardComponent implements OnInit, AfterViewInit, OnDe
   loadCurrentMetrics(): void {
     this.monitoringService.getCurrentMetrics().subscribe({
       next: (metrics) => this.currentMetrics.set(metrics),
-      error: () => this.currentMetrics.set(null)
+      error: (error: any) => {
+        console.error('Failed to load current metrics', error);
+        this.currentMetrics.set(null);
+      }
     });
   }
 
   loadBuildHistory(): void {
     this.monitoringService.getBuildHistory(10).subscribe({
-      next: (history: any[]) => this.buildHistory.set(history),
-      error: () => this.buildHistory.set([])
+      next: (builds: any[]) => {
+        this.buildHistory.set(builds);
+      },
+      error: (error: any) => {
+        console.error('Failed to load build history', error);
+        this.buildHistory.set([]);
+      }
     });
   }
 
